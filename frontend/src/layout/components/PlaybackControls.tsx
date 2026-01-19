@@ -39,7 +39,11 @@ export const PlaybackControls = () => {
 		volume,
 		setVolume,
 		isPlaybackLoading,
-		setIsPlaybackLoading
+		setIsPlaybackLoading,
+		isShuffled,
+		repeatMode,
+		toggleShuffle,
+		toggleRepeat
 	} = usePlayerStore();
 
 	const [isMuted, setIsMuted] = useState(false);
@@ -555,21 +559,46 @@ export const PlaybackControls = () => {
 					{/* Controls */}
 					<div className='flex flex-col items-center gap-1 flex-1 max-w-[600px]'>
 						<div className='flex items-center gap-4'>
-							<Button size='icon' variant='ghost' className='hidden sm:inline-flex text-zinc-400 hover:text-white h-8 w-8'>
-								<Shuffle className='h-4 w-4' />
-							</Button>
-							<Button size='icon' variant='ghost' className='text-zinc-400 hover:text-white h-8 w-8' onClick={playPrevious}>
-								<SkipBack className='h-4 w-4' />
-							</Button>
-							<Button size='icon' className='bg-white hover:bg-white/90 text-black rounded-full h-9 w-9' onClick={handlePlayPause}>
-								{isPlaying ? <Pause className='h-5 w-5' /> : <Play className='h-5 w-5 ml-0.5' />}
-							</Button>
-							<Button size='icon' variant='ghost' className='text-zinc-400 hover:text-white h-8 w-8' onClick={playNext}>
-								<SkipForward className='h-4 w-4' />
-							</Button>
-							<Button size='icon' variant='ghost' className='hidden sm:inline-flex text-zinc-400 hover:text-white h-8 w-8'>
-								<Repeat className='h-4 w-4' />
-							</Button>
+						<Button 
+							size='icon' 
+							variant='ghost' 
+							className={`hidden sm:inline-flex h-8 w-8 ${isShuffled ? 'text-emerald-400' : 'text-zinc-400 hover:text-white'}`}
+							onClick={() => {
+								toggleShuffle();
+								toast.success(isShuffled ? 'Shuffle off' : 'Shuffle on', { icon: '🔀', duration: 1500 });
+							}}
+							title={isShuffled ? 'Shuffle: On' : 'Shuffle: Off'}
+						>
+							<Shuffle className='h-4 w-4' />
+						</Button>
+						<Button size='icon' variant='ghost' className='text-zinc-400 hover:text-white h-8 w-8' onClick={playPrevious}>
+							<SkipBack className='h-4 w-4' />
+						</Button>
+						<Button size='icon' className='bg-white hover:bg-white/90 text-black rounded-full h-9 w-9' onClick={handlePlayPause}>
+							{isPlaying ? <Pause className='h-5 w-5' /> : <Play className='h-5 w-5 ml-0.5' />}
+						</Button>
+						<Button size='icon' variant='ghost' className='text-zinc-400 hover:text-white h-8 w-8' onClick={playNext}>
+							<SkipForward className='h-4 w-4' />
+						</Button>
+						<Button 
+							size='icon' 
+							variant='ghost' 
+							className={`hidden sm:inline-flex h-8 w-8 relative ${repeatMode !== 'off' ? 'text-emerald-400' : 'text-zinc-400 hover:text-white'}`}
+							onClick={() => {
+								toggleRepeat();
+								const nextMode = repeatMode === 'off' ? 'all' : repeatMode === 'all' ? 'one' : 'off';
+								toast.success(
+									nextMode === 'off' ? 'Repeat off' : nextMode === 'one' ? 'Repeat one' : 'Repeat all',
+									{ icon: '🔁', duration: 1500 }
+								);
+							}}
+							title={`Repeat: ${repeatMode}`}
+						>
+							<Repeat className='h-4 w-4' />
+							{repeatMode === 'one' && (
+								<span className='absolute -top-0.5 -right-0.5 text-[8px] font-bold bg-emerald-500 text-black rounded-full w-3 h-3 flex items-center justify-center'>1</span>
+							)}
+						</Button>
 							{/* Mix Mode Button with Dropdown */}
 							<div className='relative hidden sm:block'>
 								<Button 
