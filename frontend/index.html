@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#10b981" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-title" content="MusicFlow" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="application-name" content="MusicFlow" />
+    <meta
+      name="description"
+      content="Stream unlimited music for free - Your personal music streaming app"
+    />
+
+    <!-- Icons -->
+    <link rel="icon" type="image/png" href="/icon-192.png" />
+    <link rel="apple-touch-icon" href="/icon-192.png" />
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+
+    <title>MusicFlow - Free Music Player</title>
+
+    <!-- Splash Screen for iOS -->
+    <style>
+      html,
+      body {
+        background: #000;
+        overscroll-behavior: none;
+      }
+      /* iOS splash screen */
+      @media (display-mode: standalone) {
+        body {
+          padding-top: env(safe-area-inset-top);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <!-- YouTube IFrame API -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+
+    <!-- Hidden YouTube Player -->
+    <div
+      id="youtube-player"
+      style="position: absolute; top: -9999px; left: -9999px"
+    ></div>
+
+    <script type="module" src="/src/main.tsx"></script>
+
+    <!-- Register Service Worker -->
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker
+            .register("/sw.js")
+            .then((reg) => console.log("✅ PWA Ready!", reg.scope))
+            .catch((err) => console.log("❌ SW Error:", err));
+        });
+      }
+    </script>
+  </body>
+</html>
