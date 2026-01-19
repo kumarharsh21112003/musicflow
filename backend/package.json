@@ -12,9 +12,13 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
+    "@distube/ytdl-core": "^4.15.1",
     "cors": "^2.8.5",
     "express": "^4.18.2",
-    "ytsr": "^3.8.4",
-    "@distube/ytdl-core": "^4.15.1"
+    "express-mongo-sanitize": "^2.2.0",
+    "express-rate-limit": "^8.2.1",
+    "helmet": "^8.1.0",
+    "hpp": "^0.2.3",
+    "ytsr": "^3.8.4"
   }
 }

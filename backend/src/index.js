@@ -7,6 +7,10 @@ import cors from "cors";
 import fs from "fs";
 import { createServer } from "http";
 import cron from "node-cron";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
+import mongoSanitize from "express-mongo-sanitize";
+import hpp from "hpp";
 
 import { initializeSocket } from "./lib/socket.js";
 
@@ -27,14 +31,52 @@ const PORT = process.env.PORT;
 const httpServer = createServer(app);
 initializeSocket(httpServer);
 
+// ========== SECURITY MIDDLEWARES ==========
+
+// 1. Set security HTTP headers
+app.use(helmet({
+	crossOriginEmbedderPolicy: false,
+	crossOriginResourcePolicy: { policy: "cross-origin" },
+	contentSecurityPolicy: false // Disable for media streaming
+}));
+
+// 2. Rate limiting - prevent brute force & DDoS attacks
+const limiter = rateLimit({
+	max: 500, // 500 requests per IP
+	windowMs: 15 * 60 * 1000, // per 15 minutes
+	message: { error: 'Too many requests, please try again later.' },
+	standardHeaders: true,
+	legacyHeaders: false,
+});
+app.use('/api', limiter);
+
+// 3. Stricter rate limit for auth routes
+const authLimiter = rateLimit({
+	max: 20, // 20 login attempts
+	windowMs: 60 * 60 * 1000, // per hour
+	message: { error: 'Too many auth attempts, try again in 1 hour.' }
+});
+app.use('/api/auth', authLimiter);
+
+// 4. Body parser with size limit
+app.use(express.json({ limit: '10kb' })); // Limit body size to prevent DoS
+
+// 5. Data sanitization against NoSQL injection attacks
+app.use(mongoSanitize());
+
+// 6. Prevent HTTP Parameter Pollution attacks
+app.use(hpp());
+
+// CORS configuration
 app.use(
 	cors({
-		origin: "http://localhost:3000",
+		origin: process.env.NODE_ENV === "production" 
+			? ["https://musicflow-six.vercel.app", "https://musicflow.vercel.app"]
+			: "http://localhost:3000",
 		credentials: true,
 	})
 );
 
-app.use(express.json()); // to parse req.body
 app.use(clerkMiddleware()); // this will add auth to req obj => req.auth
 app.use(
 	fileUpload({
@@ -42,7 +84,7 @@ app.use(
 		tempFileDir: path.join(__dirname, "tmp"),
 		createParentPath: true,
 		limits: {
-			fileSize: 10 * 1024 * 1024, // 10MB  max file size
+			fileSize: 10 * 1024 * 1024, // 10MB max file size
 		},
 	})
 );
