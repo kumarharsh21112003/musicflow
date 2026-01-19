@@ -1,5 +1,6 @@
 import { ChevronLeft, ChevronRight, Search, X, LogOut, User, Headphones } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { useMusicStore } from "@/stores/useMusicStore";
 import { usePlayerStore } from "@/stores/usePlayerStore";
@@ -103,36 +104,41 @@ const Topbar = () => {
 						/>
 					</form>
 
-					{/* Search Dropdown - Spotify style with backdrop */}
-					{showDropdown && (searchQuery || recentSearches.length > 0) && (
+					{/* Search Dropdown - Spotify style with Portal */}
+					{showDropdown && (searchQuery || recentSearches.length > 0) && createPortal(
 						<>
-							{/* Backdrop to hide content behind */}
+							{/* Full screen dark backdrop */}
 							<div 
-								className='fixed inset-0 bg-black/80 z-[9999]' 
+								className='fixed inset-0 bg-black/90'
+								style={{ zIndex: 99998 }}
 								onClick={() => setShowDropdown(false)}
-								style={{ top: '60px' }}
 							/>
-							{/* Dropdown */}
-							<div className='fixed top-[70px] left-1/2 -translate-x-1/2 w-full max-w-[600px] bg-zinc-900 rounded-lg shadow-2xl border border-zinc-700 max-h-[70vh] overflow-auto z-[10000]'>
+							{/* Search Results Dropdown */}
+							<div 
+								className='fixed left-1/2 -translate-x-1/2 w-[95%] max-w-[600px] bg-[#282828] rounded-lg shadow-2xl overflow-hidden'
+								style={{ zIndex: 99999, top: '70px' }}
+							>
 								{/* Recent Searches */}
 								{!searchQuery && recentSearches.length > 0 && (
 									<>
-										<div className='px-4 py-3 font-semibold text-sm'>Recent searches</div>
+										<div className='px-4 py-3 font-bold text-sm text-white'>Recent searches</div>
 										{recentSearches.map((term, i) => (
 											<div 
 												key={i}
-												className='flex items-center justify-between px-4 py-2 hover:bg-zinc-700 cursor-pointer'
+												className='flex items-center justify-between px-4 py-3 hover:bg-white/10 cursor-pointer'
 												onClick={() => { setSearchQuery(term); searchSongs(term); }}
 											>
 												<div className='flex items-center gap-3'>
-													<Search className='size-4 text-zinc-400' />
-													<span className='text-sm'>{term}</span>
+													<div className='w-10 h-10 bg-zinc-700 rounded-full flex items-center justify-center'>
+														<Search className='size-5 text-zinc-400' />
+													</div>
+													<span className='font-medium'>{term}</span>
 												</div>
 												<button 
 													onClick={(e) => { e.stopPropagation(); clearRecent(term); }}
-													className='p-1 hover:bg-zinc-600 rounded'
+													className='p-2 hover:bg-white/20 rounded-full'
 												>
-													<X className='size-4' />
+													<X className='size-5' />
 												</button>
 											</div>
 										))}
@@ -142,11 +148,11 @@ const Topbar = () => {
 								{/* Live Search Results */}
 								{searchQuery && searchResults.length > 0 && (
 									<>
-										<div className='px-4 py-3 font-semibold text-sm'>Results</div>
+										<div className='px-4 py-3 font-bold text-sm text-white'>Results</div>
 										{searchResults.slice(0, 6).map((song) => (
 											<div 
 												key={song._id}
-												className='flex items-center gap-3 px-4 py-2 hover:bg-zinc-700 cursor-pointer'
+												className='flex items-center gap-3 px-4 py-2 hover:bg-white/10 cursor-pointer'
 												onClick={() => handlePlaySong(song)}
 											>
 												<img 
@@ -155,14 +161,14 @@ const Topbar = () => {
 													className='w-12 h-12 rounded object-cover'
 												/>
 												<div className='flex-1 min-w-0'>
-													<p className='font-medium truncate'>{song.title}</p>
+													<p className='font-medium truncate text-white'>{song.title}</p>
 													<p className='text-sm text-zinc-400 truncate'>Song • {song.artist}</p>
 												</div>
 											</div>
 										))}
 										{searchResults.length > 6 && (
 											<div 
-												className='px-4 py-3 text-sm text-emerald-400 hover:bg-zinc-700 cursor-pointer text-center font-medium'
+												className='px-4 py-4 text-sm text-emerald-400 hover:bg-white/10 cursor-pointer text-center font-bold'
 												onClick={() => { navigate("/search"); setShowDropdown(false); }}
 											>
 												See all results →
@@ -172,10 +178,15 @@ const Topbar = () => {
 								)}
 
 								{searchQuery && isLoading && (
-									<div className='px-4 py-6 text-center text-zinc-400 text-sm'>Searching...</div>
+									<div className='px-4 py-8 text-center text-zinc-400'>Searching...</div>
+								)}
+
+								{searchQuery && !isLoading && searchResults.length === 0 && (
+									<div className='px-4 py-8 text-center text-zinc-400'>No results found</div>
 								)}
 							</div>
-						</>
+						</>,
+						document.body
 					)}
 				</div>
 			</div>
