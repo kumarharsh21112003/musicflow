@@ -14,6 +14,9 @@ class AudioEngine {
         this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
         this.audioElement = new Audio();
         this.audioElement.crossOrigin = 'anonymous';
+        // Critical for iOS/Android background play
+        (this.audioElement as any).playsInline = true;
+        this.audioElement.preload = 'auto';
         
         // Create source from audio element
         this.sourceNode = this.audioContext.createMediaElementSource(this.audioElement);
@@ -69,7 +72,7 @@ class AudioEngine {
                 resolve();
             };
             
-            const handleError = (e: any) => {
+            const handleError = () => {
                 cleanup();
                 console.error('❌ Audio Engine Error:', this.audioElement?.error);
                 reject(new Error('Failed to load audio stream'));

@@ -184,40 +184,24 @@ const HomePage = () => {
 		<main className='rounded-md overflow-hidden h-full bg-gradient-to-b from-zinc-800 to-zinc-900'>
 			<ScrollArea className='h-full'>
 				<div className='p-4 sm:p-6'>
-					{/* Filter Pills */}
-					<div className='flex gap-2 mb-6'>
-						{FILTERS.map(filter => (
-							<button
-								key={filter}
-								onClick={() => setActiveFilter(filter)}
-								className={`px-4 py-2 rounded-full text-sm font-medium transition-all
-									${activeFilter === filter 
-										? 'bg-emerald-500 text-black' 
-										: 'bg-zinc-800 text-white hover:bg-zinc-700'}`}
-							>
-								{filter}
-							</button>
-						))}
-					</div>
-
-						<div className='flex items-center justify-between mb-8 sticky top-0 bg-zinc-900/60 backdrop-blur-md z-[20] -mx-4 px-4 py-2 border-b border-white/5 md:bg-transparent md:backdrop-blur-none md:border-none md:relative md:p-0 md:m-0'>
+						<div className='flex items-center justify-between mb-6 sticky top-0 bg-transparent backdrop-blur-md z-[20] -mx-4 px-4 py-3 md:relative md:p-0 md:m-0'>
 							<h1 className='text-2xl sm:text-3xl font-black tracking-tight'>{getGreeting()}</h1>
 							<div className='flex gap-4 items-center'>
-								<span className='text-zinc-400 md:hidden'><Bell size={24} /></span>
-								<span className='text-zinc-400 md:hidden'><History size={24} /></span>
-								<span className='text-zinc-400 md:hidden'><Settings size={24} /></span>
+								<span className='text-zinc-400 md:hidden'><Bell size={22} /></span>
+								<span className='text-zinc-400 md:hidden'><History size={22} /></span>
+								<span className='text-zinc-400 md:hidden'><Settings size={22} /></span>
 							</div>
 						</div>
 
-						<div className='flex gap-2 mb-8 overflow-x-auto no-scrollbar -mx-1 px-1'>
+						<div className='flex gap-2 mb-8 overflow-x-auto no-scrollbar -mx-1 px-1 sticky top-[60px] bg-transparent z-[15] py-2 md:relative md:top-0 h-14'>
 							{FILTERS.map(filter => (
 								<button
 									key={filter}
 									onClick={() => setActiveFilter(filter)}
-									className={`px-5 py-2 rounded-full text-sm font-bold transition-all whitespace-nowrap
+									className={`px-6 py-2 rounded-full text-sm font-bold transition-all whitespace-nowrap
 										${activeFilter === filter 
-											? 'bg-emerald-500 text-black' 
-											: 'bg-zinc-800 text-white hover:bg-zinc-700'}`}
+											? 'bg-emerald-500 text-black shadow-[0_4px_12px_rgba(16,185,129,0.3)]' 
+											: 'bg-zinc-800/80 text-white hover:bg-zinc-700'}`}
 								>
 									{filter}
 								</button>

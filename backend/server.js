@@ -160,14 +160,13 @@ app.get('/api/trending', async (req, res) => {
     }
 });
 
-// Stream audio with optimization
+// Stream audio with optimization and Range support
 app.get('/api/stream/:videoId', async (req, res) => {
     try {
         const { videoId } = req.params;
-        console.log(`🎵 Streaming: ${videoId}`);
+        const range = req.headers.range;
         
         const info = await ytdl.getInfo(videoId);
-        
         const format = ytdl.chooseFormat(info.formats, { 
             filter: 'audioonly', 
             quality: 'highestaudio' 
@@ -175,30 +174,44 @@ app.get('/api/stream/:videoId', async (req, res) => {
 
         if (!format) throw new Error('No audio format found');
         
-        // Set headers for audio streaming
-        res.setHeader('Content-Type', 'audio/mpeg');
-        res.setHeader('Accept-Ranges', 'bytes');
-        res.setHeader('Cache-Control', 'public, max-age=3600');
-        
-        const stream = ytdl(videoId, { 
-            format: format,
-            highWaterMark: 1 << 25,
-            liveBuffer: 10000,
-            dlChunkSize: 0 // Very important for stable streaming on some hosts
-        });
+        const totalSize = parseInt(format.contentLength);
 
-        stream.pipe(res);
+        if (range) {
+            const parts = range.replace(/bytes=/, "").split("-");
+            const start = parseInt(parts[0], 10);
+            const end = parts[1] ? parseInt(parts[1], 10) : totalSize - 1;
+            const chunksize = (end - start) + 1;
 
-        stream.on('error', (err) => {
-            console.error('❌ Stream pipe error:', err.message);
-            if (!res.headersSent) res.status(500).end();
-            stream.destroy();
-        });
+            res.writeHead(206, {
+                'Content-Range': `bytes ${start}-${end}/${totalSize}`,
+                'Accept-Ranges': 'bytes',
+                'Content-Length': chunksize,
+                'Content-Type': 'audio/mpeg',
+                'Cache-Control': 'public, max-age=3600',
+            });
 
-        req.on('close', () => {
-            stream.destroy();
-        });
+            const stream = ytdl(videoId, { 
+                format: format,
+                range: { start, end },
+                highWaterMark: 1 << 25,
+                dlChunkSize: 0
+            });
+            stream.pipe(res);
+        } else {
+            res.writeHead(200, {
+                'Content-Length': totalSize,
+                'Content-Type': 'audio/mpeg',
+                'Accept-Ranges': 'bytes',
+                'Cache-Control': 'public, max-age=3600',
+            });
 
+            const stream = ytdl(videoId, { 
+                format: format,
+                highWaterMark: 1 << 25,
+                dlChunkSize: 0
+            });
+            stream.pipe(res);
+        }
     } catch (error) {
         console.error('❌ Stream error:', error.message);
         if (!res.headersSent) res.status(500).send('Streaming failed: ' + error.message);

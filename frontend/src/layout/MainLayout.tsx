@@ -27,8 +27,8 @@ const MainLayout = () => {
 	const showRightSidebar = !isMobile && currentSong;
 
 	return (
-		<div className='h-screen bg-black text-white flex flex-col'>
-			<Topbar />
+		<div className='h-screen bg-black text-white flex flex-col overflow-hidden'>
+			{!isMobile && <Topbar />}
 			
 			<div className="flex-1 overflow-hidden relative">
 				{isMobile ? (

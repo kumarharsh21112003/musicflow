@@ -393,7 +393,7 @@ export const PlaybackControls = () => {
 
 			{/* MOBILE FLOATING PLAYER (Spotify Style) */}
 			<div 
-				className={`md:hidden fixed bottom-[80px] left-2 right-2 bg-zinc-900 shadow-[0_8px_24px_rgba(0,0,0,0.5)] rounded-lg flex flex-col z-[100] border border-white/5 transition-all duration-300 ease-out ${!currentSong ? 'translate-y-[200%]' : 'translate-y-0 active:scale-95'}`}
+				className={`md:hidden fixed bottom-[80px] left-2 right-2 bg-zinc-900 shadow-[0_4px_32px_rgba(0,0,0,0.8)] rounded-lg flex flex-col z-[100] border border-white/5 transition-all duration-300 ease-out active:scale-[0.98] ${!currentSong ? 'translate-y-[200%]' : 'translate-y-0'}`}
 				onClick={() => setShowMobilePlayer(true)}
 			>
 				<div className="flex items-center gap-3 p-2 h-[56px]">

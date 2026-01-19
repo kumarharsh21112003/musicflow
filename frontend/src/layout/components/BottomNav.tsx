@@ -18,9 +18,9 @@ export const BottomNav = () => {
                 <span className={`text-[10px] ${isActive('/search') ? 'font-bold' : 'font-medium'}`}>Search</span>
             </Link>
 
-            <Link to="#" className={`flex flex-col items-center gap-1 transition-all duration-300 ${isActive('/library') ? 'text-white scale-110' : 'text-zinc-400'}`}>
-                <Library size={26} strokeWidth={isActive('/library') ? 2.5 : 2} />
-                <span className={`text-[10px] ${isActive('/library') ? 'font-bold' : 'font-medium'}`}>Your Library</span>
+            <Link to="/liked" className={`flex flex-col items-center gap-1 transition-all duration-300 ${isActive('/liked') ? 'text-white scale-110' : 'text-zinc-400'}`}>
+                <Library size={26} strokeWidth={isActive('/liked') ? 2.5 : 2} />
+                <span className={`text-[10px] ${isActive('/liked') ? 'font-bold' : 'font-medium'}`}>Your Library</span>
             </Link>
         </div>
     )

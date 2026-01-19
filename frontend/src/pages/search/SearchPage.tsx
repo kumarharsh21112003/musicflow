@@ -196,10 +196,33 @@ const SearchPage = () => {
 							)}
 						</div>
 					) : (
-						<div className='flex flex-col items-center justify-center h-[50vh] text-center px-8'>
-							<Search className='h-24 w-24 text-zinc-800 mb-6' />
-							<h3 className='text-2xl font-black mb-3 tracking-tight'>Search for music</h3>
-							<p className='text-zinc-500 font-medium max-w-xs'>Find your favorite songs, artists, and playlists. Just start typing.</p>
+						<div className="pb-20">
+							<h2 className='text-xl font-black mb-6 tracking-tight'>Browse all</h2>
+							<div className='grid grid-cols-2 gap-4 pb-10'>
+								{[
+									{ name: "Pop", color: "bg-[#8d67ab]", img: "https://t.scdn.co/images/0a74d96e0da5456ebe03921bd20303ee" },
+									{ name: "Hip-Hop", color: "bg-[#ba5d07]", img: "https://i.scdn.co/image/ab67706f000000029bb6af539d072de34548d15c" },
+									{ name: "Bollywood", color: "bg-[#e11a32]", img: "https://i.scdn.co/image/ab67706f000000025f0ad542f8837130635334e3" },
+									{ name: "Indie", color: "bg-[#608108]", img: "https://i.scdn.co/image/ab67706f000000025f751493b827e8d64516d3f2" },
+									{ name: "Charts", color: "bg-[#8d67ab]", img: "https://charts-images.scdn.co/assets/v2/regional/top/default.jpg" },
+									{ name: "New Releases", color: "bg-[#e8115b]", img: "https://i.scdn.co/image/ab67706f000000027ea4d805212cb6abc4f1797c" },
+									{ name: "Discover", color: "bg-[#8d67ab]", img: "https://t.scdn.co/images/d39622043644458f9a2e6e300d860183.jpeg" },
+									{ name: "Concerts", color: "bg-[#1e3264]", img: "https://t.scdn.co/images/8cfa9786346c481299e5a7d5abc06560.jpeg" },
+								].map((cat) => (
+									<div 
+										key={cat.name}
+										className={`${cat.color} aspect-[16/9] rounded-lg p-3 relative overflow-hidden cursor-pointer hover:brightness-110 active:scale-95 transition-all shadow-lg`}
+										onClick={() => { setSearchQuery(cat.name); searchSongs(cat.name); }}
+									>
+										<span className="text-base font-black tracking-tight z-10 relative">{cat.name}</span>
+										<img 
+											src={cat.img} 
+											alt={cat.name} 
+											className="absolute -right-4 -bottom-2 w-20 h-20 rotate-[25deg] shadow-2xl brightness-90 grayscale-[20%]"
+										/>
+									</div>
+								))}
+							</div>
 						</div>
 					)}
 
