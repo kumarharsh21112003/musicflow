@@ -160,27 +160,55 @@ app.get('/api/trending', async (req, res) => {
     }
 });
 
-// Stream audio
+// Stream audio with optimization
 app.get('/api/stream/:videoId', async (req, res) => {
     try {
         const { videoId } = req.params;
         console.log(`🎵 Streaming: ${videoId}`);
         
-        const info = await ytdl.getInfo(videoId);
+        // High quality audio only, filter out video to save bandwidth/CPU
+        // Using a shorter timeout and better agent headers could help
+        const info = await ytdl.getInfo(videoId, {
+            requestOptions: {
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                }
+            }
+        });
+        
         const format = ytdl.chooseFormat(info.formats, { 
             filter: 'audioonly', 
             quality: 'highestaudio' 
         });
+
+        if (!format) throw new Error('No audio format found');
         
+        // Set headers for audio streaming
         res.setHeader('Content-Type', 'audio/mpeg');
-        ytdl(videoId, { 
-            format,
+        res.setHeader('Transfer-Encoding', 'chunked');
+        res.setHeader('Accept-Ranges', 'bytes');
+        
+        const stream = ytdl(videoId, { 
+            format: format,
             filter: 'audioonly',
-            quality: 'highestaudio'
-        }).pipe(res);
+            quality: 'highestaudio',
+            highWaterMark: 1 << 25 // 32MB buffer for smoother streaming
+        });
+
+        stream.pipe(res);
+
+        stream.on('error', (err) => {
+            console.error('❌ Stream pipe error:', err.message);
+            if (!res.headersSent) res.status(500).send('Stream error');
+        });
+
+        req.on('close', () => {
+            stream.destroy();
+        });
+
     } catch (error) {
         console.error('❌ Stream error:', error.message);
-        res.status(500).send('Streaming failed');
+        if (!res.headersSent) res.status(500).send('Streaming failed: ' + error.message);
     }
 });
 

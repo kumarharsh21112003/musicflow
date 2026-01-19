@@ -50,9 +50,10 @@ export const PlaybackControls = () => {
 	const dragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
 	
 	const playerRef = useRef<any>(null);
-	const progressRef = useRef<any>(null);
 	const lastVideoId = useRef<string>("");
+	const [isLoading, setIsLoading] = useState(false);
 
+	// Initialize YouTube ONLY for video synchronization
 	useEffect(() => {
 		const initYT = () => {
 			if (window.YT && window.YT.Player) {
@@ -64,129 +65,102 @@ export const PlaybackControls = () => {
 
 		const createPlayer = () => {
 			if (playerRef.current) return;
-			
 			playerRef.current = new window.YT.Player('yt-player-element', {
-				height: '100%',
-				width: '100%',
-				playerVars: {
-					autoplay: 0,
-					controls: 0,
-					modestbranding: 1,
-					rel: 0,
-					showinfo: 0,
-					iv_load_policy: 3,
-					disablekb: 1,
-					fs: 0,
-					playsinline: 1,
-					origin: window.location.origin,
-				},
+				height: '100%', width: '100%',
+				playerVars: { autoplay: 0, controls: 0, modestbranding: 1, rel: 0, showinfo: 0, iv_load_policy: 3, playsinline: 1 },
 				events: {
-					onReady: (e: any) => {
-						setIsReady(true);
-						e.target.setVolume(volume);
-					},
+					onReady: () => setIsReady(true),
 					onStateChange: (e: any) => {
-						if (e.data === window.YT.PlayerState.PLAYING) {
-							setIsPlaying(true);
-							setDuration(playerRef.current.getDuration());
-							startProgressTracker();
-						} else if (e.data === window.YT.PlayerState.PAUSED) {
-							setIsPlaying(false);
-							stopProgressTracker();
-						} else if (e.data === window.YT.PlayerState.ENDED) {
-							stopProgressTracker();
-							playNext();
-						}
-					},
-					onError: () => playNext()
+						// Sync video state if needed, but audio is handled by audioEngine
+						if (e.data === window.YT.PlayerState.ENDED) playNext();
+					}
 				}
 			});
 		};
 
 		initYT();
-		return () => stopProgressTracker();
 	}, []);
 
+	// Sync Audio Engine with Store State
 	useEffect(() => {
-		if (!currentSong?.videoId || !isReady || !playerRef.current) return;
-		if (lastVideoId.current === currentSong.videoId) return;
+		if (!currentSong) return;
 		
-		lastVideoId.current = currentSong.videoId;
-		setCurrentTime(0);
-		playerRef.current.loadVideoById(currentSong.videoId);
+		const loadAndPlay = async () => {
+			if (lastVideoId.current === currentSong.videoId) return;
+			
+			setIsLoading(true);
+			try {
+				const videoId = currentSong.videoId!;
+				lastVideoId.current = videoId;
+				
+				// Sync YouTube Video if visible
+				if (isReady && playerRef.current) {
+					playerRef.current.loadVideoById(videoId);
+					playerRef.current.mute(); // Always mute video, audioEngine provides sound
+				}
+
+				// Global Audio Engine load
+				await audioEngine.loadTrack({
+					...currentSong,
+					videoId: videoId
+				} as any);
+				setDuration(audioEngine.getDuration());
+				
+				if (isPlaying) {
+					audioEngine.play();
+					if (isReady) playerRef.current?.playVideo();
+				}
+				setIsLoading(false);
+			} catch (error) {
+				console.error("Playback error:", error);
+				setIsLoading(false);
+				toast.error("Failed to load song. Trying next...");
+				playNext();
+			}
+		};
+
+		loadAndPlay();
 	}, [currentSong?.videoId, isReady]);
 
-	const startProgressTracker = useCallback(() => {
-		stopProgressTracker();
-		let crossfadeTriggered = false;
-		
-		progressRef.current = setInterval(() => {
-			if (playerRef.current?.getCurrentTime) {
-				const time = playerRef.current.getCurrentTime();
-				const dur = playerRef.current.getDuration() || 0;
-				setCurrentTime(time);
-				setDuration(dur);
-				
-				// Mix Mode transitions (with fallback for old persisted state)
-				const mixMode = audioSettings.mixMode || 'off';
-				const isMixEnabled = mixMode !== 'off' || audioSettings.crossfadeEnabled;
-				
-				if (isMixEnabled && dur > 0 && !crossfadeTriggered) {
-					const timeLeft = dur - time;
-					
-					// Mix mode configurations
-					const mixConfigs = {
-						off: { fadeDuration: 8, switchAt: 4, fadeIn: [0.4, 0.7, 1] },
-						fade: { fadeDuration: 10, switchAt: 5, fadeIn: [0.3, 0.6, 1] }, // Smooth linear fade
-						rise: { fadeDuration: 6, switchAt: 3, fadeIn: [0.5, 0.8, 1] }, // Quick rise
-						blend: { fadeDuration: 12, switchAt: 6, fadeIn: [0.2, 0.5, 0.8, 1] }, // Long blend
-						party: { fadeDuration: 4, switchAt: 2, fadeIn: [0.6, 0.9, 1] }, // Quick party transition
-					};
-					
-					const config = mixConfigs[mixMode] || mixConfigs.off;
-					const fadeDuration = audioSettings.crossfadeDuration || config.fadeDuration;
-					
-					// Start fading when timeLeft <= fadeDuration
-					if (timeLeft <= fadeDuration && timeLeft > 0) {
-						let fadePercent = timeLeft / fadeDuration;
-						
-						// Apply different fade curves based on mode
-						if (mixMode === 'rise') {
-							fadePercent = Math.pow(fadePercent, 0.5); // Faster initial fade
-						} else if (mixMode === 'blend') {
-							fadePercent = Math.pow(fadePercent, 1.5); // Slower initial fade
-						} else if (mixMode === 'party') {
-							fadePercent = fadePercent < 0.5 ? 0 : fadePercent * 2 - 1; // Abrupt
-						}
-						
-						const fadeVolume = Math.floor(volume * fadePercent);
-						playerRef.current.setVolume?.(fadeVolume);
-						
-						// Switch to next song
-						if (timeLeft <= config.switchAt) {
-							crossfadeTriggered = true;
-							playNext();
-							// Fade in next song based on config
-							const fadeIn = config.fadeIn;
-							setTimeout(() => {
-								playerRef.current?.setVolume?.(Math.floor(volume * fadeIn[0]));
-								fadeIn.slice(1).forEach((val, i) => {
-									setTimeout(() => playerRef.current?.setVolume?.(Math.floor(volume * val)), (i + 1) * 300);
-								});
-							}, 200);
-						}
-					}
-				}
+	// Update Store Time from Audio Engine
+	useEffect(() => {
+		const handleTimeUpdate = (time: number) => {
+			setCurrentTime(time);
+			// Optional: Periodically sync video if it drifts
+			if (showVideo && isReady && playerRef.current) {
+				const ytTime = playerRef.current.getCurrentTime();
+				if (Math.abs(ytTime - time) > 2) playerRef.current.seekTo(time, true);
 			}
-		}, 200);
-	}, [audioSettings.crossfadeEnabled, audioSettings.crossfadeDuration, audioSettings.mixMode, volume, playNext]);
+		};
 
-	const stopProgressTracker = useCallback(() => {
-		if (progressRef.current) {
-			clearInterval(progressRef.current);
-			progressRef.current = null;
+		audioEngine.onTimeUpdate(handleTimeUpdate);
+		audioEngine.onEnded(() => playNext());
+
+		return () => {
+			// Cleanup handlers if needed (engine is singleton)
+		};
+	}, [showVideo, isReady, playNext]);
+
+	// Sync Play/Pause status
+	useEffect(() => {
+		if (isPlaying) {
+			audioEngine.play();
+			if (isReady) playerRef.current?.playVideo();
+		} else {
+			audioEngine.pause();
+			if (isReady) playerRef.current?.pauseVideo();
 		}
-	}, []);
+	}, [isPlaying, isReady]);
+
+	// Sync Audio Settings
+	useEffect(() => {
+		audioEngine.setBassBoost(audioSettings.bassBoost);
+		audioEngine.setTrebleBoost(audioSettings.trebleBoost);
+		audioEngine.setLoudness(audioSettings.loudness);
+		audioEngine.setVolume(volume);
+	}, [audioSettings.bassBoost, audioSettings.trebleBoost, audioSettings.loudness, volume]);
+
+	const stopProgressTracker = () => {}; // No longer needed with audioEngine.onTimeUpdate
 
 	// Apply audio settings to player AND Web Audio API Engine
 	useEffect(() => {

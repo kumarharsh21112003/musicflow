@@ -49,39 +49,42 @@ class AudioEngine {
             this.init();
         }
         
-        // Resume audio context if suspended
+        // Resume audio context
         if (this.audioContext?.state === 'suspended') {
             await this.audioContext.resume();
         }
 
-        // Use configured backend URL or find active port
         const videoId = song.videoId;
-        const streamUrl = `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:3004'}/api/stream/${videoId}`;
+        // Construct stream URL carefully
+        const baseUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3002';
+        const streamUrl = `${baseUrl.replace(/\/$/, '')}/api/stream/${videoId}`;
         
-        // Use retry logic for local development if needed, but for now direct link
-        // In prod VITE_BACKEND_URL will be used
-        
-        this.audioElement!.src = streamUrl;
-        
-        // Setup Media Session (Lock Screen Controls)
-        if ('mediaSession' in navigator) {
-            navigator.mediaSession.metadata = new MediaMetadata({
-                title: song.title,
-                artist: song.artist,
-                artwork: [
-                    { src: song.imageUrl, sizes: '96x96', type: 'image/jpeg' },
-                    { src: song.imageUrl, sizes: '128x128', type: 'image/jpeg' },
-                    { src: song.imageUrl, sizes: '192x192', type: 'image/jpeg' },
-                    { src: song.imageUrl, sizes: '256x256', type: 'image/jpeg' },
-                    { src: song.imageUrl, sizes: '384x384', type: 'image/jpeg' },
-                    { src: song.imageUrl, sizes: '512x512', type: 'image/jpeg' },
-                ]
-            });
-        }
+        console.log(`📡 Loading stream: ${streamUrl}`);
         
         return new Promise<void>((resolve, reject) => {
-            this.audioElement!.oncanplay = () => resolve();
-            this.audioElement!.onerror = () => reject(new Error('Failed to load audio'));
+            if (!this.audioElement) return reject(new Error('Audio element not initialized'));
+            
+            const handleCanPlay = () => {
+                cleanup();
+                resolve();
+            };
+            
+            const handleError = (e: any) => {
+                cleanup();
+                console.error('❌ Audio Engine Error:', this.audioElement?.error);
+                reject(new Error('Failed to load audio stream'));
+            };
+            
+            const cleanup = () => {
+                this.audioElement!.removeEventListener('canplay', handleCanPlay);
+                this.audioElement!.removeEventListener('error', handleError);
+            };
+            
+            this.audioElement.addEventListener('canplay', handleCanPlay);
+            this.audioElement.addEventListener('error', handleError);
+            
+            this.audioElement.src = streamUrl;
+            this.audioElement.load();
         });
     }
 
