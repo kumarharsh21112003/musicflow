@@ -198,7 +198,13 @@ const Topbar = () => {
 								<p className='text-xs text-zinc-400'>{user?.email}</p>
 							</div>
 							<button 
-								onClick={logout}
+								onClick={(e) => {
+									e.stopPropagation();
+									e.preventDefault();
+									console.log('Logout clicked!');
+									logout();
+									setShowProfile(false);
+								}}
 								className='w-full px-4 py-3 flex items-center gap-3 hover:bg-zinc-700 text-left text-red-400'
 							>
 								<LogOut className='size-4' />
