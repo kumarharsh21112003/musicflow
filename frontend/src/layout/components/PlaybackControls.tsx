@@ -458,14 +458,19 @@ export const PlaybackControls = () => {
 				
 				<div id="yt-player-element" style={{ width: '100%', height: '100%' }} />
 				
-				{/* FULL OVERLAY - Blocks ALL clicks on video */}
+				{/* FULL OVERLAY - Blocks clicks but allows dragging */}
 				<div 
 					style={{
 						position: 'absolute',
 						top: 0, left: 0, right: 0, bottom: 0,
 						zIndex: 14,
-						cursor: 'default'
+						cursor: isFullscreen ? 'default' : (isDragging ? 'grabbing' : 'grab')
 					}} 
+					onMouseDown={(e) => {
+						if (!isFullscreen) {
+							handleDragStart(e);
+						}
+					}}
 					onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
 				/>
 				
