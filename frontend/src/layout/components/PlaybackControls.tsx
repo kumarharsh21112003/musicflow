@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { usePlayerStore } from "@/stores/usePlayerStore";
-import { Pause, Play, SkipBack, SkipForward, Volume1, Volume2, VolumeX, Video, VideoOff, Shuffle, Repeat, Maximize2, Minimize2, X, Headphones, Sparkles, Waves } from "lucide-react";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { Pause, Play, SkipBack, SkipForward, Volume1, Volume2, VolumeX, Video, VideoOff, Maximize2, Minimize2, X, Headphones, Sparkles, Shuffle, Repeat, Waves } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 import { audioEngine } from "@/lib/audioEngine";
 import { MobilePlayer } from "./MobilePlayer";
@@ -51,7 +51,7 @@ export const PlaybackControls = () => {
 	
 	const playerRef = useRef<any>(null);
 	const lastVideoId = useRef<string>("");
-	const [isLoading, setIsLoading] = useState(false);
+	const [isPlaybackLoading, setIsPlaybackLoading] = useState(false);
 
 	// Initialize YouTube ONLY for video synchronization
 	useEffect(() => {
@@ -88,7 +88,7 @@ export const PlaybackControls = () => {
 		const loadAndPlay = async () => {
 			if (lastVideoId.current === currentSong.videoId) return;
 			
-			setIsLoading(true);
+			setIsPlaybackLoading(true);
 			try {
 				const videoId = currentSong.videoId!;
 				lastVideoId.current = videoId;
@@ -110,10 +110,10 @@ export const PlaybackControls = () => {
 					audioEngine.play();
 					if (isReady) playerRef.current?.playVideo();
 				}
-				setIsLoading(false);
+				setIsPlaybackLoading(false);
 			} catch (error) {
 				console.error("Playback error:", error);
-				setIsLoading(false);
+				setIsPlaybackLoading(false);
 				toast.error("Failed to load song. Trying next...");
 				playNext();
 			}
@@ -160,9 +160,7 @@ export const PlaybackControls = () => {
 		audioEngine.setVolume(volume);
 	}, [audioSettings.bassBoost, audioSettings.trebleBoost, audioSettings.loudness, volume]);
 
-	const stopProgressTracker = () => {}; // No longer needed with audioEngine.onTimeUpdate
-
-	// Apply audio settings to player AND Web Audio API Engine
+	// Audio components
 	useEffect(() => {
 		if (playerRef.current && audioSettings) {
 			// Apply loudness as volume boost for YouTube player
@@ -394,37 +392,37 @@ export const PlaybackControls = () => {
 
 			{/* MOBILE FLOATING PLAYER (Spotify Style) */}
 			<div 
-				className={`md:hidden fixed bottom-[70px] left-2 right-2 bg-[#262626] rounded-md p-2 flex flex-col z-[45] shadow-xl border-b border-zinc-800 transition-transform duration-300 ${!currentSong ? 'translate-y-[200%]' : 'translate-y-0'}`}
+				className={`md:hidden fixed bottom-[72px] left-2 right-2 bg-[#282828] rounded-md p-2 flex flex-col z-[100] shadow-[0_8px_24px_rgba(0,0,0,0.5)] border border-white/5 transition-transform duration-300 ${!currentSong ? 'translate-y-[200%]' : 'translate-y-0'}`}
 				onClick={() => setShowMobilePlayer(true)}
 			>
 				<div className="flex items-center gap-3">
 					<img 
-						src={currentSong?.imageUrl || `https://i.ytimg.com/vi/${currentSong?.videoId}/mqdefault.jpg`} 
+						src={currentSong?.imageUrl} 
 						alt="Album Art" 
-						className="w-10 h-10 rounded bg-zinc-800 object-cover flex-shrink-0" 
+						className="w-10 h-10 rounded bg-zinc-800 object-cover flex-shrink-0 shadow-lg" 
 						onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.png' }}
 					/>
 					<div className="flex-1 min-w-0 flex flex-col justify-center mr-2">
-						<div className="font-semibold text-xs text-white truncate leading-tight mb-0.5">
+						<div className="font-bold text-[13px] text-white truncate leading-tight mb-0.5">
 							{currentSong?.title || "Choose a song"}
 						</div>
-						<div className="text-[10px] text-zinc-400 truncate leading-tight">
-							{currentSong?.artist} • MusicFlow
+						<div className="text-[11px] text-zinc-400 font-medium truncate leading-tight">
+							{currentSong?.artist}
 						</div>
 					</div>
 					
 					{/* Mobile Controls */}
-					<div className="flex items-center gap-3 mr-1">
+					<div className="flex items-center gap-4 mr-2">
 						<button 
 							onClick={(e) => { e.stopPropagation(); handlePlayPause(); }} 
-							className="text-white focus:outline-none"
+							className="text-white hover:scale-105 active:scale-90 transition-transform"
 						>
-							{isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" />}
+							{isPlaying ? <Pause size={28} fill="currentColor" /> : <Play size={28} fill="currentColor" />}
 						</button>
 					</div>
 				</div>
 				{/* Thin Progress Bar */}
-				<div className="absolute bottom-0 left-2 right-2 h-[2px] bg-zinc-600 rounded-full overflow-hidden">
+				<div className="absolute bottom-[1px] left-2 right-2 h-[2px] bg-white/10 rounded-full overflow-hidden">
 					<div 
 						className="h-full bg-white rounded-full transition-all duration-300 linear" 
 						style={{ width: `${(currentTime / (duration || 1)) * 100}%` }} 
