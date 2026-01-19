@@ -103,70 +103,79 @@ const Topbar = () => {
 						/>
 					</form>
 
-					{/* Search Dropdown */}
+					{/* Search Dropdown - Spotify style with backdrop */}
 					{showDropdown && (searchQuery || recentSearches.length > 0) && (
-						<div className='absolute top-14 left-0 right-0 bg-zinc-900 rounded-lg shadow-2xl border border-zinc-700 max-h-[400px] overflow-auto z-[100]'>
-							{/* Recent Searches */}
-							{!searchQuery && recentSearches.length > 0 && (
-								<>
-									<div className='px-4 py-3 font-semibold text-sm'>Recent searches</div>
-									{recentSearches.map((term, i) => (
-										<div 
-											key={i}
-											className='flex items-center justify-between px-4 py-2 hover:bg-zinc-700 cursor-pointer'
-											onClick={() => { setSearchQuery(term); searchSongs(term); }}
-										>
-											<div className='flex items-center gap-3'>
-												<Search className='size-4 text-zinc-400' />
-												<span className='text-sm'>{term}</span>
-											</div>
-											<button 
-												onClick={(e) => { e.stopPropagation(); clearRecent(term); }}
-												className='p-1 hover:bg-zinc-600 rounded'
+						<>
+							{/* Backdrop to hide content behind */}
+							<div 
+								className='fixed inset-0 bg-black/60 z-[90]' 
+								onClick={() => setShowDropdown(false)}
+								style={{ top: '60px' }}
+							/>
+							{/* Dropdown */}
+							<div className='absolute top-14 left-0 right-0 bg-zinc-900 rounded-lg shadow-2xl border border-zinc-700 max-h-[70vh] overflow-auto z-[100]'>
+								{/* Recent Searches */}
+								{!searchQuery && recentSearches.length > 0 && (
+									<>
+										<div className='px-4 py-3 font-semibold text-sm'>Recent searches</div>
+										{recentSearches.map((term, i) => (
+											<div 
+												key={i}
+												className='flex items-center justify-between px-4 py-2 hover:bg-zinc-700 cursor-pointer'
+												onClick={() => { setSearchQuery(term); searchSongs(term); }}
 											>
-												<X className='size-4' />
-											</button>
-										</div>
-									))}
-								</>
-							)}
-
-							{/* Live Search Results */}
-							{searchQuery && searchResults.length > 0 && (
-								<>
-									<div className='px-4 py-3 font-semibold text-sm border-t border-zinc-700'>Results</div>
-									{searchResults.slice(0, 5).map((song) => (
-										<div 
-											key={song._id}
-											className='flex items-center gap-3 px-4 py-2 hover:bg-zinc-700 cursor-pointer'
-											onClick={() => handlePlaySong(song)}
-										>
-											<img 
-												src={song.imageUrl} 
-												alt={song.title}
-												className='w-10 h-10 rounded object-cover'
-											/>
-											<div className='flex-1 min-w-0'>
-												<p className='text-sm font-medium truncate'>{song.title}</p>
-												<p className='text-xs text-zinc-400 truncate'>Song • {song.artist}</p>
+												<div className='flex items-center gap-3'>
+													<Search className='size-4 text-zinc-400' />
+													<span className='text-sm'>{term}</span>
+												</div>
+												<button 
+													onClick={(e) => { e.stopPropagation(); clearRecent(term); }}
+													className='p-1 hover:bg-zinc-600 rounded'
+												>
+													<X className='size-4' />
+												</button>
 											</div>
-										</div>
-									))}
-									{searchResults.length > 5 && (
-										<div 
-											className='px-4 py-3 text-sm text-emerald-400 hover:bg-zinc-700 cursor-pointer text-center'
-											onClick={() => { navigate("/search"); setShowDropdown(false); }}
-										>
-											See all results →
-										</div>
-									)}
-								</>
-							)}
+										))}
+									</>
+								)}
 
-							{searchQuery && isLoading && (
-								<div className='px-4 py-4 text-center text-zinc-400 text-sm'>Searching...</div>
-							)}
-						</div>
+								{/* Live Search Results */}
+								{searchQuery && searchResults.length > 0 && (
+									<>
+										<div className='px-4 py-3 font-semibold text-sm'>Results</div>
+										{searchResults.slice(0, 6).map((song) => (
+											<div 
+												key={song._id}
+												className='flex items-center gap-3 px-4 py-2 hover:bg-zinc-700 cursor-pointer'
+												onClick={() => handlePlaySong(song)}
+											>
+												<img 
+													src={song.imageUrl} 
+													alt={song.title}
+													className='w-12 h-12 rounded object-cover'
+												/>
+												<div className='flex-1 min-w-0'>
+													<p className='font-medium truncate'>{song.title}</p>
+													<p className='text-sm text-zinc-400 truncate'>Song • {song.artist}</p>
+												</div>
+											</div>
+										))}
+										{searchResults.length > 6 && (
+											<div 
+												className='px-4 py-3 text-sm text-emerald-400 hover:bg-zinc-700 cursor-pointer text-center font-medium'
+												onClick={() => { navigate("/search"); setShowDropdown(false); }}
+											>
+												See all results →
+											</div>
+										)}
+									</>
+								)}
+
+								{searchQuery && isLoading && (
+									<div className='px-4 py-6 text-center text-zinc-400 text-sm'>Searching...</div>
+								)}
+							</div>
+						</>
 					)}
 				</div>
 			</div>
