@@ -7,6 +7,8 @@
   "background_color": "#000000",
   "theme_color": "#10b981",
   "orientation": "portrait-primary",
+  "prefer_related_applications": false,
+  "scope": "/",
   "icons": [
     {
       "src": "/icon-192.png",
@@ -41,5 +43,10 @@
       "url": "/liked",
       "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
     }
-  ]
+  ],
+  "related_applications": [],
+  "handle_links": "preferred",
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  }
 }

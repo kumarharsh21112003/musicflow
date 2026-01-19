@@ -1,4 +1,4 @@
-const CACHE_NAME = 'musicflow-v1';
+const CACHE_NAME = 'musicflow-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -33,11 +33,16 @@ self.addEventListener('fetch', (event) => {
   // Skip non-GET requests
   if (event.request.method !== 'GET') return;
   
-  // Skip API requests (always fetch fresh)
+  // CRITICAL: Never intercept audio/stream requests - let them go directly
+  if (event.request.url.includes('/api/stream')) return;
   if (event.request.url.includes('/api/')) return;
   
   // Skip YouTube requests
   if (event.request.url.includes('youtube.com') || event.request.url.includes('ytimg.com')) return;
+  
+  // Skip audio/video MIME types
+  const url = new URL(event.request.url);
+  if (url.pathname.endsWith('.mp3') || url.pathname.endsWith('.mp4') || url.pathname.endsWith('.webm')) return;
 
   event.respondWith(
     fetch(event.request)
@@ -75,4 +80,11 @@ self.addEventListener('push', (event) => {
   );
 });
 
-console.log('🎵 MusicFlow Service Worker loaded');
+// Handle audio focus and background playback messages
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'KEEP_ALIVE') {
+    console.log('🎵 Received keep-alive ping for background playback');
+  }
+});
+
+console.log('🎵 MusicFlow Service Worker v2 loaded - Background Audio Optimized');

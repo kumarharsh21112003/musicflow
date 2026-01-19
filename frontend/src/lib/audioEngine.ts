@@ -1,4 +1,4 @@
-// Web Audio API Engine for real Bass/Treble EQ
+// Web Audio API Engine for real Bass/Treble EQ with Background Playback Support
 class AudioEngine {
     private audioContext: AudioContext | null = null;
     private audioElement: HTMLAudioElement | null = null;
@@ -7,6 +7,7 @@ class AudioEngine {
     private trebleFilter: BiquadFilterNode | null = null;
     private gainNode: GainNode | null = null;
     private isInitialized = false;
+    private wakeLock: any = null;
 
     init() {
         if (this.isInitialized) return;
@@ -14,9 +15,12 @@ class AudioEngine {
         this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
         this.audioElement = new Audio();
         this.audioElement.crossOrigin = 'anonymous';
-        // Critical for iOS/Android background play
+        
+        // CRITICAL for mobile background playback
         (this.audioElement as any).playsInline = true;
         this.audioElement.preload = 'auto';
+        this.audioElement.setAttribute('webkit-playsinline', 'true');
+        this.audioElement.setAttribute('playsinline', 'true');
         
         // Create source from audio element
         this.sourceNode = this.audioContext.createMediaElementSource(this.audioElement);
@@ -44,7 +48,26 @@ class AudioEngine {
         this.gainNode.connect(this.audioContext.destination);
         
         this.isInitialized = true;
-        console.log('🎧 Audio Engine initialized with EQ');
+        console.log('🎧 Audio Engine initialized with EQ & Background Support');
+    }
+
+    // Request wake lock to prevent screen from sleeping during playback
+    async requestWakeLock() {
+        try {
+            if ('wakeLock' in navigator) {
+                this.wakeLock = await (navigator as any).wakeLock.request('screen');
+                console.log('🔒 Wake Lock acquired for background playback');
+            }
+        } catch (err) {
+            console.log('Wake Lock not available:', err);
+        }
+    }
+
+    releaseWakeLock() {
+        if (this.wakeLock) {
+            this.wakeLock.release();
+            this.wakeLock = null;
+        }
     }
 
     async loadTrack(song: { _id: string, title: string, artist: string, imageUrl: string, videoId: string }) {
@@ -52,17 +75,19 @@ class AudioEngine {
             this.init();
         }
         
-        // Resume audio context
+        // Resume audio context (important for mobile)
         if (this.audioContext?.state === 'suspended') {
             await this.audioContext.resume();
         }
 
         const videoId = song.videoId;
-        // Construct stream URL carefully
         const baseUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3002';
         const streamUrl = `${baseUrl.replace(/\/$/, '')}/api/stream/${videoId}`;
         
         console.log(`📡 Loading stream: ${streamUrl}`);
+        
+        // Update Media Session metadata for lock screen controls
+        this.updateMediaSession(song);
         
         return new Promise<void>((resolve, reject) => {
             if (!this.audioElement) return reject(new Error('Audio element not initialized'));
@@ -91,6 +116,24 @@ class AudioEngine {
         });
     }
 
+    // Update lock screen / notification controls
+    updateMediaSession(song: { title: string, artist: string, imageUrl: string }) {
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: song.title,
+                artist: song.artist,
+                album: 'MusicFlow',
+                artwork: [
+                    { src: song.imageUrl, sizes: '96x96', type: 'image/jpeg' },
+                    { src: song.imageUrl, sizes: '128x128', type: 'image/jpeg' },
+                    { src: song.imageUrl, sizes: '192x192', type: 'image/jpeg' },
+                    { src: song.imageUrl, sizes: '256x256', type: 'image/jpeg' },
+                    { src: song.imageUrl, sizes: '512x512', type: 'image/jpeg' },
+                ]
+            });
+        }
+    }
+
     setMediaSessionHandlers(handlers: { 
         play: () => void, 
         pause: () => void, 
@@ -109,12 +152,30 @@ class AudioEngine {
         }
     }
 
-    play() {
-        this.audioElement?.play();
+    async play() {
+        try {
+            // Resume context if suspended (mobile browsers pause it)
+            if (this.audioContext?.state === 'suspended') {
+                await this.audioContext.resume();
+            }
+            await this.audioElement?.play();
+            await this.requestWakeLock();
+            
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.playbackState = 'playing';
+            }
+        } catch (err) {
+            console.error('Play failed:', err);
+        }
     }
 
     pause() {
         this.audioElement?.pause();
+        this.releaseWakeLock();
+        
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.playbackState = 'paused';
+        }
     }
 
     seek(time: number) {
@@ -129,31 +190,25 @@ class AudioEngine {
         }
     }
 
-    // EQ Controls - Real audio processing!
+    // EQ Controls
     setBassBoost(value: number) {
-        // Convert 0-100 to -15 to +15 dB
         const gain = ((value - 50) / 50) * 15;
         if (this.bassFilter) {
             this.bassFilter.gain.value = gain;
-            console.log(`🔊 Bass: ${gain.toFixed(1)}dB`);
         }
     }
 
     setTrebleBoost(value: number) {
-        // Convert 0-100 to -15 to +15 dB
         const gain = ((value - 50) / 50) * 15;
         if (this.trebleFilter) {
             this.trebleFilter.gain.value = gain;
-            console.log(`🔔 Treble: ${gain.toFixed(1)}dB`);
         }
     }
 
     setLoudness(value: number) {
-        // Convert 0-100 to 0.5 to 2.0 gain
         const gain = 0.5 + (value / 100) * 1.5;
         if (this.gainNode) {
             this.gainNode.gain.value = gain;
-            console.log(`📢 Loudness: ${(gain * 100).toFixed(0)}%`);
         }
     }
 
@@ -179,7 +234,6 @@ class AudioEngine {
             this.audioElement.addEventListener('timeupdate', listener);
             this.audioElement.addEventListener('durationchange', listener);
             
-            // Return cleanup function
             return () => {
                 this.audioElement?.removeEventListener('timeupdate', listener);
                 this.audioElement?.removeEventListener('durationchange', listener);
@@ -196,6 +250,7 @@ class AudioEngine {
 
     destroy() {
         this.audioElement?.pause();
+        this.releaseWakeLock();
         this.audioContext?.close();
         this.isInitialized = false;
     }
