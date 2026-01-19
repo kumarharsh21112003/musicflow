@@ -166,12 +166,17 @@ export const PlaybackControls = () => {
 					playerRef.current.mute(); // Always mute video, audioEngine provides sound
 				}
 
-				// Global Audio Engine load
+			// Global Audio Engine load
 				await audioEngine.loadTrack({
 					...currentSong,
 					videoId: videoId
 				} as any);
-				setDuration(audioEngine.getDuration());
+				
+				// Wait for metadata to load and get duration
+				setTimeout(() => {
+					const dur = audioEngine.getDuration();
+					if (dur > 0) setDuration(dur);
+				}, 500);
 				
 				// Always auto-play when new song is loaded (setCurrentSong sets isPlaying: true)
 				audioEngine.play();
@@ -836,7 +841,7 @@ const AudioVisualizerEffect = ({
 			ctx.clearRect(0, 0, canvas.width, canvas.height);
 
 			// Simulate audio data with random values (smooth transitions)
-			bars = bars.map((bar, i) => {
+			bars = bars.map((bar) => {
 				const target = isPlaying ? Math.random() * 80 + 20 : 5;
 				return bar + (target - bar) * 0.15;
 			});

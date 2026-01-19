@@ -341,14 +341,20 @@ class AudioEngine {
             const listener = () => {
                 const cur = this.audioElement?.currentTime || 0;
                 const dur = this.audioElement?.duration || 0;
-                callback(cur, dur);
+                // Only call if duration is valid (not NaN)
+                if (!isNaN(dur)) {
+                    callback(cur, dur);
+                }
             };
             this.audioElement.addEventListener('timeupdate', listener);
             this.audioElement.addEventListener('durationchange', listener);
+            // Also listen to loadedmetadata for initial duration
+            this.audioElement.addEventListener('loadedmetadata', listener);
             
             return () => {
                 this.audioElement?.removeEventListener('timeupdate', listener);
                 this.audioElement?.removeEventListener('durationchange', listener);
+                this.audioElement?.removeEventListener('loadedmetadata', listener);
             };
         }
         return () => {};
