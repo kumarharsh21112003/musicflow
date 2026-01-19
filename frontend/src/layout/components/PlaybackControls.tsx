@@ -457,9 +457,9 @@ export const PlaybackControls = () => {
 							{showQualityMenu && (
 								<div 
 									style={{
-										position: 'absolute', top: '100%', right: 0, marginTop: 8,
+										position: 'absolute', bottom: '100%', right: 0, marginBottom: 8,
 										background: 'rgba(0,0,0,0.95)', borderRadius: 8, padding: 4,
-										minWidth: 100, zIndex: 100, border: '1px solid #333'
+										minWidth: 110, zIndex: 100, border: '1px solid #333'
 									}}
 									onMouseDown={(e) => e.stopPropagation()}
 								>
