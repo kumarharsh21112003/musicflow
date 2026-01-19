@@ -105,7 +105,7 @@ const Topbar = () => {
 
 					{/* Search Dropdown */}
 					{showDropdown && (searchQuery || recentSearches.length > 0) && (
-						<div className='absolute top-14 left-0 right-0 bg-zinc-800 rounded-lg shadow-xl border border-zinc-700 max-h-[400px] overflow-auto'>
+						<div className='absolute top-14 left-0 right-0 bg-zinc-900 rounded-lg shadow-2xl border border-zinc-700 max-h-[400px] overflow-auto z-[100]'>
 							{/* Recent Searches */}
 							{!searchQuery && recentSearches.length > 0 && (
 								<>
