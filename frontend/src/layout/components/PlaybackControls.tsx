@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { usePlayerStore } from "@/stores/usePlayerStore";
-import { Pause, Play, SkipBack, SkipForward, Volume1, Volume2, VolumeX, Video, VideoOff, Maximize2, Minimize2, X, Headphones, Sparkles, Shuffle, Repeat, Waves, Moon, Timer, Settings } from "lucide-react";
+import { Pause, Play, SkipBack, SkipForward, Volume1, Volume2, VolumeX, Video, VideoOff, Maximize2, Minimize2, X, Headphones, Sparkles, Shuffle, Repeat, Waves, Moon, Timer } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 import { audioEngine } from "@/lib/audioEngine";
@@ -56,9 +56,6 @@ export const PlaybackControls = () => {
 	const [sleepTimer, setSleepTimer] = useState<number | null>(null);
 	const [sleepTimeRemaining, setSleepTimeRemaining] = useState<number>(0);
 	const [showVisualizer, setShowVisualizer] = useState(false);
-	const [videoQuality, setVideoQuality] = useState<'auto' | 'small' | 'medium' | 'large' | 'hd720' | 'hd1080'>('auto');
-	const [showQualityMenu, setShowQualityMenu] = useState(false);
-	const [availableQualities, setAvailableQualities] = useState<string[]>(['auto', 'small', 'medium', 'hd720', 'hd1080']);
 	const dragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
 	const sleepTimerRef = useRef<NodeJS.Timeout | null>(null);
 	const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -97,7 +94,6 @@ export const PlaybackControls = () => {
 								// Set to highest available quality
 								const highest = availableQuals[0]; // First is highest
 								e.target.setPlaybackQuality(highest);
-								setAvailableQualities(['auto', ...availableQuals]);
 							}
 						}
 						// Sync video state if needed, but audio is handled by audioEngine
@@ -455,60 +451,7 @@ export const PlaybackControls = () => {
 					<span style={{ fontSize: 14, color: 'white', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, marginRight: 8, pointerEvents: 'none' }}>
 						{currentSong?.title}
 					</span>
-					<div style={{ display: 'flex', gap: 8, position: 'relative' }}>
-						{/* Quality Selector */}
-						<div style={{ position: 'relative' }}>
-							<button 
-								onClick={() => setShowQualityMenu(!showQualityMenu)}
-								onMouseDown={(e) => e.stopPropagation()}
-								style={{ padding: 8, borderRadius: 9999, background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
-							>
-								<Settings size={16} />
-								<span style={{ fontSize: 10, fontWeight: 'bold' }}>
-									{videoQuality === 'auto' ? 'AUTO' : videoQuality === 'small' ? '360p' : videoQuality === 'medium' ? '480p' : videoQuality === 'large' ? '480p' : videoQuality === 'hd720' ? '720p' : '1080p'}
-								</span>
-							</button>
-							
-							{showQualityMenu && (
-								<div 
-									style={{
-										position: 'absolute', bottom: '100%', right: 0, marginBottom: 8,
-										background: 'rgba(0,0,0,0.95)', borderRadius: 8, padding: 4,
-										minWidth: 110, zIndex: 100, border: '1px solid #333'
-									}}
-									onMouseDown={(e) => e.stopPropagation()}
-								>
-									{[
-										{ value: 'auto', label: 'Auto' },
-										{ value: 'small', label: '360p' },
-										{ value: 'medium', label: '480p' },
-										{ value: 'hd720', label: '720p HD' },
-										{ value: 'hd1080', label: '1080p FHD' }
-									].filter(opt => availableQualities.includes(opt.value)).map(opt => (
-										<button
-											key={opt.value}
-											onClick={() => {
-												setVideoQuality(opt.value as any);
-												if (playerRef.current?.setPlaybackQuality) {
-													playerRef.current.setPlaybackQuality(opt.value);
-												}
-												setShowQualityMenu(false);
-												toast.success(`Quality: ${opt.label}`, { icon: '🎥', duration: 1500 });
-											}}
-											style={{
-												display: 'block', width: '100%', padding: '8px 12px', textAlign: 'left',
-												background: videoQuality === opt.value ? 'rgba(16,185,129,0.3)' : 'transparent',
-												color: videoQuality === opt.value ? '#10b981' : 'white',
-												border: 'none', cursor: 'pointer', borderRadius: 4, fontSize: 13
-											}}
-										>
-											{opt.label}
-										</button>
-									))}
-								</div>
-							)}
-						</div>
-						
+					<div style={{ display: 'flex', gap: 8 }}>
 						<button 
 							onClick={() => setIsFullscreen(!isFullscreen)}
 							onMouseDown={(e) => e.stopPropagation()}
@@ -517,7 +460,7 @@ export const PlaybackControls = () => {
 							{isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
 						</button>
 						<button 
-							onClick={() => { setShowVideo(false); setIsFullscreen(false); setVideoPosition({ x: 0, y: 0 }); setShowQualityMenu(false); }}
+							onClick={() => { setShowVideo(false); setIsFullscreen(false); setVideoPosition({ x: 0, y: 0 }); }}
 							onMouseDown={(e) => e.stopPropagation()}
 							style={{ padding: 8, borderRadius: 9999, background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', cursor: 'pointer' }}
 						>
