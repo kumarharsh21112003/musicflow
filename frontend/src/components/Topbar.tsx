@@ -195,7 +195,7 @@ const Topbar = () => {
 						<div className='absolute top-12 right-0 bg-zinc-800 rounded-lg shadow-xl z-50 py-2 min-w-[200px] border border-zinc-700'>
 							<div className='px-4 py-3 border-b border-zinc-700'>
 								<p className='font-medium'>{user?.displayName || 'User'}</p>
-								<p className='text-xs text-zinc-400'>{user?.email}</p>
+								<p className='text-xs text-zinc-400'>{user?.email || 'Signed in'}</p>
 							</div>
 							<button 
 								onClick={(e) => {
