@@ -69,7 +69,7 @@ const RightSidebar = ({ onShowLyrics }: RightSidebarProps) => {
 	return (
 		<div className='h-full bg-zinc-900 rounded-lg flex flex-col overflow-hidden'>
 			{/* Header */}
-			<div className='p-4 flex items-center justify-between border-b border-zinc-800'>
+			<div className='p-3 flex items-center justify-between border-b border-zinc-800 shrink-0'>
 				<span className='text-sm font-medium truncate flex-1'>{currentSong.title}</span>
 				<div className='flex items-center gap-1'>
 					{/* Lyrics Button */}
@@ -165,68 +165,69 @@ const RightSidebar = ({ onShowLyrics }: RightSidebarProps) => {
 				</>
 			)}
 
-			{/* Album Art */}
-			<div className='p-4'>
-				<div className='aspect-square rounded-lg overflow-hidden shadow-2xl'>
-					<img
-						src={currentSong.imageUrl || `https://i.ytimg.com/vi/${currentSong.videoId}/maxresdefault.jpg`}
-						alt={currentSong.title}
-						className='w-full h-full object-cover'
-						onError={(e) => {
-							(e.target as HTMLImageElement).src = `https://i.ytimg.com/vi/${currentSong.videoId}/hqdefault.jpg`;
-						}}
-					/>
-				</div>
-			</div>
-
-			{/* Song Info */}
-			<div className='px-4 pb-4'>
-				<div className='flex items-center justify-between'>
-					<div className='min-w-0 flex-1'>
-						<h3 className='text-xl font-bold truncate'>{currentSong.title}</h3>
-						<p className='text-zinc-400 truncate'>{currentSong.artist}</p>
+			{/* Scrollable Content */}
+			<div className='flex-1 overflow-y-auto'>
+				{/* Album Art */}
+				<div className='p-3'>
+					<div className='aspect-square rounded-lg overflow-hidden shadow-2xl'>
+						<img
+							src={currentSong.imageUrl || `https://i.ytimg.com/vi/${currentSong.videoId}/maxresdefault.jpg`}
+							alt={currentSong.title}
+							className='w-full h-full object-cover'
+							onError={(e) => {
+								(e.target as HTMLImageElement).src = `https://i.ytimg.com/vi/${currentSong.videoId}/hqdefault.jpg`;
+							}}
+						/>
 					</div>
+				</div>
+
+				{/* Song Info */}
+				<div className='px-3 pb-3'>
+					<div className='flex items-center justify-between'>
+						<div className='min-w-0 flex-1'>
+							<h3 className='text-lg font-bold truncate'>{currentSong.title}</h3>
+							<p className='text-sm text-zinc-400 truncate'>{currentSong.artist}</p>
+						</div>
+						<Button 
+							variant='ghost' 
+							size='icon' 
+							className={`h-8 w-8 ${isLiked ? 'text-emerald-400' : 'text-zinc-400 hover:text-white'}`}
+							onClick={handleLike}
+						>
+							<Heart className={`h-5 w-5 ${isLiked ? 'fill-emerald-400' : ''}`} />
+						</Button>
+					</div>
+				</div>
+
+				{/* Play Button */}
+				<div className='px-3 pb-3'>
 					<Button 
-						variant='ghost' 
-						size='icon' 
-						className={`h-8 w-8 ${isLiked ? 'text-emerald-400' : 'text-zinc-400 hover:text-white'}`}
-						onClick={handleLike}
+						onClick={togglePlay}
+						className='w-full py-5 bg-emerald-500 hover:bg-emerald-400 text-black font-bold rounded-full'
 					>
-						<Heart className={`h-5 w-5 ${isLiked ? 'fill-emerald-400' : ''}`} />
+						{isPlaying ? <Pause className='h-5 w-5 mr-2' /> : <Play className='h-5 w-5 mr-2' />}
+						{isPlaying ? 'Pause' : 'Play'}
 					</Button>
 				</div>
-			</div>
 
-			{/* Play Button */}
-			<div className='px-4 pb-4'>
-				<Button 
-					onClick={togglePlay}
-					className='w-full py-6 bg-emerald-500 hover:bg-emerald-400 text-black font-bold rounded-full'
-				>
-					{isPlaying ? <Pause className='h-6 w-6 mr-2' /> : <Play className='h-6 w-6 mr-2' />}
-					{isPlaying ? 'Pause' : 'Play'}
-				</Button>
-			</div>
-
-			{/* Up Next */}
-			<div className='flex-1 overflow-hidden'>
-				<div className='px-4 pb-2'>
-					<h4 className='text-sm font-semibold text-zinc-400'>Up Next</h4>
-				</div>
-				<div className='overflow-y-auto max-h-40 px-4 space-y-2'>
-					{queue.slice(0, 5).map((song, idx) => (
-						<div key={`${song._id}-${idx}`} className='flex items-center gap-3 p-2 rounded hover:bg-zinc-800/50'>
-							<img
-								src={song.imageUrl || `https://i.ytimg.com/vi/${song.videoId}/default.jpg`}
-								alt={song.title}
-								className='w-10 h-10 rounded object-cover'
-							/>
-							<div className='min-w-0 flex-1'>
-								<p className='text-sm font-medium truncate'>{song.title}</p>
-								<p className='text-xs text-zinc-400 truncate'>{song.artist}</p>
+				{/* Up Next */}
+				<div className='px-3 pb-3'>
+					<h4 className='text-sm font-semibold text-zinc-400 mb-2'>Up Next</h4>
+					<div className='space-y-1'>
+						{queue.slice(0, 4).map((song, idx) => (
+							<div key={`${song._id}-${idx}`} className='flex items-center gap-2 p-2 rounded hover:bg-zinc-800/50'>
+								<img
+									src={song.imageUrl || `https://i.ytimg.com/vi/${song.videoId}/default.jpg`}
+									alt={song.title}
+									className='w-9 h-9 rounded object-cover'
+								/>
+								<div className='min-w-0 flex-1'>
+									<p className='text-xs font-medium truncate'>{song.title}</p>
+									<p className='text-xs text-zinc-500 truncate'>{song.artist}</p>
+								</div>
 							</div>
-						</div>
-					))}
+						))}
+					</div>
 				</div>
 			</div>
 		</div>
