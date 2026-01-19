@@ -103,20 +103,18 @@ const Topbar = () => {
 							className='w-full pl-12 pr-4 py-3 bg-zinc-800 rounded-full text-sm border-2 border-transparent focus:border-white/20 outline-none placeholder:text-zinc-400'
 						/>
 					</form>
-
 					{/* Search Dropdown - Spotify style with Portal */}
 					{showDropdown && (searchQuery || recentSearches.length > 0) && createPortal(
-						<>
-							{/* Full screen dark backdrop */}
+						<div className="fixed inset-0" style={{ zIndex: 2147483647 }}>
+							{/* Dark backdrop */}
 							<div 
-								className='fixed inset-0 bg-black/90'
-								style={{ zIndex: 99998 }}
+								className='absolute inset-0 bg-black/95 backdrop-blur-sm'
 								onClick={() => setShowDropdown(false)}
 							/>
-							{/* Search Results Dropdown */}
+							{/* Results Container */}
 							<div 
-								className='fixed left-1/2 -translate-x-1/2 w-[95%] max-w-[600px] bg-[#282828] rounded-lg shadow-2xl overflow-hidden'
-								style={{ zIndex: 99999, top: '70px' }}
+								className='absolute left-1/2 -translate-x-1/2 w-[95%] max-w-[650px] bg-[#121212] rounded-xl shadow-2xl border border-white/10 overflow-hidden'
+								style={{ top: '70px' }}
 							>
 								{/* Recent Searches */}
 								{!searchQuery && recentSearches.length > 0 && (
@@ -185,7 +183,7 @@ const Topbar = () => {
 									<div className='px-4 py-8 text-center text-zinc-400'>No results found</div>
 								)}
 							</div>
-						</>,
+						</div>,
 						document.body
 					)}
 				</div>
