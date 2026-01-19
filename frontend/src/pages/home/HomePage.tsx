@@ -6,7 +6,7 @@ import SectionGrid from "./components/SectionGrid";
 import { usePlayerStore } from "@/stores/usePlayerStore";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { Button } from "@/components/ui/button";
-import { Check, Loader2 } from "lucide-react";
+import { Check, Loader2, Sparkles } from "lucide-react";
 
 // Artist names for selection
 const ARTISTS = [
@@ -200,7 +200,12 @@ const HomePage = () => {
 						))}
 					</div>
 
-					<h1 className='text-2xl sm:text-3xl font-bold mb-6'>{getGreeting()}</h1>
+					<div className='flex items-center justify-between mb-6'>
+						<h1 className='text-2xl sm:text-3xl font-bold'>{getGreeting()}</h1>
+						<div className='md:hidden flex gap-4'>
+							<span className='text-emerald-500'><Sparkles className='size-6' /></span>
+						</div>
+					</div>
 					
 					<FeaturedSection />
 

@@ -206,28 +206,27 @@ export const PlaybackControls = () => {
 			});
 
 			navigator.mediaSession.setActionHandler('play', () => {
-				if (playerRef.current) {
-					playerRef.current.playVideo();
-					setIsPlaying(true);
-				}
+				setIsPlaying(true);
+				audioEngine.play();
+				if (isReady) playerRef.current?.playVideo();
 			});
 			navigator.mediaSession.setActionHandler('pause', () => {
-				if (playerRef.current) {
-					playerRef.current.pauseVideo();
-					setIsPlaying(false);
-				}
+				setIsPlaying(false);
+				audioEngine.pause();
+				if (isReady) playerRef.current?.pauseVideo();
 			});
 			navigator.mediaSession.setActionHandler('previoustrack', playPrevious);
 			navigator.mediaSession.setActionHandler('nexttrack', playNext);
 			
 			navigator.mediaSession.setActionHandler('seekto', (details) => {
-				if (playerRef.current && details.seekTime) {
-					playerRef.current.seekTo(details.seekTime, true);
+				if (details.seekTime !== undefined) {
+					audioEngine.seek(details.seekTime);
+					if (isReady) playerRef.current?.seekTo(details.seekTime, true);
 					setCurrentTime(details.seekTime);
 				}
 			});
 		}
-	}, [currentSong, playNext, playPrevious, setIsPlaying]);
+	}, [currentSong, playNext, playPrevious, setIsPlaying, isReady]);
 
 	// Update playback state for Media Session
 	useEffect(() => {
@@ -236,36 +235,28 @@ export const PlaybackControls = () => {
 		}
 	}, [isPlaying]);
 
-	// Unused but keeping for potential future use
-	const _handleAudioSettingChange = (setting: string, value: any) => {
-		updateAudioSettings({ [setting]: value });
-		toast.success(`${setting.replace(/([A-Z])/g, ' $1').trim()} updated!`, {
-			icon: '🎧',
-			duration: 1500,
-		});
-	};
-
 	const handlePlayPause = () => {
 		if (!currentSong && queue.length > 0) {
 			setCurrentSong(queue[0]);
 			return;
 		}
-		if (playerRef.current) {
-			isPlaying ? playerRef.current.pauseVideo() : playerRef.current.playVideo();
-		}
+		setIsPlaying(!isPlaying);
 	};
 
 	const handleSeek = (value: number[]) => {
-		if (playerRef.current?.seekTo) {
-			playerRef.current.seekTo(value[0], true);
-			setCurrentTime(value[0]);
+		const newTime = value[0];
+		setCurrentTime(newTime);
+		audioEngine.seek(newTime);
+		if (isReady && playerRef.current?.seekTo) {
+			playerRef.current.seekTo(newTime, true);
 		}
 	};
 
 	const handleVolumeChange = (value: number[]) => {
 		setVolume(value[0]);
 		setIsMuted(value[0] === 0);
-		playerRef.current?.setVolume?.(value[0]);
+		audioEngine.setVolume(value[0]);
+		if (isReady) playerRef.current?.setVolume?.(value[0]);
 	};
 
 	const handleMute = () => {

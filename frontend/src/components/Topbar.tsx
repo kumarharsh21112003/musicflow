@@ -1,19 +1,17 @@
-import { ChevronLeft, ChevronRight, MoreHorizontal, Search, Home, X, LogOut, User } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search, X, LogOut, User, Headphones } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useMusicStore } from "@/stores/useMusicStore";
 import { usePlayerStore } from "@/stores/usePlayerStore";
 import { useAuthStore } from "@/stores/useAuthStore";
 
 const Topbar = () => {
-	const [showMenu, setShowMenu] = useState(false);
 	const [searchQuery, setSearchQuery] = useState("");
 	const [showDropdown, setShowDropdown] = useState(false);
 	const [recentSearches, setRecentSearches] = useState<string[]>([]);
 	const [showProfile, setShowProfile] = useState(false);
 	const searchRef = useRef<HTMLDivElement>(null);
 	const navigate = useNavigate();
-	const location = useLocation();
 	const { searchSongs, searchResults, isLoading } = useMusicStore();
 	const { setCurrentSong, setQueue } = usePlayerStore();
 	const { user, logout } = useAuthStore();
@@ -71,59 +69,28 @@ const Topbar = () => {
 		localStorage.setItem('musicflow_recent_searches', JSON.stringify(updated));
 	};
 
-	const menuItems = [
-		{ label: "File" },
-		{ label: "Edit" },
-		{ label: "View" },
-		{ label: "Playback" },
-		{ label: "Help" },
-	];
-
 	return (
 		<div className='flex items-center justify-between p-3 sticky top-0 bg-black/80 backdrop-blur-md z-10 gap-4'>
-			{/* Left - Menu & Navigation */}
+			{/* Left - Navigation (PC ONLY) */}
 			<div className='flex gap-2 items-center'>
-				<div className='relative'>
-					<button 
-						onClick={() => setShowMenu(!showMenu)}
-						className='p-2 hover:bg-zinc-800 rounded-full transition-colors'
-					>
-						<MoreHorizontal className='size-5' />
-					</button>
-					
-					{showMenu && (
-						<>
-							<div className='fixed inset-0 z-40' onClick={() => setShowMenu(false)} />
-							<div className='absolute top-10 left-0 bg-zinc-800 rounded-lg shadow-xl z-50 py-2 min-w-[140px] border border-zinc-700'>
-								{menuItems.map((item) => (
-									<div key={item.label} className='px-4 py-2 hover:bg-zinc-700 cursor-pointer text-sm'>
-										{item.label}
-									</div>
-								))}
-							</div>
-						</>
-					)}
-				</div>
-
 				<button onClick={() => navigate(-1)} className='p-2 bg-black/60 rounded-full hover:bg-black/80'>
 					<ChevronLeft className='size-5' />
 				</button>
-				<button onClick={() => navigate(1)} className='p-2 bg-black/60 rounded-full hover:bg-black/80'>
+				<button onClick={() => navigate(1)} className='hidden md:block p-2 bg-black/60 rounded-full hover:bg-black/80'>
 					<ChevronRight className='size-5' />
 				</button>
 			</div>
 
-			{/* Center - Home & Search */}
-			<div className='flex-1 flex items-center justify-center gap-2 max-w-xl'>
-				<button 
-					onClick={() => navigate("/")}
-					className={`p-3 rounded-full transition-colors ${location.pathname === "/" ? "bg-white text-black" : "bg-zinc-800 hover:bg-zinc-700"}`}
-				>
-					<Home className='size-5' />
-				</button>
-				
-				{/* Search with Dropdown */}
-				<div ref={searchRef} className='flex-1 relative'>
+			{/* Center - PC Search / Mobile Logo */}
+			<div className='flex-1 flex items-center md:justify-center gap-2 max-w-xl'>
+                <div className='md:hidden flex items-center gap-2'>
+                    <div className='size-8 bg-emerald-500 rounded-full flex items-center justify-center'>
+                        <Headphones className='size-5 text-black' />
+                    </div>
+                    <span className='font-bold tracking-tight'>MusicFlow</span>
+                </div>
+
+				<div ref={searchRef} className='hidden md:block flex-1 relative'>
 					<form onSubmit={handleSearch}>
 						<Search className='absolute left-4 top-1/2 -translate-y-1/2 size-5 text-zinc-400' />
 						<input
