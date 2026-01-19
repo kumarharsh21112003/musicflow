@@ -5,7 +5,8 @@ import {
   signOut,
   onAuthStateChanged,
   User,
-  signInWithPopup
+  signInWithPopup,
+  getRedirectResult
 } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db, googleProvider } from '@/lib/firebase';
@@ -89,6 +90,18 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   signInWithGoogle: async () => {
     set({ isLoading: true });
     try {
+      // Check if running as standalone PWA (home screen)
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                           (window.navigator as any).standalone === true;
+      
+      if (isStandalone) {
+        // PWA mode: Use redirect instead of popup (popup blocked in PWA)
+        const { signInWithRedirect } = await import('firebase/auth');
+        await signInWithRedirect(auth, googleProvider);
+        return true; // Will redirect, so this won't actually return
+      }
+      
+      // Normal browser: Use popup
       const result = await signInWithPopup(auth, googleProvider);
       
       // Check if user document exists
@@ -114,7 +127,18 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       toast.success('Welcome! 🎵');
       return true;
     } catch (error: any) {
-      toast.error(error.message);
+      // If popup blocked, try redirect
+      if (error.code === 'auth/popup-blocked' || error.code === 'auth/popup-closed-by-user') {
+        try {
+          const { signInWithRedirect } = await import('firebase/auth');
+          await signInWithRedirect(auth, googleProvider);
+          return true;
+        } catch (redirectError) {
+          toast.error('Sign in failed. Please try again.');
+        }
+      } else {
+        toast.error(error.message);
+      }
       set({ isLoading: false });
       return false;
     }
@@ -176,4 +200,32 @@ onAuthStateChanged(auth, async (user) => {
   if (user) {
     await useAuthStore.getState().syncUserData();
   }
+});
+
+// Handle redirect result for PWA sign-in
+getRedirectResult(auth).then(async (result) => {
+  if (result?.user) {
+    // Check if user document exists
+    const userDoc = await getDoc(doc(db, 'users', result.user.uid));
+    
+    if (!userDoc.exists()) {
+      // Create new user
+      const userData = {
+        email: result.user.email || '',
+        displayName: result.user.displayName || 'User',
+        selectedArtists: [],
+        playlists: [],
+        likedSongs: [],
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      };
+      await setDoc(doc(db, 'users', result.user.uid), userData);
+    }
+    
+    useAuthStore.setState({ isLoading: false });
+    await useAuthStore.getState().syncUserData();
+  }
+}).catch((error) => {
+  console.error('Redirect sign-in error:', error);
+  useAuthStore.setState({ isLoading: false });
 });
