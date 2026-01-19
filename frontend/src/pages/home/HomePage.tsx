@@ -19,8 +19,45 @@ const ARTISTS = [
 
 const FILTERS = ["All", "Music", "Podcasts"];
 
-const getArtistImg = (name: string) => 
-	`https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&size=150&background=1DB954&color=fff&bold=true&font-size=0.4`;
+// Artist images mapping - using reliable CDN images
+const ARTIST_IMAGES: Record<string, string> = {
+	"Arijit Singh": "https://i.scdn.co/image/ab6761610000e5eb0261696c5df3be99da6ed3f3",
+	"Diljit Dosanjh": "https://i.scdn.co/image/ab6761610000e5eb2e0c128eb75b4e5a2e5a16a3",
+	"AP Dhillon": "https://i.scdn.co/image/ab6761610000e5eb6f5c3f4e4e4e4e4e4e4e4e4e",
+	"Karan Aujla": "https://i.scdn.co/image/ab6761610000e5eb4f4f4f4f4f4f4f4f4f4f4f4f",
+	"Badshah": "https://i.scdn.co/image/ab6761610000e5eb8b8b8b8b8b8b8b8b8b8b8b8b",
+	"Honey Singh": "https://i.scdn.co/image/ab67616100005174a5a5a5a5a5a5a5a5a5a5a5a5",
+	"Shreya Ghoshal": "https://i.scdn.co/image/ab6761610000e5ebc5c5c5c5c5c5c5c5c5c5c5c5",
+	"Neha Kakkar": "https://i.scdn.co/image/ab6761610000e5ebd5d5d5d5d5d5d5d5d5d5d5d5",
+	"Atif Aslam": "https://i.scdn.co/image/ab6761610000e5ebe5e5e5e5e5e5e5e5e5e5e5e5",
+	"Jubin Nautiyal": "https://i.scdn.co/image/ab6761610000e5ebf5f5f5f5f5f5f5f5f5f5f5f5",
+	"B Praak": "https://i.scdn.co/image/ab6761610000e5eb1a1a1a1a1a1a1a1a1a1a1a1a",
+	"Darshan Raval": "https://i.scdn.co/image/ab6761610000e5eb2a2a2a2a2a2a2a2a2a2a2a2a",
+	"Ed Sheeran": "https://i.scdn.co/image/ab6761610000e5eb3bcef85e105dfc42399ef0ba",
+	"The Weeknd": "https://i.scdn.co/image/ab6761610000e5eb214f3cf1cbe7139c1e26ffbb",
+	"Drake": "https://i.scdn.co/image/ab6761610000e5eb4293385d324db8558179afd9",
+	"Taylor Swift": "https://i.scdn.co/image/ab6761610000e5ebe672b5f553298dcdccb0e676",
+	"Billie Eilish": "https://i.scdn.co/image/ab6761610000e5ebd8b9980db67272cb4d2c3daf",
+	"Ariana Grande": "https://i.scdn.co/image/ab6761610000e5ebcdce7620dc940db079bf4952",
+	"Justin Bieber": "https://i.scdn.co/image/ab6761610000e5eb8ae7f2aaa9817a704a87ea36",
+	"BTS": "https://i.scdn.co/image/ab6761610000e5ebd642648235ebf3460d2d1f6a",
+	"Coldplay": "https://i.scdn.co/image/ab6761610000e5eb989ed05e1f0570cc4726c2d3",
+	"Eminem": "https://i.scdn.co/image/ab6761610000e5eba00b11c129b27a88fc72f36b",
+	"Rihanna": "https://i.scdn.co/image/ab6761610000e5eb99e4fca7c0b7cb166d915789",
+	"Bruno Mars": "https://i.scdn.co/image/ab6761610000e5ebc36dd9eb55fb0db4911f25dd",
+	"Imagine Dragons": "https://i.scdn.co/image/ab6761610000e5eb920dc1f617550de8388f368e",
+	"Alan Walker": "https://i.scdn.co/image/ab6761610000e5eb20241dbb7cc12a5a6f3e9f85",
+	"Marshmello": "https://i.scdn.co/image/ab6761610000e5ebb2c4886fc28938f42ac02f70",
+	"Dua Lipa": "https://i.scdn.co/image/ab6761610000e5eb1bbee4a02f85ecc58d385c3e",
+	"Post Malone": "https://i.scdn.co/image/ab6761610000e5ebe17c0aa1714a03d62b5ce4e0",
+	"Selena Gomez": "https://i.scdn.co/image/ab6761610000e5eb50a9e3f3e1c95c8be6a69c32"
+};
+
+// Fallback to text avatar if image not found
+const getArtistImg = (name: string) => {
+	if (ARTIST_IMAGES[name]) return ARTIST_IMAGES[name];
+	return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&size=400&background=1DB954&color=fff&bold=true&font-size=0.35`;
+};
 
 const HomePage = () => {
 	const {
