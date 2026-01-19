@@ -204,7 +204,13 @@ onAuthStateChanged(auth, async (user) => {
 
 // Handle redirect result for PWA sign-in
 getRedirectResult(auth).then(async (result) => {
+  console.log('Redirect result:', result);
   if (result?.user) {
+    console.log('User from redirect:', result.user.email);
+    
+    // Set user in state FIRST
+    useAuthStore.setState({ user: result.user, isLoading: true });
+    
     // Check if user document exists
     const userDoc = await getDoc(doc(db, 'users', result.user.uid));
     
@@ -220,10 +226,15 @@ getRedirectResult(auth).then(async (result) => {
         updatedAt: Date.now(),
       };
       await setDoc(doc(db, 'users', result.user.uid), userData);
+      useAuthStore.setState({ userData });
     }
     
-    useAuthStore.setState({ isLoading: false });
+    // Sync user data and update state
     await useAuthStore.getState().syncUserData();
+    useAuthStore.setState({ isLoading: false });
+    console.log('PWA Google login successful!');
+  } else {
+    useAuthStore.setState({ isLoading: false });
   }
 }).catch((error) => {
   console.error('Redirect sign-in error:', error);

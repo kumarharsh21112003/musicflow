@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, Search, X, LogOut, User, Headphones, Home, Library } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search, X, LogOut, User, Home, Library } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -54,15 +54,25 @@ const Topbar = () => {
 		}
 	};
 
-	const handlePlaySong = (song: any) => {
+	const handlePlaySong = async (song: any) => {
+		console.log('Playing song:', song.title, song);
+		
 		// Save to recent searches (full song object)
 		const updated = [song, ...recentSearches.filter(s => s._id !== song._id)].slice(0, 10);
 		setRecentSearches(updated);
 		localStorage.setItem('musicflow_recent_searches_songs', JSON.stringify(updated));
 
-		setQueue(searchResults.length > 0 ? searchResults : [song]);
-		setCurrentSong(song);
+		// Close dropdown first
 		setShowDropdown(false);
+		
+		// Set queue and play
+		const queue = searchResults.length > 0 ? searchResults : [song];
+		setQueue(queue);
+		
+		// Small delay to ensure state updates
+		setTimeout(() => {
+			setCurrentSong(song);
+		}, 50);
 	};
 
 	const clearRecent = (id: string) => {
@@ -132,7 +142,7 @@ const Topbar = () => {
 								{!searchQuery && recentSearches.length > 0 && (
 									<div className="py-2">
 										<div className='px-4 py-3 font-bold text-base text-white'>Recent searches</div>
-										<div className="max-h-[60vh] overflow-y-auto">
+										<div className="max-h-[60vh] overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
 											{recentSearches.map((song) => (
 												<div 
 													key={song._id}
@@ -173,7 +183,7 @@ const Topbar = () => {
 										) : searchResults.length > 0 ? (
 											<>
 												<div className='px-4 py-2 font-bold text-sm text-white opacity-60 uppercase tracking-wider'>Results</div>
-												<div className="max-h-[60vh] overflow-y-auto">
+												<div className="max-h-[60vh] overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
 													{searchResults.slice(0, 8).map((song) => (
 														<div 
 															key={song._id}
