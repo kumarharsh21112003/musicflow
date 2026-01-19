@@ -6,9 +6,15 @@ class AudioEngine {
     private bassFilter: BiquadFilterNode | null = null;
     private trebleFilter: BiquadFilterNode | null = null;
     private gainNode: GainNode | null = null;
+    private stereoPanner: StereoPannerNode | null = null;
+    private spatialConvolver: ConvolverNode | null = null;
+    private spatialGain: GainNode | null = null;
+    private dryGain: GainNode | null = null;
+    private isSpatialEnabled = false;
     private isInitialized = false;
     private wakeLock: any = null;
     private wasPlayingBeforeHidden = false;
+    private panOscillation: number | null = null;
 
     init() {
         if (this.isInitialized) return;
@@ -47,15 +53,60 @@ class AudioEngine {
         // Gain/Loudness
         this.gainNode = this.audioContext.createGain();
         this.gainNode.gain.value = 1;
+
+        // Stereo Panner for 3D effect
+        this.stereoPanner = this.audioContext.createStereoPanner();
+        this.stereoPanner.pan.value = 0;
+
+        // Spatial Audio - Dry path (original signal)
+        this.dryGain = this.audioContext.createGain();
+        this.dryGain.gain.value = 1;
+
+        // Spatial Audio - Wet path (reverb/spatial effect)
+        this.spatialGain = this.audioContext.createGain();
+        this.spatialGain.gain.value = 0; // Off by default
         
-        // Connect: source -> bass -> treble -> gain -> output
+        // Create reverb impulse for spatial effect
+        this.spatialConvolver = this.audioContext.createConvolver();
+        this.createSpatialImpulse();
+        
+        // Connect: source -> bass -> treble -> gain -> panner -> [dry + spatial] -> output
         this.sourceNode.connect(this.bassFilter);
         this.bassFilter.connect(this.trebleFilter);
         this.trebleFilter.connect(this.gainNode);
-        this.gainNode.connect(this.audioContext.destination);
+        this.gainNode.connect(this.stereoPanner);
+        
+        // Dry path (direct)
+        this.stereoPanner.connect(this.dryGain);
+        this.dryGain.connect(this.audioContext.destination);
+        
+        // Wet/Spatial path (through convolver)
+        this.stereoPanner.connect(this.spatialConvolver);
+        this.spatialConvolver.connect(this.spatialGain);
+        this.spatialGain.connect(this.audioContext.destination);
         
         this.isInitialized = true;
-        console.log('🎧 Audio Engine initialized with EQ & Background Support');
+        console.log('🎧 Audio Engine initialized with EQ, Spatial Audio & Background Support');
+    }
+
+    // Create spatial impulse response for 3D surround effect
+    private createSpatialImpulse() {
+        if (!this.audioContext || !this.spatialConvolver) return;
+        
+        const sampleRate = this.audioContext.sampleRate;
+        const length = sampleRate * 2; // 2 second reverb
+        const impulse = this.audioContext.createBuffer(2, length, sampleRate);
+        
+        for (let channel = 0; channel < 2; channel++) {
+            const channelData = impulse.getChannelData(channel);
+            for (let i = 0; i < length; i++) {
+                // Create a natural decay with some randomness for spatial feel
+                const decay = Math.exp(-3 * i / length);
+                channelData[i] = (Math.random() * 2 - 1) * decay * 0.5;
+            }
+        }
+        
+        this.spatialConvolver.buffer = impulse;
     }
 
     // Request wake lock to prevent screen from sleeping during playback
@@ -216,6 +267,60 @@ class AudioEngine {
         const gain = 0.5 + (value / 100) * 1.5;
         if (this.gainNode) {
             this.gainNode.gain.value = gain;
+        }
+    }
+
+    // Spatial Audio 3D Effect
+    setSpatialAudio(enabled: boolean) {
+        this.isSpatialEnabled = enabled;
+        
+        if (enabled) {
+            // Enable spatial reverb
+            if (this.spatialGain) {
+                this.spatialGain.gain.value = 0.3; // 30% wet signal
+            }
+            if (this.dryGain) {
+                this.dryGain.gain.value = 0.7; // 70% dry signal
+            }
+            
+            // Start subtle stereo panning oscillation for 3D feel
+            this.startPanOscillation();
+            console.log('🎧 Spatial Audio: ON');
+        } else {
+            // Disable spatial reverb
+            if (this.spatialGain) {
+                this.spatialGain.gain.value = 0;
+            }
+            if (this.dryGain) {
+                this.dryGain.gain.value = 1;
+            }
+            
+            // Stop panning oscillation
+            this.stopPanOscillation();
+            if (this.stereoPanner) {
+                this.stereoPanner.pan.value = 0; // Center
+            }
+            console.log('🎧 Spatial Audio: OFF');
+        }
+    }
+
+    private startPanOscillation() {
+        if (this.panOscillation) return;
+        
+        let phase = 0;
+        this.panOscillation = window.setInterval(() => {
+            if (this.stereoPanner && this.isSpatialEnabled) {
+                // Subtle left-right movement (±0.3) at ~0.5Hz
+                phase += 0.05;
+                this.stereoPanner.pan.value = Math.sin(phase) * 0.3;
+            }
+        }, 100);
+    }
+
+    private stopPanOscillation() {
+        if (this.panOscillation) {
+            clearInterval(this.panOscillation);
+            this.panOscillation = null;
         }
     }
 

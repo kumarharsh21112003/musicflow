@@ -82,6 +82,20 @@ export const PlaybackControls = () => {
 		initYT();
 	}, []);
 
+	// Connect Audio Settings to Real Audio Engine EQ
+	useEffect(() => {
+		audioEngine.setBassBoost(audioSettings.bassBoost);
+		audioEngine.setTrebleBoost(audioSettings.trebleBoost);
+		audioEngine.setLoudness(audioSettings.loudness);
+		audioEngine.setSpatialAudio(audioSettings.spatialAudio);
+		console.log('🎛️ Audio Settings Updated:', { 
+			bass: audioSettings.bassBoost, 
+			treble: audioSettings.trebleBoost, 
+			loudness: audioSettings.loudness,
+			spatial: audioSettings.spatialAudio
+		});
+	}, [audioSettings.bassBoost, audioSettings.trebleBoost, audioSettings.loudness, audioSettings.spatialAudio]);
+
 	// Sync Audio Engine with Store State
 	useEffect(() => {
 		if (!currentSong) return;
