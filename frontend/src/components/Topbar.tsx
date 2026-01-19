@@ -147,7 +147,7 @@ const Topbar = () => {
 												<div 
 													key={song._id}
 													className='flex items-center justify-between px-4 py-2 hover:bg-white/10 cursor-pointer group'
-													onClick={() => handlePlaySong(song)}
+													onClick={(e) => { e.stopPropagation(); handlePlaySong(song); }}
 												>
 													<div className='flex items-center gap-3 min-w-0'>
 														<img 
@@ -188,7 +188,7 @@ const Topbar = () => {
 														<div 
 															key={song._id}
 															className='flex items-center gap-3 px-4 py-2 hover:bg-white/10 cursor-pointer transition-colors'
-															onClick={() => handlePlaySong(song)}
+															onClick={(e) => { e.stopPropagation(); handlePlaySong(song); }}
 														>
 															<img 
 																src={song.imageUrl} 
