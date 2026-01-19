@@ -6,7 +6,7 @@ import SectionGrid from "./components/SectionGrid";
 import { usePlayerStore } from "@/stores/usePlayerStore";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { Button } from "@/components/ui/button";
-import { Check, Loader2, Sparkles } from "lucide-react";
+import { Check, Loader2, Bell, Clock as History, Settings } from "lucide-react";
 
 // Artist names for selection
 const ARTISTS = [
@@ -200,26 +200,45 @@ const HomePage = () => {
 						))}
 					</div>
 
-					<div className='flex items-center justify-between mb-6'>
-						<h1 className='text-2xl sm:text-3xl font-bold'>{getGreeting()}</h1>
-						<div className='md:hidden flex gap-4'>
-							<span className='text-emerald-500'><Sparkles className='size-6' /></span>
+						<div className='flex items-center justify-between mb-8 sticky top-0 bg-zinc-900/60 backdrop-blur-md z-[20] -mx-4 px-4 py-2 border-b border-white/5 md:bg-transparent md:backdrop-blur-none md:border-none md:relative md:p-0 md:m-0'>
+							<h1 className='text-2xl sm:text-3xl font-black tracking-tight'>{getGreeting()}</h1>
+							<div className='flex gap-4 items-center'>
+								<span className='text-zinc-400 md:hidden'><Bell size={24} /></span>
+								<span className='text-zinc-400 md:hidden'><History size={24} /></span>
+								<span className='text-zinc-400 md:hidden'><Settings size={24} /></span>
+							</div>
 						</div>
-					</div>
-					
-					<FeaturedSection />
 
-					<div className='space-y-8'>
-						{recommendedSongs.length > 0 && (
-							<SectionGrid title='Based on Your Artists 💜' songs={recommendedSongs.slice(0, 10)} isLoading={isLoading} />
-						)}
-						{madeForYouSongs.length > 0 && (
-							<SectionGrid title='Made For You' songs={madeForYouSongs} isLoading={isLoading} />
-						)}
-						{trendingSongs.length > 0 && (
-							<SectionGrid title='Trending Now 🔥' songs={trendingSongs} isLoading={isLoading} />
-						)}
-					</div>
+						<div className='flex gap-2 mb-8 overflow-x-auto no-scrollbar -mx-1 px-1'>
+							{FILTERS.map(filter => (
+								<button
+									key={filter}
+									onClick={() => setActiveFilter(filter)}
+									className={`px-5 py-2 rounded-full text-sm font-bold transition-all whitespace-nowrap
+										${activeFilter === filter 
+											? 'bg-emerald-500 text-black' 
+											: 'bg-zinc-800 text-white hover:bg-zinc-700'}`}
+								>
+									{filter}
+								</button>
+							))}
+						</div>
+						
+						<FeaturedSection />
+
+						<div className='space-y-10 pb-32'>
+							{recommendedSongs.length > 0 && (
+								<SectionGrid title='Recently Played' songs={recommendedSongs.slice(0, 8)} isLoading={isLoading} />
+							) || <SectionGrid title='Recently Played' songs={featuredSongs.slice(0, 8)} isLoading={isLoading} />}
+							
+							{madeForYouSongs.length > 0 && (
+								<SectionGrid title='Made For You' songs={madeForYouSongs} isLoading={isLoading} />
+							)}
+							
+							{trendingSongs.length > 0 && (
+								<SectionGrid title='Trending Now' songs={trendingSongs} isLoading={isLoading} />
+							)}
+						</div>
 				</div>
 			</ScrollArea>
 		</main>

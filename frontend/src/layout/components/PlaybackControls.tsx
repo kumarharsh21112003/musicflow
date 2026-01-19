@@ -393,27 +393,30 @@ export const PlaybackControls = () => {
 
 			{/* MOBILE FLOATING PLAYER (Spotify Style) */}
 			<div 
-				className={`md:hidden fixed bottom-[72px] left-2 right-2 bg-[#282828] rounded-md p-2 flex flex-col z-[100] shadow-[0_8px_24px_rgba(0,0,0,0.5)] border border-white/5 transition-transform duration-300 ${!currentSong ? 'translate-y-[200%]' : 'translate-y-0'}`}
+				className={`md:hidden fixed bottom-[80px] left-2 right-2 bg-zinc-900 shadow-[0_8px_24px_rgba(0,0,0,0.5)] rounded-lg flex flex-col z-[100] border border-white/5 transition-all duration-300 ease-out ${!currentSong ? 'translate-y-[200%]' : 'translate-y-0 active:scale-95'}`}
 				onClick={() => setShowMobilePlayer(true)}
 			>
-				<div className="flex items-center gap-3">
+				<div className="flex items-center gap-3 p-2 h-[56px]">
 					<img 
 						src={currentSong?.imageUrl} 
 						alt="Album Art" 
-						className="w-10 h-10 rounded bg-zinc-800 object-cover flex-shrink-0 shadow-lg" 
+						className="w-10 h-10 rounded-md bg-zinc-800 object-cover flex-shrink-0 shadow-md" 
 						onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.png' }}
 					/>
-					<div className="flex-1 min-w-0 flex flex-col justify-center mr-2">
-						<div className="font-bold text-[13px] text-white truncate leading-tight mb-0.5">
+					<div className="flex-1 min-w-0 flex flex-col justify-center">
+						<div className="font-bold text-[13px] text-white truncate leading-tight">
 							{currentSong?.title || "Choose a song"}
 						</div>
-						<div className="text-[11px] text-zinc-400 font-medium truncate leading-tight">
+						<div className="text-[11px] text-zinc-400 font-medium truncate leading-tight opacity-80">
 							{currentSong?.artist}
 						</div>
 					</div>
 					
 					{/* Mobile Controls */}
-					<div className="flex items-center gap-4 mr-2">
+					<div className="flex items-center gap-5 px-2">
+                        <button className="text-zinc-400 hidden sm:block">
+                            <Headphones size={20} />
+                        </button>
 						<button 
 							onClick={(e) => { e.stopPropagation(); handlePlayPause(); }} 
 							className="text-white hover:scale-105 active:scale-90 transition-transform disabled:opacity-50"
@@ -429,8 +432,8 @@ export const PlaybackControls = () => {
 						</button>
 					</div>
 				</div>
-				{/* Thin Progress Bar */}
-				<div className="absolute bottom-[1px] left-2 right-2 h-[2px] bg-white/10 rounded-full overflow-hidden">
+				{/* Razor-thin Progress Bar at the bottom */}
+				<div className="absolute bottom-0 left-[8px] right-[8px] h-[2px] bg-white/10 rounded-full overflow-hidden">
 					<div 
 						className="h-full bg-white rounded-full transition-all duration-300 linear" 
 						style={{ width: `${(currentTime / (duration || 1)) * 100}%` }} 
