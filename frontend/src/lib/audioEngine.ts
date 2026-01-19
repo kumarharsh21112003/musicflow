@@ -169,10 +169,23 @@ class AudioEngine {
         return this.audioElement && !this.audioElement.paused;
     }
 
-    onTimeUpdate(callback: (time: number) => void) {
+    onTimeUpdate(callback: (time: number, duration: number) => void) {
         if (this.audioElement) {
-            this.audioElement.ontimeupdate = () => callback(this.audioElement!.currentTime);
+            const listener = () => {
+                const cur = this.audioElement?.currentTime || 0;
+                const dur = this.audioElement?.duration || 0;
+                callback(cur, dur);
+            };
+            this.audioElement.addEventListener('timeupdate', listener);
+            this.audioElement.addEventListener('durationchange', listener);
+            
+            // Return cleanup function
+            return () => {
+                this.audioElement?.removeEventListener('timeupdate', listener);
+                this.audioElement?.removeEventListener('durationchange', listener);
+            };
         }
+        return () => {};
     }
 
     onEnded(callback: () => void) {

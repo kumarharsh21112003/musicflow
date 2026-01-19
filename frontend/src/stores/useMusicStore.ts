@@ -1,5 +1,4 @@
 import { Song } from "@/types";
-import toast from "react-hot-toast";
 import { create } from "zustand";
 
 interface MusicStore {
@@ -88,14 +87,13 @@ export const useMusicStore = create<MusicStore>((set) => ({
 			const data = await response.json();
 			if (Array.isArray(data) && data.length > 0) {
 				set({ searchResults: data.map(convertToSong), isLoading: false });
-				toast.success(`Found ${data.length} songs!`);
 				return;
 			}
 		} catch (e) {
 			console.error('Search error:', e);
 		}
 		set({ searchResults: [], isLoading: false });
-		toast.error('Backend not running! Run: node server.js');
+		console.error('Backend unavailable');
 	},
 
 	fetchTrending: async () => {

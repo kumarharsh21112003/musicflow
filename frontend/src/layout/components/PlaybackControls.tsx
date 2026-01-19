@@ -120,9 +120,7 @@ export const PlaybackControls = () => {
 					playerRef.current.unMute();
 					playerRef.current.setVolume(volume);
 					if (isPlaying) playerRef.current.playVideo();
-					toast.success("Using fallback player...");
 				} else {
-					toast.error("Failed to load song. Trying next...");
 					playNext();
 				}
 				setIsPlaybackLoading(false);
@@ -134,8 +132,9 @@ export const PlaybackControls = () => {
 
 	// Update Store Time from Audio Engine
 	useEffect(() => {
-		const handleTimeUpdate = (time: number) => {
+		const handleTimeUpdate = (time: number, duration: number) => {
 			setCurrentTime(time);
+			if (duration > 0) setDuration(duration);
 			// Optional: Periodically sync video if it drifts
 			if (showVideo && isReady && playerRef.current) {
 				const ytTime = playerRef.current.getCurrentTime();
@@ -143,13 +142,13 @@ export const PlaybackControls = () => {
 			}
 		};
 
-		audioEngine.onTimeUpdate(handleTimeUpdate);
+		const cleanup = audioEngine.onTimeUpdate(handleTimeUpdate);
 		audioEngine.onEnded(() => playNext());
 
 		return () => {
-			// Cleanup handlers if needed (engine is singleton)
+			cleanup();
 		};
-	}, [showVideo, isReady, playNext]);
+	}, [showVideo, isReady, playNext, setCurrentTime, setDuration]);
 
 	// Sync Play/Pause status
 	useEffect(() => {
@@ -161,6 +160,23 @@ export const PlaybackControls = () => {
 			if (isReady) playerRef.current?.pauseVideo();
 		}
 	}, [isPlaying, isReady]);
+
+	// Polling for YouTube fallback time sync (critical for mobile progress bar)
+	useEffect(() => {
+		let interval: any;
+		if (isPlaying && isReady && playerRef.current) {
+			interval = setInterval(() => {
+				// Only poll if audioEngine is NOT playing (meaning we are in fallback mode)
+				if (!audioEngine.isPlaying()) {
+					const time = playerRef.current.getCurrentTime();
+					const dur = playerRef.current.getDuration();
+					if (time !== undefined) setCurrentTime(time);
+					if (dur > 0) setDuration(dur);
+				}
+			}, 100); // Fast polling for smooth slider
+		}
+		return () => clearInterval(interval);
+	}, [isPlaying, isReady, setCurrentTime, setDuration]);
 
 	// Sync Audio Settings
 	useEffect(() => {

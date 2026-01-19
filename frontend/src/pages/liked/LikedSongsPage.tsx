@@ -4,7 +4,6 @@ import { Heart, Play, Pause, Trash2, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
 
 const LikedSongsPage = () => {
 	const { likedSongs, removeFromLikedSongs } = usePlaylistStore();
@@ -15,7 +14,6 @@ const LikedSongsPage = () => {
 		if (likedSongs.length > 0) {
 			setQueue(likedSongs);
 			setCurrentSong(likedSongs[0]);
-			toast.success("Playing all liked songs");
 		}
 	};
 
@@ -27,7 +25,6 @@ const LikedSongsPage = () => {
 	const handleRemove = (songId: string, e: React.MouseEvent) => {
 		e.stopPropagation();
 		removeFromLikedSongs(songId);
-		toast.success("Removed from Liked Songs");
 	};
 
 	const formatDuration = (seconds?: number) => {
