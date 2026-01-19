@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { usePlayerStore } from "@/stores/usePlayerStore";
-import { Pause, Play, SkipBack, SkipForward, Volume1, Volume2, VolumeX, Video, VideoOff, Maximize2, Minimize2, X, Headphones, Sparkles, Shuffle, Repeat, Waves } from "lucide-react";
+import { Pause, Play, SkipBack, SkipForward, Volume1, Volume2, VolumeX, Video, VideoOff, Maximize2, Minimize2, X, Headphones, Sparkles, Shuffle, Repeat, Waves, Moon, Timer } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 import { audioEngine } from "@/lib/audioEngine";
@@ -49,7 +49,14 @@ export const PlaybackControls = () => {
 	const [videoPosition, setVideoPosition] = useState({ x: 0, y: 0 });
 	const [isDragging, setIsDragging] = useState(false);
 	const [showAudioMenu, setShowAudioMenu] = useState(false);
+	const [sleepTimer, setSleepTimer] = useState<number | null>(null);
+	const [sleepTimeRemaining, setSleepTimeRemaining] = useState<number>(0);
+	const [showVisualizer, setShowVisualizer] = useState(false);
 	const dragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
+	const sleepTimerRef = useRef<NodeJS.Timeout | null>(null);
+	const canvasRef = useRef<HTMLCanvasElement>(null);
+	const analyserRef = useRef<AnalyserNode | null>(null);
+	const animationRef = useRef<number | null>(null);
 	
 	const playerRef = useRef<any>(null);
 	const lastVideoId = useRef<string>("");
@@ -95,6 +102,51 @@ export const PlaybackControls = () => {
 			spatial: audioSettings.spatialAudio
 		});
 	}, [audioSettings.bassBoost, audioSettings.trebleBoost, audioSettings.loudness, audioSettings.spatialAudio]);
+
+	// Sleep Timer Logic
+	useEffect(() => {
+		if (sleepTimer && sleepTimer > 0) {
+			setSleepTimeRemaining(sleepTimer * 60); // Convert minutes to seconds
+			
+			sleepTimerRef.current = setInterval(() => {
+				setSleepTimeRemaining(prev => {
+					if (prev <= 1) {
+						// Timer finished - pause music
+						audioEngine.pause();
+						setIsPlaying(false);
+						setSleepTimer(null);
+						toast.success('💤 Sleep timer ended. Good night!', { duration: 3000 });
+						if (sleepTimerRef.current) clearInterval(sleepTimerRef.current);
+						return 0;
+					}
+					return prev - 1;
+				});
+			}, 1000);
+		}
+		
+		return () => {
+			if (sleepTimerRef.current) clearInterval(sleepTimerRef.current);
+		};
+	}, [sleepTimer, setIsPlaying]);
+
+	const startSleepTimer = (minutes: number) => {
+		if (sleepTimerRef.current) clearInterval(sleepTimerRef.current);
+		setSleepTimer(minutes);
+		toast.success(`⏰ Sleep timer set for ${minutes} minutes`, { icon: '🌙' });
+	};
+
+	const cancelSleepTimer = () => {
+		if (sleepTimerRef.current) clearInterval(sleepTimerRef.current);
+		setSleepTimer(null);
+		setSleepTimeRemaining(0);
+		toast.success('Sleep timer cancelled');
+	};
+
+	const formatSleepTime = (seconds: number) => {
+		const mins = Math.floor(seconds / 60);
+		const secs = seconds % 60;
+		return `${mins}:${secs.toString().padStart(2, '0')}`;
+	};
 
 	// Sync Audio Engine with Store State
 	useEffect(() => {
@@ -650,21 +702,55 @@ export const PlaybackControls = () => {
 										</div>
 
 										{/* Spatial Audio Toggle */}
-										<div className='flex items-center justify-between p-2 bg-zinc-700/50 rounded'>
-											<div>
-												<p className='text-sm font-medium'>Spatial Audio</p>
-												<p className='text-xs text-zinc-400'>3D surround effect</p>
-											</div>
-											<button
-												onClick={() => updateAudioSettings({ spatialAudio: !audioSettings.spatialAudio })}
-												className={`w-10 h-6 rounded-full relative transition-colors
-													${audioSettings.spatialAudio ? 'bg-emerald-500' : 'bg-zinc-600'}`}
-											>
-												<div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all
-													${audioSettings.spatialAudio ? 'right-1' : 'left-1'}`} />
-											</button>
-										</div>
+								<div className='flex items-center justify-between p-2 bg-zinc-700/50 rounded'>
+									<div>
+										<p className='text-sm font-medium'>Spatial Audio</p>
+										<p className='text-xs text-zinc-400'>3D surround effect</p>
 									</div>
+									<button
+										onClick={() => updateAudioSettings({ spatialAudio: !audioSettings.spatialAudio })}
+										className={`w-10 h-6 rounded-full relative transition-colors
+											${audioSettings.spatialAudio ? 'bg-emerald-500' : 'bg-zinc-600'}`}
+									>
+										<div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all
+											${audioSettings.spatialAudio ? 'right-1' : 'left-1'}`} />
+									</button>
+								</div>
+
+								{/* Sleep Timer */}
+								<div className='mt-3 pt-3 border-t border-zinc-700'>
+									<div className='flex items-center gap-2 mb-2'>
+										<Moon className='h-4 w-4 text-emerald-400' />
+										<span className='text-sm font-medium'>Sleep Timer</span>
+										{sleepTimer && (
+											<span className='ml-auto text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full'>
+												<Timer className='h-3 w-3 inline mr-1' />
+												{formatSleepTime(sleepTimeRemaining)}
+											</span>
+										)}
+									</div>
+									{sleepTimer ? (
+										<button
+											onClick={cancelSleepTimer}
+											className='w-full py-2 text-xs font-medium bg-red-500/20 text-red-400 rounded hover:bg-red-500/30 transition-colors'
+										>
+											Cancel Timer
+										</button>
+									) : (
+										<div className='grid grid-cols-4 gap-2'>
+											{[15, 30, 60, 90].map(mins => (
+												<button
+													key={mins}
+													onClick={() => startSleepTimer(mins)}
+													className='py-2 text-xs font-medium bg-zinc-700 rounded hover:bg-zinc-600 transition-colors'
+												>
+													{mins}m
+												</button>
+											))}
+										</div>
+									)}
+								</div>
+							</div>
 								</>
 							)}
 						</div>
