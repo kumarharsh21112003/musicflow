@@ -756,12 +756,21 @@ export const PlaybackControls = () => {
 						</div>
 						
 						<Button 
-							size='icon' variant='ghost' 
-							className={`h-8 w-8 ${showVideo ? 'text-emerald-500' : 'text-zinc-400'}`} 
-							onClick={() => setShowVideo(!showVideo)}
-						>
-							{showVideo ? <Video className='h-4 w-4' /> : <VideoOff className='h-4 w-4' />}
-						</Button>
+						size='icon' variant='ghost' 
+						className={`h-8 w-8 ${showVideo ? 'text-emerald-500' : 'text-zinc-400'}`} 
+						onClick={() => setShowVideo(!showVideo)}
+						title='Toggle Video'
+					>
+						{showVideo ? <Video className='h-4 w-4' /> : <VideoOff className='h-4 w-4' />}
+					</Button>
+					<Button 
+						size='icon' variant='ghost' 
+						className={`h-8 w-8 ${showVisualizer ? 'text-emerald-500' : 'text-zinc-400'}`} 
+						onClick={() => setShowVisualizer(!showVisualizer)}
+						title='Audio Visualizer'
+					>
+						<Waves className='h-4 w-4' />
+					</Button>
 						<Button size='icon' variant='ghost' className='h-8 w-8 text-zinc-400' onClick={handleMute}>
 							{getVolumeIcon()}
 						</Button>
@@ -769,6 +778,94 @@ export const PlaybackControls = () => {
 					</div>
 				</div>
 			</footer>
+
+			{/* Audio Visualizer Overlay */}
+			{showVisualizer && currentSong && (
+				<div className='fixed bottom-28 right-4 z-50 bg-zinc-900/95 backdrop-blur-xl rounded-xl border border-zinc-700 p-4 shadow-2xl'>
+					<div className='flex items-center justify-between mb-3'>
+						<div className='flex items-center gap-2'>
+							<Waves className='h-4 w-4 text-emerald-400' />
+							<span className='text-sm font-bold'>Audio Visualizer</span>
+						</div>
+						<button onClick={() => setShowVisualizer(false)} className='p-1 hover:bg-zinc-700 rounded'>
+							<X className='h-4 w-4' />
+						</button>
+					</div>
+					<canvas 
+						ref={canvasRef}
+						width={280}
+						height={100}
+						className='rounded-lg bg-zinc-800'
+					/>
+					<AudioVisualizerEffect 
+						canvasRef={canvasRef} 
+						isPlaying={isPlaying} 
+						analyserRef={analyserRef}
+						animationRef={animationRef}
+					/>
+				</div>
+			)}
 		</>
 	);
+};
+
+// Audio Visualizer Effect Component
+const AudioVisualizerEffect = ({ 
+	canvasRef, 
+	isPlaying,
+	analyserRef,
+	animationRef
+}: { 
+	canvasRef: React.RefObject<HTMLCanvasElement>; 
+	isPlaying: boolean;
+	analyserRef: React.MutableRefObject<AnalyserNode | null>;
+	animationRef: React.MutableRefObject<number | null>;
+}) => {
+	useEffect(() => {
+		const canvas = canvasRef.current;
+		if (!canvas) return;
+
+		const ctx = canvas.getContext('2d');
+		if (!ctx) return;
+
+		const barCount = 32;
+		const barWidth = canvas.width / barCount - 2;
+		let bars = Array(barCount).fill(0);
+
+		const animate = () => {
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+			// Simulate audio data with random values (smooth transitions)
+			bars = bars.map((bar, i) => {
+				const target = isPlaying ? Math.random() * 80 + 20 : 5;
+				return bar + (target - bar) * 0.15;
+			});
+
+			// Draw gradient bars
+			bars.forEach((height, i) => {
+				const x = i * (barWidth + 2);
+				const gradient = ctx.createLinearGradient(0, canvas.height, 0, canvas.height - height);
+				gradient.addColorStop(0, '#10b981');
+				gradient.addColorStop(0.5, '#34d399');
+				gradient.addColorStop(1, '#6ee7b7');
+				
+				ctx.fillStyle = gradient;
+				ctx.beginPath();
+				ctx.roundRect(x, canvas.height - height, barWidth, height, 2);
+				ctx.fill();
+			});
+
+			animationRef.current = requestAnimationFrame(animate);
+		};
+
+		animate();
+
+		return () => {
+			if (animationRef.current) {
+				cancelAnimationFrame(animationRef.current);
+			}
+		};
+	}, [canvasRef, isPlaying, analyserRef, animationRef]);
+
+	return null;
 };
