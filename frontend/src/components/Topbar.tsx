@@ -136,7 +136,7 @@ const Topbar = () => {
 							{/* Results Container */}
 							<div 
 								className='absolute left-1/2 -translate-x-1/2 w-[95%] max-w-[500px] bg-[#282828] rounded-lg shadow-[0_8px_24px_rgba(0,0,0,0.5)] overflow-hidden animate-in fade-in zoom-in-95 duration-200'
-								style={{ top: '64px' }}
+								style={{ top: '64px' }} onMouseDown={(e) => e.stopPropagation()}
 							>
 								{/* Section: Recent Searches */}
 								{!searchQuery && recentSearches.length > 0 && (
