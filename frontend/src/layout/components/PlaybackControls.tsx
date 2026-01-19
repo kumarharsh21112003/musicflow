@@ -58,6 +58,7 @@ export const PlaybackControls = () => {
 	const [showVisualizer, setShowVisualizer] = useState(false);
 	const [videoQuality, setVideoQuality] = useState<'auto' | 'small' | 'medium' | 'large' | 'hd720' | 'hd1080'>('auto');
 	const [showQualityMenu, setShowQualityMenu] = useState(false);
+	const [availableQualities, setAvailableQualities] = useState<string[]>(['auto', 'small', 'medium', 'hd720', 'hd1080']);
 	const dragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
 	const sleepTimerRef = useRef<NodeJS.Timeout | null>(null);
 	const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -83,8 +84,22 @@ export const PlaybackControls = () => {
 				height: '100%', width: '100%',
 				playerVars: { autoplay: 0, controls: 0, modestbranding: 1, rel: 0, showinfo: 0, iv_load_policy: 3, playsinline: 1 },
 				events: {
-					onReady: () => setIsReady(true),
+					onReady: (e: any) => {
+						setIsReady(true);
+						// Set highest quality by default
+						e.target.setPlaybackQuality('hd1080');
+					},
 					onStateChange: (e: any) => {
+						// When video starts playing, force highest quality
+						if (e.data === window.YT.PlayerState.PLAYING) {
+							const availableQuals = e.target.getAvailableQualityLevels();
+							if (availableQuals && availableQuals.length > 0) {
+								// Set to highest available quality
+								const highest = availableQuals[0]; // First is highest
+								e.target.setPlaybackQuality(highest);
+								setAvailableQualities(['auto', ...availableQuals]);
+							}
+						}
 						// Sync video state if needed, but audio is handled by audioEngine
 						if (e.data === window.YT.PlayerState.ENDED) playNext();
 					}
@@ -469,7 +484,7 @@ export const PlaybackControls = () => {
 										{ value: 'medium', label: '480p' },
 										{ value: 'hd720', label: '720p HD' },
 										{ value: 'hd1080', label: '1080p FHD' }
-									].map(opt => (
+									].filter(opt => availableQualities.includes(opt.value)).map(opt => (
 										<button
 											key={opt.value}
 											onClick={() => {
