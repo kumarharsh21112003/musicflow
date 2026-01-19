@@ -108,12 +108,12 @@ const Topbar = () => {
 						<>
 							{/* Backdrop to hide content behind */}
 							<div 
-								className='fixed inset-0 bg-black/60 z-[90]' 
+								className='fixed inset-0 bg-black/80 z-[9999]' 
 								onClick={() => setShowDropdown(false)}
 								style={{ top: '60px' }}
 							/>
 							{/* Dropdown */}
-							<div className='absolute top-14 left-0 right-0 bg-zinc-900 rounded-lg shadow-2xl border border-zinc-700 max-h-[70vh] overflow-auto z-[100]'>
+							<div className='fixed top-[70px] left-1/2 -translate-x-1/2 w-full max-w-[600px] bg-zinc-900 rounded-lg shadow-2xl border border-zinc-700 max-h-[70vh] overflow-auto z-[10000]'>
 								{/* Recent Searches */}
 								{!searchQuery && recentSearches.length > 0 && (
 									<>
