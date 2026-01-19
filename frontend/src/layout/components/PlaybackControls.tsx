@@ -327,297 +327,347 @@ export const PlaybackControls = () => {
 	};
 
 	return (
-		<footer className='h-24 bg-zinc-900 border-t border-zinc-800 px-4'>
-			{/* Video Container - DRAGGABLE */}
+		<>
+			{/* MOBILE FLOATING PLAYER (Spotify Style) */}
 			<div 
-				style={{
-					position: 'fixed',
-					...(showVideo 
-						? (isFullscreen 
-							? { inset: 0, zIndex: 9999 }
-							: { 
-								bottom: 112 - videoPosition.y, 
-								right: 16 - videoPosition.x, 
-								width: 384, 
-								height: 216, 
-								zIndex: 9999, 
-								borderRadius: 12,
-								cursor: isDragging ? 'grabbing' : 'default'
-							})
-						: { top: -9999, left: -9999, width: 1, height: 1, opacity: 0 }
-					),
-					backgroundColor: 'black',
-					overflow: 'hidden',
-					boxShadow: showVideo && !isFullscreen ? '0 10px 40px rgba(0,0,0,0.5)' : 'none',
-					border: showVideo && !isFullscreen ? '1px solid #333' : 'none'
-				}}
+				className={`md:hidden fixed bottom-[70px] left-2 right-2 bg-[#262626] rounded-md p-2 flex flex-col z-[45] shadow-xl border-b border-zinc-800 transition-transform duration-300 ${!currentSong ? 'translate-y-[200%]' : 'translate-y-0'}`}
+				onClick={() => setShowVideo(true)}
 			>
-				{/* DRAG HANDLE - Top bar is draggable */}
-				<div 
-					style={{ 
-						display: showVideo ? 'flex' : 'none',
-						position: 'absolute', top: 0, left: 0, right: 0, zIndex: 20,
-						justifyContent: 'space-between', alignItems: 'center', padding: 12,
-						background: 'linear-gradient(to bottom, rgba(0,0,0,0.9), transparent)',
-						cursor: isFullscreen ? 'default' : 'grab'
-					}}
-					onMouseDown={handleDragStart}
-				>
-					<span style={{ fontSize: 14, color: 'white', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, marginRight: 8, pointerEvents: 'none' }}>
-						{currentSong?.title}
-					</span>
-					<div style={{ display: 'flex', gap: 8 }}>
-						<button 
-							onClick={() => setIsFullscreen(!isFullscreen)}
-							onMouseDown={(e) => e.stopPropagation()}
-							style={{ padding: 8, borderRadius: 9999, background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', cursor: 'pointer' }}
-						>
-							{isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
-						</button>
-						<button 
-							onClick={() => { setShowVideo(false); setIsFullscreen(false); setVideoPosition({ x: 0, y: 0 }); }}
-							onMouseDown={(e) => e.stopPropagation()}
-							style={{ padding: 8, borderRadius: 9999, background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', cursor: 'pointer' }}
-						>
-							<X size={16} />
-						</button>
-					</div>
-				</div>
-				
-				<div id="yt-player-element" style={{ width: '100%', height: '100%' }} />
-				
-				{/* FULL OVERLAY - Blocks ALL clicks on video */}
-				<div 
-					style={{
-						position: 'absolute',
-						top: 0, left: 0, right: 0, bottom: 0,
-						zIndex: 14,
-						cursor: 'default'
-					}} 
-					onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
-				/>
-				
-				{/* Simple subtle gradients */}
-				<div style={{
-					position: 'absolute', top: 0, left: 0, right: 0, height: 40,
-					background: 'linear-gradient(to bottom, rgba(0,0,0,0.4), transparent)',
-					zIndex: 15, pointerEvents: 'none'
-				}} />
-				<div style={{
-					position: 'absolute', bottom: 0, left: 0, right: 0, height: 40,
-					background: 'linear-gradient(to top, rgba(0,0,0,0.4), transparent)',
-					zIndex: 15, pointerEvents: 'none'
-				}} />
-			</div>
-			
-			<div className='flex justify-between items-center h-full max-w-[1800px] mx-auto'>
-				{/* Song info */}
-				<div className='hidden sm:flex items-center gap-4 min-w-[200px] w-[30%]'>
-					{currentSong ? (
-						<>
-							<img
-								src={`https://i.ytimg.com/vi/${currentSong.videoId}/mqdefault.jpg`}
-								alt={currentSong.title}
-								className='w-14 h-14 object-cover rounded cursor-pointer hover:opacity-80 transition'
-								onClick={() => setShowVideo(!showVideo)}
-							/>
-							<div className='flex-1 min-w-0'>
-								<div className='font-medium truncate text-sm'>{currentSong.title}</div>
-								<div className='text-xs text-zinc-400 truncate'>{currentSong.artist}</div>
-							</div>
-						</>
-					) : (
-						<div className='text-zinc-500 text-sm'>Select a song</div>
-					)}
-				</div>
-
-				{/* Controls */}
-				<div className='flex flex-col items-center gap-1 flex-1 max-w-[600px]'>
-					<div className='flex items-center gap-4'>
-						<Button size='icon' variant='ghost' className='hidden sm:inline-flex text-zinc-400 hover:text-white h-8 w-8'>
-							<Shuffle className='h-4 w-4' />
-						</Button>
-						<Button size='icon' variant='ghost' className='text-zinc-400 hover:text-white h-8 w-8' onClick={playPrevious}>
-							<SkipBack className='h-4 w-4' />
-						</Button>
-						<Button size='icon' className='bg-white hover:bg-white/90 text-black rounded-full h-9 w-9' onClick={handlePlayPause}>
-							{isPlaying ? <Pause className='h-5 w-5' /> : <Play className='h-5 w-5 ml-0.5' />}
-						</Button>
-						<Button size='icon' variant='ghost' className='text-zinc-400 hover:text-white h-8 w-8' onClick={playNext}>
-							<SkipForward className='h-4 w-4' />
-						</Button>
-						<Button size='icon' variant='ghost' className='hidden sm:inline-flex text-zinc-400 hover:text-white h-8 w-8'>
-							<Repeat className='h-4 w-4' />
-						</Button>
-						{/* Mix Mode Button with Dropdown */}
-						<div className='relative hidden sm:block'>
-							<Button 
-								size='icon' 
-								variant='ghost' 
-								className={`h-8 w-8 ${(audioSettings.mixMode || 'off') !== 'off' ? 'text-emerald-400' : 'text-zinc-400 hover:text-white'}`}
-								onClick={() => {
-									// Cycle through modes
-									const modes: ('off' | 'fade' | 'rise' | 'blend' | 'party')[] = ['off', 'fade', 'rise', 'blend', 'party'];
-									const currentIdx = modes.indexOf(audioSettings.mixMode || 'off');
-									const nextMode = modes[(currentIdx + 1) % modes.length];
-									updateAudioSettings({ mixMode: nextMode, crossfadeEnabled: nextMode !== 'off' });
-									const modeNames: Record<string, string> = {
-										off: 'Mix OFF',
-										fade: '🎵 Fade Mode',
-										rise: '🚀 Rise Mode', 
-										blend: '🌊 Blend Mode',
-										party: '🎉 Party Mode'
-									};
-									toast.success(modeNames[nextMode], { duration: 1500 });
-								}}
-								title='Mix Mode - Click to cycle'
-							>
-								<Waves className='h-4 w-4' />
-							</Button>
-							{(audioSettings.mixMode || 'off') !== 'off' && (
-								<span className='absolute -top-1 -right-1 text-[9px] bg-emerald-500 text-black px-1 rounded font-bold uppercase'>
-									{(audioSettings.mixMode || 'off').slice(0, 1)}
-								</span>
-							)}
+				<div className="flex items-center gap-3">
+					<img 
+						src={currentSong?.imageUrl || '/placeholder.png'} 
+						alt="Album Art" 
+						className="w-10 h-10 rounded bg-zinc-800 object-cover flex-shrink-0" 
+					/>
+					<div className="flex-1 min-w-0 flex flex-col justify-center mr-2">
+						<div className="font-semibold text-xs text-white truncate leading-tight mb-0.5">
+							{currentSong?.title || "Choose a song"}
+						</div>
+						<div className="text-[10px] text-zinc-400 truncate leading-tight">
+							{currentSong?.artist} • <span className={audioSettings.mixMode !== 'off' ? "text-emerald-400" : ""}>
+								{audioSettings.mixMode !== 'off' ? `Mix: ${audioSettings.mixMode}` : "MusicFlow"}
+							</span>
 						</div>
 					</div>
-
-					<div className='flex items-center gap-2 w-full'>
-						<span className='text-xs text-zinc-400 w-10 text-right font-mono'>{formatTime(currentTime)}</span>
-						<Slider value={[currentTime]} max={duration || 100} step={1} className='flex-1' onValueChange={handleSeek} />
-						<span className='text-xs text-zinc-400 w-10 font-mono'>{formatTime(duration)}</span>
+					
+					{/* Mobile Controls */}
+					<div className="flex items-center gap-3 mr-1">
+						<button 
+							onClick={(e) => { e.stopPropagation(); updateAudioSettings({ mixMode: 'off' }); }}
+							className={`text-zinc-400 ${audioSettings.mixMode !== 'off' ? 'text-emerald-500' : ''}`}
+						>
+							<Sparkles size={18} />
+						</button>
+						<button 
+							onClick={(e) => { e.stopPropagation(); handlePlayPause(); }} 
+							className="text-white focus:outline-none"
+						>
+							{isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" />}
+						</button>
 					</div>
 				</div>
-				
-				{/* Volume & Audio Quality */}
-				<div className='hidden sm:flex items-center gap-3 min-w-[200px] w-[30%] justify-end'>
-					{/* Audio Quality Badge */}
-					<div className='flex items-center gap-1 px-2 py-1 bg-emerald-500/20 rounded text-emerald-400 text-xs font-bold'>
-						<Sparkles className='h-3 w-3' />
-						<span>{audioSettings.qualityMode === 'ultra' ? 'ULTRA' : 'HQ'}</span>
-					</div>
-					
-					{/* Audio Enhancement Button */}
-					<div className='relative'>
-						<Button 
-							size='icon' variant='ghost' 
-							className={`h-8 w-8 ${showAudioMenu ? 'text-emerald-400' : 'text-zinc-400 hover:text-emerald-400'}`}
-							onClick={() => setShowAudioMenu(!showAudioMenu)}
-							title='Audio Enhancement'
-						>
-							<Headphones className='h-4 w-4' />
-						</Button>
-
-						{/* Audio Settings Dropdown */}
-						{showAudioMenu && (
-							<>
-								<div className='fixed inset-0 z-40' onClick={() => setShowAudioMenu(false)} />
-								<div className='absolute bottom-12 right-0 bg-zinc-800 rounded-lg shadow-xl z-50 p-4 w-[280px] border border-zinc-700'>
-									<div className='flex items-center justify-between mb-4'>
-										<h3 className='font-bold text-sm'>Audio Enhancement</h3>
-										<div className='flex items-center gap-1 px-2 py-0.5 bg-emerald-500/20 rounded text-emerald-400 text-xs'>
-											<Sparkles className='h-3 w-3' />
-											PREMIUM
-										</div>
-									</div>
-
-									{/* Quality Mode */}
-									<div className='mb-4'>
-										<label className='text-xs text-zinc-400 mb-2 block'>Quality Mode</label>
-										<div className='flex gap-2'>
-											{(['auto', 'high', 'ultra'] as const).map((mode) => (
-												<button
-													key={mode}
-													onClick={() => {
-														updateAudioSettings({ qualityMode: mode });
-														toast.success(`Quality: ${mode.toUpperCase()}`, { icon: '✨', duration: 1500 });
-													}}
-													className={`flex-1 py-2 rounded text-xs font-medium transition-all
-														${audioSettings.qualityMode === mode 
-															? 'bg-emerald-500 text-black' 
-															: 'bg-zinc-700 text-zinc-300 hover:bg-zinc-600'}`}
-												>
-													{mode.toUpperCase()}
-												</button>
-											))}
-										</div>
-									</div>
-
-									{/* Bass Boost */}
-									<div className='mb-3'>
-										<div className='flex justify-between text-xs mb-1'>
-											<span className='text-zinc-400'>Bass Boost</span>
-											<span className='text-emerald-400'>{audioSettings.bassBoost}%</span>
-										</div>
-										<Slider 
-											value={[audioSettings.bassBoost]} 
-											max={100} 
-											onValueChange={(v) => updateAudioSettings({ bassBoost: v[0] })}
-											className='w-full'
-										/>
-									</div>
-
-									{/* Treble */}
-									<div className='mb-3'>
-										<div className='flex justify-between text-xs mb-1'>
-											<span className='text-zinc-400'>Treble</span>
-											<span className='text-emerald-400'>{audioSettings.trebleBoost}%</span>
-										</div>
-										<Slider 
-											value={[audioSettings.trebleBoost]} 
-											max={100} 
-											onValueChange={(v) => updateAudioSettings({ trebleBoost: v[0] })}
-											className='w-full'
-										/>
-									</div>
-
-									{/* Loudness */}
-									<div className='mb-4'>
-										<div className='flex justify-between text-xs mb-1'>
-											<span className='text-zinc-400'>Loudness</span>
-											<span className='text-emerald-400'>{audioSettings.loudness}%</span>
-										</div>
-										<Slider 
-											value={[audioSettings.loudness]} 
-											max={100} 
-											onValueChange={(v) => updateAudioSettings({ loudness: v[0] })}
-											className='w-full'
-										/>
-									</div>
-
-									{/* Spatial Audio Toggle */}
-									<div className='flex items-center justify-between p-2 bg-zinc-700/50 rounded'>
-										<div>
-											<p className='text-sm font-medium'>Spatial Audio</p>
-											<p className='text-xs text-zinc-400'>3D surround effect</p>
-										</div>
-										<button
-											onClick={() => updateAudioSettings({ spatialAudio: !audioSettings.spatialAudio })}
-											className={`w-10 h-6 rounded-full relative transition-colors
-												${audioSettings.spatialAudio ? 'bg-emerald-500' : 'bg-zinc-600'}`}
-										>
-											<div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all
-												${audioSettings.spatialAudio ? 'right-1' : 'left-1'}`} />
-										</button>
-									</div>
-								</div>
-							</>
-						)}
-					</div>
-					
-					<Button 
-						size='icon' variant='ghost' 
-						className={`h-8 w-8 ${showVideo ? 'text-emerald-500' : 'text-zinc-400'}`} 
-						onClick={() => setShowVideo(!showVideo)}
-					>
-						{showVideo ? <Video className='h-4 w-4' /> : <VideoOff className='h-4 w-4' />}
-					</Button>
-					<Button size='icon' variant='ghost' className='h-8 w-8 text-zinc-400' onClick={handleMute}>
-						{getVolumeIcon()}
-					</Button>
-					<Slider value={[isMuted ? 0 : volume]} max={100} step={1} className='w-24' onValueChange={handleVolumeChange} />
+				{/* Thin Progress Bar */}
+				<div className="absolute bottom-0 left-2 right-2 h-[2px] bg-zinc-600 rounded-full overflow-hidden">
+					<div 
+						className="h-full bg-white rounded-full transition-all duration-300 linear" 
+						style={{ width: `${(currentTime / (duration || 1)) * 100}%` }} 
+					/>
 				</div>
 			</div>
-		</footer>
+
+			{/* DESKTOP FOOTER PLAYER */}
+			<footer className='hidden md:flex h-24 bg-zinc-900 border-t border-zinc-800 px-4 flex-col justify-center relative z-50'>
+				{/* Video Container - DRAGGABLE */}
+				<div 
+					style={{
+						position: 'fixed',
+						...(showVideo 
+							? (isFullscreen 
+								? { inset: 0, zIndex: 9999 }
+								: { 
+									bottom: 112 - videoPosition.y, 
+									right: 16 - videoPosition.x, 
+									width: 384, 
+									height: 216, 
+									zIndex: 9999, 
+									borderRadius: 12,
+									cursor: isDragging ? 'grabbing' : 'default'
+								})
+							: { top: -9999, left: -9999, width: 1, height: 1, opacity: 0 }
+						),
+						backgroundColor: 'black',
+						overflow: 'hidden',
+						boxShadow: showVideo && !isFullscreen ? '0 10px 40px rgba(0,0,0,0.5)' : 'none',
+						border: showVideo && !isFullscreen ? '1px solid #333' : 'none'
+					}}
+				>
+					{/* DRAG HANDLE - Top bar is draggable */}
+					<div 
+						style={{ 
+							display: showVideo ? 'flex' : 'none',
+							position: 'absolute', top: 0, left: 0, right: 0, zIndex: 20,
+							justifyContent: 'space-between', alignItems: 'center', padding: 12,
+							background: 'linear-gradient(to bottom, rgba(0,0,0,0.9), transparent)',
+							cursor: isFullscreen ? 'default' : 'grab'
+						}}
+						onMouseDown={handleDragStart}
+					>
+						<span style={{ fontSize: 14, color: 'white', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, marginRight: 8, pointerEvents: 'none' }}>
+							{currentSong?.title}
+						</span>
+						<div style={{ display: 'flex', gap: 8 }}>
+							<button 
+								onClick={() => setIsFullscreen(!isFullscreen)}
+								onMouseDown={(e) => e.stopPropagation()}
+								style={{ padding: 8, borderRadius: 9999, background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', cursor: 'pointer' }}
+							>
+								{isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+							</button>
+							<button 
+								onClick={() => { setShowVideo(false); setIsFullscreen(false); setVideoPosition({ x: 0, y: 0 }); }}
+								onMouseDown={(e) => e.stopPropagation()}
+								style={{ padding: 8, borderRadius: 9999, background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', cursor: 'pointer' }}
+							>
+								<X size={16} />
+							</button>
+						</div>
+					</div>
+					
+					<div id="yt-player-element" style={{ width: '100%', height: '100%' }} />
+					
+					{/* FULL OVERLAY - Blocks ALL clicks on video */}
+					<div 
+						style={{
+							position: 'absolute',
+							top: 0, left: 0, right: 0, bottom: 0,
+							zIndex: 14,
+							cursor: 'default'
+						}} 
+						onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+					/>
+					
+					{/* Simple subtle gradients */}
+					<div style={{
+						position: 'absolute', top: 0, left: 0, right: 0, height: 40,
+						background: 'linear-gradient(to bottom, rgba(0,0,0,0.4), transparent)',
+						zIndex: 15, pointerEvents: 'none'
+					}} />
+					<div style={{
+						position: 'absolute', bottom: 0, left: 0, right: 0, height: 40,
+						background: 'linear-gradient(to top, rgba(0,0,0,0.4), transparent)',
+						zIndex: 15, pointerEvents: 'none'
+					}} />
+				</div>
+				
+				<div className='flex justify-between items-center h-full max-w-[1800px] mx-auto w-full'>
+					{/* Song info */}
+					<div className='hidden sm:flex items-center gap-4 min-w-[200px] w-[30%]'>
+						{currentSong ? (
+							<>
+								<img
+									src={`https://i.ytimg.com/vi/${currentSong.videoId}/mqdefault.jpg`}
+									alt={currentSong.title}
+									className='w-14 h-14 object-cover rounded cursor-pointer hover:opacity-80 transition'
+									onClick={() => setShowVideo(!showVideo)}
+								/>
+								<div className='flex-1 min-w-0'>
+									<div className='font-medium truncate text-sm'>{currentSong.title}</div>
+									<div className='text-xs text-zinc-400 truncate'>{currentSong.artist}</div>
+								</div>
+							</>
+						) : (
+							<div className='text-zinc-500 text-sm'>Select a song</div>
+						)}
+					</div>
+
+					{/* Controls */}
+					<div className='flex flex-col items-center gap-1 flex-1 max-w-[600px]'>
+						<div className='flex items-center gap-4'>
+							<Button size='icon' variant='ghost' className='hidden sm:inline-flex text-zinc-400 hover:text-white h-8 w-8'>
+								<Shuffle className='h-4 w-4' />
+							</Button>
+							<Button size='icon' variant='ghost' className='text-zinc-400 hover:text-white h-8 w-8' onClick={playPrevious}>
+								<SkipBack className='h-4 w-4' />
+							</Button>
+							<Button size='icon' className='bg-white hover:bg-white/90 text-black rounded-full h-9 w-9' onClick={handlePlayPause}>
+								{isPlaying ? <Pause className='h-5 w-5' /> : <Play className='h-5 w-5 ml-0.5' />}
+							</Button>
+							<Button size='icon' variant='ghost' className='text-zinc-400 hover:text-white h-8 w-8' onClick={playNext}>
+								<SkipForward className='h-4 w-4' />
+							</Button>
+							<Button size='icon' variant='ghost' className='hidden sm:inline-flex text-zinc-400 hover:text-white h-8 w-8'>
+								<Repeat className='h-4 w-4' />
+							</Button>
+							{/* Mix Mode Button with Dropdown */}
+							<div className='relative hidden sm:block'>
+								<Button 
+									size='icon' 
+									variant='ghost' 
+									className={`h-8 w-8 ${(audioSettings.mixMode || 'off') !== 'off' ? 'text-emerald-400' : 'text-zinc-400 hover:text-white'}`}
+									onClick={() => {
+										// Cycle through modes
+										const modes: ('off' | 'fade' | 'rise' | 'blend' | 'party')[] = ['off', 'fade', 'rise', 'blend', 'party'];
+										const currentIdx = modes.indexOf(audioSettings.mixMode || 'off');
+										const nextMode = modes[(currentIdx + 1) % modes.length];
+										updateAudioSettings({ mixMode: nextMode, crossfadeEnabled: nextMode !== 'off' });
+										const modeNames: Record<string, string> = {
+											off: 'Mix OFF',
+											fade: '🎵 Fade Mode',
+											rise: '🚀 Rise Mode', 
+											blend: '🌊 Blend Mode',
+											party: '🎉 Party Mode'
+										};
+										toast.success(modeNames[nextMode], { duration: 1500 });
+									}}
+									title='Mix Mode - Click to cycle'
+								>
+									<Waves className='h-4 w-4' />
+								</Button>
+								{(audioSettings.mixMode || 'off') !== 'off' && (
+									<span className='absolute -top-1 -right-1 text-[9px] bg-emerald-500 text-black px-1 rounded font-bold uppercase'>
+										{(audioSettings.mixMode || 'off').slice(0, 1)}
+									</span>
+								)}
+							</div>
+						</div>
+
+						<div className='flex items-center gap-2 w-full'>
+							<span className='text-xs text-zinc-400 w-10 text-right font-mono'>{formatTime(currentTime)}</span>
+							<Slider value={[currentTime]} max={duration || 100} step={1} className='flex-1' onValueChange={handleSeek} />
+							<span className='text-xs text-zinc-400 w-10 font-mono'>{formatTime(duration)}</span>
+						</div>
+					</div>
+					
+					{/* Volume & Audio Quality */}
+					<div className='hidden sm:flex items-center gap-3 min-w-[200px] w-[30%] justify-end'>
+						{/* Audio Quality Badge */}
+						<div className='flex items-center gap-1 px-2 py-1 bg-emerald-500/20 rounded text-emerald-400 text-xs font-bold'>
+							<Sparkles className='h-3 w-3' />
+							<span>{audioSettings.qualityMode === 'ultra' ? 'ULTRA' : 'HQ'}</span>
+						</div>
+						
+						{/* Audio Enhancement Button */}
+						<div className='relative'>
+							<Button 
+								size='icon' variant='ghost' 
+								className={`h-8 w-8 ${showAudioMenu ? 'text-emerald-400' : 'text-zinc-400 hover:text-emerald-400'}`}
+								onClick={() => setShowAudioMenu(!showAudioMenu)}
+								title='Audio Enhancement'
+							>
+								<Headphones className='h-4 w-4' />
+							</Button>
+
+							{/* Audio Settings Dropdown */}
+							{showAudioMenu && (
+								<>
+									<div className='fixed inset-0 z-40' onClick={() => setShowAudioMenu(false)} />
+									<div className='absolute bottom-12 right-0 bg-zinc-800 rounded-lg shadow-xl z-50 p-4 w-[280px] border border-zinc-700'>
+										<div className='flex items-center justify-between mb-4'>
+											<h3 className='font-bold text-sm'>Audio Enhancement</h3>
+											<div className='flex items-center gap-1 px-2 py-0.5 bg-emerald-500/20 rounded text-emerald-400 text-xs'>
+												<Sparkles className='h-3 w-3' />
+												PREMIUM
+											</div>
+										</div>
+
+										{/* Quality Mode */}
+										<div className='mb-4'>
+											<label className='text-xs text-zinc-400 mb-2 block'>Quality Mode</label>
+											<div className='flex gap-2'>
+												{(['auto', 'high', 'ultra'] as const).map((mode) => (
+													<button
+														key={mode}
+														onClick={() => {
+															updateAudioSettings({ qualityMode: mode });
+															toast.success(`Quality: ${mode.toUpperCase()}`, { icon: '✨', duration: 1500 });
+														}}
+														className={`flex-1 py-2 rounded text-xs font-medium transition-all
+															${audioSettings.qualityMode === mode 
+																? 'bg-emerald-500 text-black' 
+																: 'bg-zinc-700 text-zinc-300 hover:bg-zinc-600'}`}
+													>
+														{mode.toUpperCase()}
+													</button>
+												))}
+											</div>
+										</div>
+
+										{/* Bass Boost */}
+										<div className='mb-3'>
+											<div className='flex justify-between text-xs mb-1'>
+												<span className='text-zinc-400'>Bass Boost</span>
+												<span className='text-emerald-400'>{audioSettings.bassBoost}%</span>
+											</div>
+											<Slider 
+												value={[audioSettings.bassBoost]} 
+												max={100} 
+												onValueChange={(v) => updateAudioSettings({ bassBoost: v[0] })}
+												className='w-full'
+											/>
+										</div>
+
+										{/* Treble */}
+										<div className='mb-3'>
+											<div className='flex justify-between text-xs mb-1'>
+												<span className='text-zinc-400'>Treble</span>
+												<span className='text-emerald-400'>{audioSettings.trebleBoost}%</span>
+											</div>
+											<Slider 
+												value={[audioSettings.trebleBoost]} 
+												max={100} 
+												onValueChange={(v) => updateAudioSettings({ trebleBoost: v[0] })}
+												className='w-full'
+											/>
+										</div>
+
+										{/* Loudness */}
+										<div className='mb-4'>
+											<div className='flex justify-between text-xs mb-1'>
+												<span className='text-zinc-400'>Loudness</span>
+												<span className='text-emerald-400'>{audioSettings.loudness}%</span>
+											</div>
+											<Slider 
+												value={[audioSettings.loudness]} 
+												max={100} 
+												onValueChange={(v) => updateAudioSettings({ loudness: v[0] })}
+												className='w-full'
+											/>
+										</div>
+
+										{/* Spatial Audio Toggle */}
+										<div className='flex items-center justify-between p-2 bg-zinc-700/50 rounded'>
+											<div>
+												<p className='text-sm font-medium'>Spatial Audio</p>
+												<p className='text-xs text-zinc-400'>3D surround effect</p>
+											</div>
+											<button
+												onClick={() => updateAudioSettings({ spatialAudio: !audioSettings.spatialAudio })}
+												className={`w-10 h-6 rounded-full relative transition-colors
+													${audioSettings.spatialAudio ? 'bg-emerald-500' : 'bg-zinc-600'}`}
+											>
+												<div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all
+													${audioSettings.spatialAudio ? 'right-1' : 'left-1'}`} />
+											</button>
+										</div>
+									</div>
+								</>
+							)}
+						</div>
+						
+						<Button 
+							size='icon' variant='ghost' 
+							className={`h-8 w-8 ${showVideo ? 'text-emerald-500' : 'text-zinc-400'}`} 
+							onClick={() => setShowVideo(!showVideo)}
+						>
+							{showVideo ? <Video className='h-4 w-4' /> : <VideoOff className='h-4 w-4' />}
+						</Button>
+						<Button size='icon' variant='ghost' className='h-8 w-8 text-zinc-400' onClick={handleMute}>
+							{getVolumeIcon()}
+						</Button>
+						<Slider value={[isMuted ? 0 : volume]} max={100} step={1} className='w-24' onValueChange={handleVolumeChange} />
+					</div>
+				</div>
+			</footer>
+		</>
 	);
 };

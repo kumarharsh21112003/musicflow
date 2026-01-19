@@ -7,6 +7,7 @@ import Topbar from "@/components/Topbar";
 import LyricsPanel from "@/components/LyricsPanel";
 import { useEffect, useState } from "react";
 import { usePlayerStore } from "@/stores/usePlayerStore";
+import { BottomNav } from "./components/BottomNav";
 
 const MainLayout = () => {
 	const [isMobile, setIsMobile] = useState(false);
@@ -27,39 +28,51 @@ const MainLayout = () => {
 
 	return (
 		<div className='h-screen bg-black text-white flex flex-col'>
-			{/* Topbar - Always visible */}
 			<Topbar />
 			
-			<ResizablePanelGroup direction='horizontal' className='flex-1 flex h-full overflow-hidden p-2'>
-				{/* Left sidebar */}
-				<ResizablePanel defaultSize={20} minSize={isMobile ? 0 : 10} maxSize={25}>
-					<LeftSidebar />
-				</ResizablePanel>
-
-				<ResizableHandle className='w-2 bg-black rounded-lg transition-colors' />
-
-				{/* Main content */}
-				<ResizablePanel defaultSize={showRightSidebar ? 55 : 80}>
-					<Outlet />
-				</ResizablePanel>
-
-				{showRightSidebar && (
-					<>
-						<ResizableHandle className='w-2 bg-black rounded-lg transition-colors' />
-						
-						{/* Right sidebar - Now Playing or Lyrics */}
-						<ResizablePanel defaultSize={25} minSize={20} maxSize={35}>
-							{showLyrics ? (
+			<div className="flex-1 overflow-hidden relative">
+				{isMobile ? (
+					// Mobile Layout - No Resizable Panels
+					<div className="h-full overflow-y-auto pb-32">
+						<Outlet />
+						{/* Mobile Lyrics Overlay */}
+						{showLyrics && (
+							<div className="fixed inset-0 z-50 bg-black">
 								<LyricsPanel onClose={() => setShowLyrics(false)} />
-							) : (
-								<RightSidebar onShowLyrics={() => setShowLyrics(true)} />
-							)}
+							</div>
+						)}
+					</div>
+				) : (
+					// Desktop Layout
+					<ResizablePanelGroup direction='horizontal' className='flex h-full p-2'>
+						<ResizablePanel defaultSize={20} minSize={10} maxSize={25}>
+							<LeftSidebar />
 						</ResizablePanel>
-					</>
+
+						<ResizableHandle className='w-2 bg-black rounded-lg transition-colors' />
+
+						<ResizablePanel defaultSize={showRightSidebar ? 55 : 80}>
+							<Outlet />
+						</ResizablePanel>
+
+						{showRightSidebar && (
+							<>
+								<ResizableHandle className='w-2 bg-black rounded-lg transition-colors' />
+								<ResizablePanel defaultSize={25} minSize={20} maxSize={35}>
+									{showLyrics ? (
+										<LyricsPanel onClose={() => setShowLyrics(false)} />
+									) : (
+										<RightSidebar onShowLyrics={() => setShowLyrics(true)} />
+									)}
+								</ResizablePanel>
+							</>
+						)}
+					</ResizablePanelGroup>
 				)}
-			</ResizablePanelGroup>
+			</div>
 
 			<PlaybackControls />
+			{isMobile && <BottomNav />}
 		</div>
 	);
 };

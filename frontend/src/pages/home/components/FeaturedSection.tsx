@@ -35,7 +35,7 @@ const FeaturedSection = () => {
 	};
 
 	return (
-		<div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-8'>
+		<div className='grid grid-cols-2 lg:grid-cols-3 gap-2 mb-8'>
 			{featuredSongs.map((song) => {
 				const isCurrentSong = currentSong?._id === song._id;
 				const showPause = isCurrentSong && isPlaying;

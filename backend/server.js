@@ -174,23 +174,10 @@ process.on('unhandledRejection', (err) => {
     console.error('💥 Unhandled:', err?.message || err);
 });
 
-const PORT = process.env.PORT || 3002;
+const PORT = parseInt(process.env.PORT) || 3002;
 
-const startServer = (port) => {
-    const server = app.listen(port, () => {
-        console.log(`\n🎵 MusicFlow Backend Ready!`);
-        console.log(`   URL: http://localhost:${port}`);
-        console.log(`   Cache: 30 min | Crash protection: ON\n`);
-    });
-    
-    server.on('error', (err) => {
-        if (err.code === 'EADDRINUSE') {
-            console.log(`⚠️  Port ${port} in use, trying ${port + 1}...`);
-            startServer(port + 1);
-        } else {
-            console.error('Server error:', err);
-        }
-    });
-};
-
-startServer(PORT);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`\n🎵 MusicFlow Backend Ready!`);
+    console.log(`   URL: http://localhost:${PORT}`);
+    console.log(`   Mode: ${process.env.NODE_ENV || 'development'}`);
+});
