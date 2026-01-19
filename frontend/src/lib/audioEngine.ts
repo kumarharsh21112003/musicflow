@@ -8,11 +8,18 @@ class AudioEngine {
     private gainNode: GainNode | null = null;
     private isInitialized = false;
     private wakeLock: any = null;
+    private wasPlayingBeforeHidden = false;
 
     init() {
         if (this.isInitialized) return;
         
         this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+        
+        // Handle visibility change for background play
+        document.addEventListener('visibilitychange', this.handleVisibilityChange.bind(this));
+        
+        // Handle page focus for audio context resume
+        window.addEventListener('focus', this.handleFocus.bind(this));
         this.audioElement = new Audio();
         this.audioElement.crossOrigin = 'anonymous';
         
@@ -248,7 +255,33 @@ class AudioEngine {
         }
     }
 
+    // Handle visibility change for background play on mobile
+    private handleVisibilityChange() {
+        if (document.hidden) {
+            // Page is hidden - store current playing state
+            this.wasPlayingBeforeHidden = this.isPlaying() || false;
+        } else {
+            // Page is visible again - resume audio context if needed
+            if (this.audioContext?.state === 'suspended') {
+                this.audioContext.resume();
+            }
+            // If was playing before, ensure playback continues
+            if (this.wasPlayingBeforeHidden && this.audioElement?.paused) {
+                this.audioElement.play().catch(() => {});
+            }
+        }
+    }
+
+    // Handle focus to resume audio context (important for iOS)
+    private handleFocus() {
+        if (this.audioContext?.state === 'suspended') {
+            this.audioContext.resume();
+        }
+    }
+
     destroy() {
+        document.removeEventListener('visibilitychange', this.handleVisibilityChange.bind(this));
+        window.removeEventListener('focus', this.handleFocus.bind(this));
         this.audioElement?.pause();
         this.releaseWakeLock();
         this.audioContext?.close();
