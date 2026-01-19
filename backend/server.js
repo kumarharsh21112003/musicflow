@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import ytsr from 'ytsr';
-import ytdl from 'ytdl-core';
+import ytdl from '@distube/ytdl-core';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -166,15 +166,7 @@ app.get('/api/stream/:videoId', async (req, res) => {
         const { videoId } = req.params;
         console.log(`🎵 Streaming: ${videoId}`);
         
-        // High quality audio only, filter out video to save bandwidth/CPU
-        // Using a shorter timeout and better agent headers could help
-        const info = await ytdl.getInfo(videoId, {
-            requestOptions: {
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                }
-            }
-        });
+        const info = await ytdl.getInfo(videoId);
         
         const format = ytdl.chooseFormat(info.formats, { 
             filter: 'audioonly', 
@@ -185,21 +177,22 @@ app.get('/api/stream/:videoId', async (req, res) => {
         
         // Set headers for audio streaming
         res.setHeader('Content-Type', 'audio/mpeg');
-        res.setHeader('Transfer-Encoding', 'chunked');
         res.setHeader('Accept-Ranges', 'bytes');
+        res.setHeader('Cache-Control', 'public, max-age=3600');
         
         const stream = ytdl(videoId, { 
             format: format,
-            filter: 'audioonly',
-            quality: 'highestaudio',
-            highWaterMark: 1 << 25 // 32MB buffer for smoother streaming
+            highWaterMark: 1 << 25,
+            liveBuffer: 10000,
+            dlChunkSize: 0 // Very important for stable streaming on some hosts
         });
 
         stream.pipe(res);
 
         stream.on('error', (err) => {
             console.error('❌ Stream pipe error:', err.message);
-            if (!res.headersSent) res.status(500).send('Stream error');
+            if (!res.headersSent) res.status(500).end();
+            stream.destroy();
         });
 
         req.on('close', () => {

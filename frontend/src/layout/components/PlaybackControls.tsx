@@ -37,7 +37,9 @@ export const PlaybackControls = () => {
 		setCurrentTime,
 		setDuration,
 		volume,
-		setVolume
+		setVolume,
+		isPlaybackLoading,
+		setIsPlaybackLoading
 	} = usePlayerStore();
 
 	const [isMuted, setIsMuted] = useState(false);
@@ -51,7 +53,6 @@ export const PlaybackControls = () => {
 	
 	const playerRef = useRef<any>(null);
 	const lastVideoId = useRef<string>("");
-	const [isPlaybackLoading, setIsPlaybackLoading] = useState(false);
 
 	// Initialize YouTube ONLY for video synchronization
 	useEffect(() => {
@@ -112,15 +113,24 @@ export const PlaybackControls = () => {
 				}
 				setIsPlaybackLoading(false);
 			} catch (error) {
-				console.error("Playback error:", error);
+				console.error("AudioEngine failed, falling back to YouTube:", error);
+				
+				// Fallback Strategy: Use YouTube IFrame audio if direct stream fails
+				if (isReady && playerRef.current) {
+					playerRef.current.unMute();
+					playerRef.current.setVolume(volume);
+					if (isPlaying) playerRef.current.playVideo();
+					toast.success("Using fallback player...");
+				} else {
+					toast.error("Failed to load song. Trying next...");
+					playNext();
+				}
 				setIsPlaybackLoading(false);
-				toast.error("Failed to load song. Trying next...");
-				playNext();
 			}
 		};
 
 		loadAndPlay();
-	}, [currentSong?.videoId, isReady]);
+	}, [currentSong?.videoId, isReady, setIsPlaybackLoading]);
 
 	// Update Store Time from Audio Engine
 	useEffect(() => {
@@ -415,9 +425,16 @@ export const PlaybackControls = () => {
 					<div className="flex items-center gap-4 mr-2">
 						<button 
 							onClick={(e) => { e.stopPropagation(); handlePlayPause(); }} 
-							className="text-white hover:scale-105 active:scale-90 transition-transform"
+							className="text-white hover:scale-105 active:scale-90 transition-transform disabled:opacity-50"
+							disabled={isPlaybackLoading}
 						>
-							{isPlaying ? <Pause size={28} fill="currentColor" /> : <Play size={28} fill="currentColor" />}
+							{isPlaybackLoading ? (
+								<div className="size-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+							) : isPlaying ? (
+								<Pause size={28} fill="currentColor" />
+							) : (
+								<Play size={28} fill="currentColor" />
+							)}
 						</button>
 					</div>
 				</div>

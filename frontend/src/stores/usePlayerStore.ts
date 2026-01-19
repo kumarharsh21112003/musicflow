@@ -29,6 +29,7 @@ interface PlayerStore {
 	currentTime: number;
 	duration: number;
 	volume: number;
+	isPlaybackLoading: boolean;
 
 	setCurrentSong: (song: Song | null) => void;
 	setIsPlaying: (playing: boolean) => void;
@@ -42,6 +43,7 @@ interface PlayerStore {
 	setCurrentTime: (time: number) => void;
 	setDuration: (duration: number) => void;
 	setVolume: (volume: number) => void;
+	setIsPlaybackLoading: (loading: boolean) => void;
 }
 
 export const usePlayerStore = create<PlayerStore>()(
@@ -54,6 +56,7 @@ export const usePlayerStore = create<PlayerStore>()(
 			currentTime: 0,
 			duration: 0,
 			volume: 80,
+			isPlaybackLoading: false,
 			audioSettings: {
 				bassBoost: 50,
 				trebleBoost: 50,
@@ -140,6 +143,7 @@ export const usePlayerStore = create<PlayerStore>()(
 			setCurrentTime: (time) => set({ currentTime: time }),
 			setDuration: (duration) => set({ duration: duration }),
 			setVolume: (volume) => set({ volume: volume }),
+			setIsPlaybackLoading: (loading) => set({ isPlaybackLoading: loading }),
 
 			// Get top played artists for recommendations
 			getTopArtists: () => {

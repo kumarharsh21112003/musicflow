@@ -17,7 +17,10 @@ const formatTime = (seconds: number) => {
 };
 
 export const MobilePlayer = ({ isOpen, onClose }: MobilePlayerProps) => {
-    const { currentSong, isPlaying, togglePlay, playNext, playPrevious, currentTime, duration, setCurrentTime } = usePlayerStore();
+    const { 
+        currentSong, isPlaying, togglePlay, playNext, playPrevious, 
+        currentTime, duration, setCurrentTime, isPlaybackLoading 
+    } = usePlayerStore();
 
     if (!isOpen || !currentSong) return null;
 
@@ -107,9 +110,12 @@ export const MobilePlayer = ({ isOpen, onClose }: MobilePlayerProps) => {
                     
                     <button 
                         onClick={togglePlay} 
-                        className="w-20 h-20 bg-white rounded-full flex items-center justify-center text-black hover:scale-105 active:scale-95 transition shadow-2xl"
+                        disabled={isPlaybackLoading}
+                        className="w-20 h-20 bg-white rounded-full flex items-center justify-center text-black hover:scale-105 active:scale-95 transition shadow-2xl disabled:opacity-70"
                     >
-                        {isPlaying ? (
+                        {isPlaybackLoading ? (
+                            <div className="size-8 border-[3px] border-zinc-200 border-t-emerald-500 rounded-full animate-spin" />
+                        ) : isPlaying ? (
                             <Pause size={36} fill="currentColor" />
                         ) : (
                             <Play size={36} fill="currentColor" className="ml-1" />
