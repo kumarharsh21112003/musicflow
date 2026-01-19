@@ -100,7 +100,7 @@ _Native mobile experience with full background control._
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/yourusername/musicflow.git
+git clone https://github.com/kumarharsh21112003/musicflow.git
 
 # 2. Install Dependencies (Root)
 npm install
@@ -125,12 +125,12 @@ A Dockerfile is being prepared for containerized deployment.
 
 ---
 
-## �‍💻 Author's Note
+## 👨‍💻 Author's Note
 
 _"I didn't want to build just another music player. I wanted to build a music **experience**. From the way the bass boosts to how the songs transition, every line of code was written with the audiophile in mind."_
 
 **Kumar Harsh**
-[GitHub](https://github.com/yourusername) • [LinkedIn](https://linkedin.com/in/yourusername)
+[GitHub](https://github.com/kumarharsh21112003) • [LinkedIn](https://www.linkedin.com/in/kumar-harsh-99b4982b1/)
 
 ---
 
