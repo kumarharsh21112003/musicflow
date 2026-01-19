@@ -16,32 +16,18 @@ const formatTime = (seconds: number) => {
 };
 
 export const MobilePlayer = ({ isOpen, onClose }: MobilePlayerProps) => {
-    const { currentSong, isPlaying, togglePlay, playNext, playPrevious } = usePlayerStore();
-    const [currentTime, setCurrentTime] = useState(0);
-    const [duration, setDuration] = useState(0);
-
-    // Sync with YouTube player periodically
-    useEffect(() => {
-        if (!isOpen) return;
-        const interval = setInterval(() => {
-            if (window.YT && window.YT.getPlayerState) {
-                // Accessing player instance indirectly via window usually needs a global ref or store
-                // For now, we rely on the main PlaybackControls to drive the audio, 
-                // but we need to poll time for this UI. 
-                // A better way is to move currentTime to the store. 
-                // For simplicity in this demo, we'll estimate or read from DOM if possible, 
-                // but ideally the store should emit updates.
-            }
-        }, 1000);
-        return () => clearInterval(interval);
-    }, [isOpen]);
-
-    // Note: In a real app, currentTime should be in the global store to sync perfectly.
-    // For this specific UI implementation request, I'll mock the slider movement 
-    // or rely on the user to understand it connects to the same backend state.
-    // To make it functional, I will assume PlaybackControls is running in background.
+    const { currentSong, isPlaying, togglePlay, playNext, playPrevious, currentTime, duration, setCurrentTime } = usePlayerStore();
 
     if (!isOpen || !currentSong) return null;
+
+    const handleSeek = (value: number[]) => {
+        const newTime = value[0];
+        setCurrentTime(newTime);
+        // Sync with YouTube player if needed
+        if (window.YT) {
+            // This is handled via the store/engine integration
+        }
+    };
 
     return (
         <div className="fixed inset-0 z-[60] bg-gradient-to-b from-blue-900/80 to-black flex flex-col text-white pb-6 animate-in slide-in-from-bottom duration-300">
@@ -76,10 +62,16 @@ export const MobilePlayer = ({ isOpen, onClose }: MobilePlayerProps) => {
 
             {/* Progress */}
             <div className="px-8 mb-8">
-                <Slider defaultValue={[33]} max={100} className="mb-2" />
+                <Slider 
+                    value={[currentTime]} 
+                    max={duration || 100} 
+                    step={1}
+                    onValueChange={handleSeek}
+                    className="mb-2" 
+                />
                 <div className="flex justify-between text-xs text-zinc-400">
-                    <span>0:45</span>
-                    <span>3:40</span>
+                    <span>{formatTime(currentTime)}</span>
+                    <span>{formatTime(duration)}</span>
                 </div>
             </div>
 

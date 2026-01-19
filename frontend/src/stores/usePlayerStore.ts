@@ -26,6 +26,9 @@ interface PlayerStore {
 	currentIndex: number;
 	audioSettings: AudioSettings;
 	listeningHistory: ListenedSong[];
+	currentTime: number;
+	duration: number;
+	volume: number;
 
 	setCurrentSong: (song: Song | null) => void;
 	setIsPlaying: (playing: boolean) => void;
@@ -36,6 +39,9 @@ interface PlayerStore {
 	updateAudioSettings: (settings: Partial<AudioSettings>) => void;
 	getTopArtists: () => string[];
 	toggleCrossfade: () => void;
+	setCurrentTime: (time: number) => void;
+	setDuration: (duration: number) => void;
+	setVolume: (volume: number) => void;
 }
 
 export const usePlayerStore = create<PlayerStore>()(
@@ -45,6 +51,9 @@ export const usePlayerStore = create<PlayerStore>()(
 			isPlaying: false,
 			queue: [],
 			currentIndex: -1,
+			currentTime: 0,
+			duration: 0,
+			volume: 80,
 			audioSettings: {
 				bassBoost: 50,
 				trebleBoost: 50,
@@ -59,7 +68,7 @@ export const usePlayerStore = create<PlayerStore>()(
 
 			setCurrentSong: (song) => {
 				if (!song) {
-					set({ currentSong: null, isPlaying: false });
+					set({ currentSong: null, isPlaying: false, currentTime: 0, duration: 0 });
 					return;
 				}
 
@@ -81,6 +90,7 @@ export const usePlayerStore = create<PlayerStore>()(
 					currentIndex: songIndex !== -1 ? songIndex : 0,
 					isPlaying: true,
 					listeningHistory: updatedHistory,
+					currentTime: 0,
 				});
 			},
 
@@ -127,6 +137,10 @@ export const usePlayerStore = create<PlayerStore>()(
 				}));
 			},
 
+			setCurrentTime: (time) => set({ currentTime: time }),
+			setDuration: (duration) => set({ duration: duration }),
+			setVolume: (volume) => set({ volume: volume }),
+
 			// Get top played artists for recommendations
 			getTopArtists: () => {
 				const { listeningHistory } = get();
@@ -158,6 +172,7 @@ export const usePlayerStore = create<PlayerStore>()(
 			partialize: (state) => ({ 
 				audioSettings: state.audioSettings,
 				listeningHistory: state.listeningHistory,
+                volume: state.volume,
 			}),
 		}
 	)

@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import ytsr from 'ytsr';
+import ytdl from 'ytdl-core';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -156,6 +157,30 @@ app.get('/api/trending', async (req, res) => {
         console.error('❌ Trending error:', error.message);
         // Return empty but don't crash
         res.json([]);
+    }
+});
+
+// Stream audio
+app.get('/api/stream/:videoId', async (req, res) => {
+    try {
+        const { videoId } = req.params;
+        console.log(`🎵 Streaming: ${videoId}`);
+        
+        const info = await ytdl.getInfo(videoId);
+        const format = ytdl.chooseFormat(info.formats, { 
+            filter: 'audioonly', 
+            quality: 'highestaudio' 
+        });
+        
+        res.setHeader('Content-Type', 'audio/mpeg');
+        ytdl(videoId, { 
+            format,
+            filter: 'audioonly',
+            quality: 'highestaudio'
+        }).pipe(res);
+    } catch (error) {
+        console.error('❌ Stream error:', error.message);
+        res.status(500).send('Streaming failed');
     }
 });
 

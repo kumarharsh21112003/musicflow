@@ -10,7 +10,7 @@ import { usePlayerStore } from "@/stores/usePlayerStore";
 import { BottomNav } from "./components/BottomNav";
 
 const MainLayout = () => {
-	const [isMobile, setIsMobile] = useState(false);
+	const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 	const [showLyrics, setShowLyrics] = useState(false);
 	const { currentSong } = usePlayerStore();
 

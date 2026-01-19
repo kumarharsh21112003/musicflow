@@ -31,15 +31,18 @@ export const PlaybackControls = () => {
 		queue,
 		setCurrentSong,
 		audioSettings,
-		updateAudioSettings
+		updateAudioSettings,
+		currentTime,
+		duration,
+		setCurrentTime,
+		setDuration,
+		volume,
+		setVolume
 	} = usePlayerStore();
 
-	const [volume, setVolume] = useState(80);
 	const [isMuted, setIsMuted] = useState(false);
 	const [showVideo, setShowVideo] = useState(false);
 	const [isFullscreen, setIsFullscreen] = useState(false);
-	const [currentTime, setCurrentTime] = useState(0);
-	const [duration, setDuration] = useState(0);
 	const [isReady, setIsReady] = useState(false);
 	const [videoPosition, setVideoPosition] = useState({ x: 0, y: 0 });
 	const [isDragging, setIsDragging] = useState(false);
@@ -333,6 +336,88 @@ export const PlaybackControls = () => {
 		<>
 			<MobilePlayer isOpen={showMobilePlayer} onClose={() => setShowMobilePlayer(false)} />
 
+			{/* Video Container - GLOBAL (Required for audio even on mobile) */}
+			<div 
+				style={{
+					position: 'fixed',
+					...(showVideo 
+						? (isFullscreen 
+							? { inset: 0, zIndex: 9999 }
+							: { 
+								bottom: 112 - videoPosition.y, 
+								right: 16 - videoPosition.x, 
+								width: 384, 
+								height: 216, 
+								zIndex: 9999, 
+								borderRadius: 12,
+								cursor: isDragging ? 'grabbing' : 'default'
+							})
+						: { top: -9999, left: -9999, width: 1, height: 1, opacity: 0 }
+					),
+					backgroundColor: 'black',
+					overflow: 'hidden',
+					boxShadow: showVideo && !isFullscreen ? '0 10px 40px rgba(0,0,0,0.5)' : 'none',
+					border: showVideo && !isFullscreen ? '1px solid #333' : 'none'
+				}}
+			>
+				{/* DRAG HANDLE - Top bar is draggable */}
+				<div 
+					style={{ 
+						display: showVideo ? 'flex' : 'none',
+						position: 'absolute', top: 0, left: 0, right: 0, zIndex: 20,
+						justifyContent: 'space-between', alignItems: 'center', padding: 12,
+						background: 'linear-gradient(to bottom, rgba(0,0,0,0.9), transparent)',
+						cursor: isFullscreen ? 'default' : 'grab'
+					}}
+					onMouseDown={handleDragStart}
+				>
+					<span style={{ fontSize: 14, color: 'white', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, marginRight: 8, pointerEvents: 'none' }}>
+						{currentSong?.title}
+					</span>
+					<div style={{ display: 'flex', gap: 8 }}>
+						<button 
+							onClick={() => setIsFullscreen(!isFullscreen)}
+							onMouseDown={(e) => e.stopPropagation()}
+							style={{ padding: 8, borderRadius: 9999, background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', cursor: 'pointer' }}
+						>
+							{isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+						</button>
+						<button 
+							onClick={() => { setShowVideo(false); setIsFullscreen(false); setVideoPosition({ x: 0, y: 0 }); }}
+							onMouseDown={(e) => e.stopPropagation()}
+							style={{ padding: 8, borderRadius: 9999, background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', cursor: 'pointer' }}
+						>
+							<X size={16} />
+						</button>
+					</div>
+				</div>
+				
+				<div id="yt-player-element" style={{ width: '100%', height: '100%' }} />
+				
+				{/* FULL OVERLAY - Blocks ALL clicks on video */}
+				<div 
+					style={{
+						position: 'absolute',
+						top: 0, left: 0, right: 0, bottom: 0,
+						zIndex: 14,
+						cursor: 'default'
+					}} 
+					onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+				/>
+				
+				{/* Simple subtle gradients */}
+				<div style={{
+					position: 'absolute', top: 0, left: 0, right: 0, height: 40,
+					background: 'linear-gradient(to bottom, rgba(0,0,0,0.4), transparent)',
+					zIndex: 15, pointerEvents: 'none'
+				}} />
+				<div style={{
+					position: 'absolute', bottom: 0, left: 0, right: 0, height: 40,
+					background: 'linear-gradient(to top, rgba(0,0,0,0.4), transparent)',
+					zIndex: 15, pointerEvents: 'none'
+				}} />
+			</div>
+
 			{/* MOBILE FLOATING PLAYER (Spotify Style) */}
 			<div 
 				className={`md:hidden fixed bottom-[70px] left-2 right-2 bg-[#262626] rounded-md p-2 flex flex-col z-[45] shadow-xl border-b border-zinc-800 transition-transform duration-300 ${!currentSong ? 'translate-y-[200%]' : 'translate-y-0'}`}
@@ -340,29 +425,22 @@ export const PlaybackControls = () => {
 			>
 				<div className="flex items-center gap-3">
 					<img 
-						src={currentSong?.imageUrl || '/placeholder.png'} 
+						src={currentSong?.imageUrl || `https://i.ytimg.com/vi/${currentSong?.videoId}/mqdefault.jpg`} 
 						alt="Album Art" 
 						className="w-10 h-10 rounded bg-zinc-800 object-cover flex-shrink-0" 
+						onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.png' }}
 					/>
 					<div className="flex-1 min-w-0 flex flex-col justify-center mr-2">
 						<div className="font-semibold text-xs text-white truncate leading-tight mb-0.5">
 							{currentSong?.title || "Choose a song"}
 						</div>
 						<div className="text-[10px] text-zinc-400 truncate leading-tight">
-							{currentSong?.artist} • <span className={audioSettings.mixMode !== 'off' ? "text-emerald-400" : ""}>
-								{audioSettings.mixMode !== 'off' ? `Mix: ${audioSettings.mixMode}` : "MusicFlow"}
-							</span>
+							{currentSong?.artist} • MusicFlow
 						</div>
 					</div>
 					
 					{/* Mobile Controls */}
 					<div className="flex items-center gap-3 mr-1">
-						<button 
-							onClick={(e) => { e.stopPropagation(); updateAudioSettings({ mixMode: 'off' }); }}
-							className={`text-zinc-400 ${audioSettings.mixMode !== 'off' ? 'text-emerald-500' : ''}`}
-						>
-							<Sparkles size={18} />
-						</button>
 						<button 
 							onClick={(e) => { e.stopPropagation(); handlePlayPause(); }} 
 							className="text-white focus:outline-none"
@@ -382,87 +460,6 @@ export const PlaybackControls = () => {
 
 			{/* DESKTOP FOOTER PLAYER */}
 			<footer className='hidden md:flex h-24 bg-zinc-900 border-t border-zinc-800 px-4 flex-col justify-center relative z-50'>
-				{/* Video Container - DRAGGABLE */}
-				<div 
-					style={{
-						position: 'fixed',
-						...(showVideo 
-							? (isFullscreen 
-								? { inset: 0, zIndex: 9999 }
-								: { 
-									bottom: 112 - videoPosition.y, 
-									right: 16 - videoPosition.x, 
-									width: 384, 
-									height: 216, 
-									zIndex: 9999, 
-									borderRadius: 12,
-									cursor: isDragging ? 'grabbing' : 'default'
-								})
-							: { top: -9999, left: -9999, width: 1, height: 1, opacity: 0 }
-						),
-						backgroundColor: 'black',
-						overflow: 'hidden',
-						boxShadow: showVideo && !isFullscreen ? '0 10px 40px rgba(0,0,0,0.5)' : 'none',
-						border: showVideo && !isFullscreen ? '1px solid #333' : 'none'
-					}}
-				>
-					{/* DRAG HANDLE - Top bar is draggable */}
-					<div 
-						style={{ 
-							display: showVideo ? 'flex' : 'none',
-							position: 'absolute', top: 0, left: 0, right: 0, zIndex: 20,
-							justifyContent: 'space-between', alignItems: 'center', padding: 12,
-							background: 'linear-gradient(to bottom, rgba(0,0,0,0.9), transparent)',
-							cursor: isFullscreen ? 'default' : 'grab'
-						}}
-						onMouseDown={handleDragStart}
-					>
-						<span style={{ fontSize: 14, color: 'white', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, marginRight: 8, pointerEvents: 'none' }}>
-							{currentSong?.title}
-						</span>
-						<div style={{ display: 'flex', gap: 8 }}>
-							<button 
-								onClick={() => setIsFullscreen(!isFullscreen)}
-								onMouseDown={(e) => e.stopPropagation()}
-								style={{ padding: 8, borderRadius: 9999, background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', cursor: 'pointer' }}
-							>
-								{isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
-							</button>
-							<button 
-								onClick={() => { setShowVideo(false); setIsFullscreen(false); setVideoPosition({ x: 0, y: 0 }); }}
-								onMouseDown={(e) => e.stopPropagation()}
-								style={{ padding: 8, borderRadius: 9999, background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', cursor: 'pointer' }}
-							>
-								<X size={16} />
-							</button>
-						</div>
-					</div>
-					
-					<div id="yt-player-element" style={{ width: '100%', height: '100%' }} />
-					
-					{/* FULL OVERLAY - Blocks ALL clicks on video */}
-					<div 
-						style={{
-							position: 'absolute',
-							top: 0, left: 0, right: 0, bottom: 0,
-							zIndex: 14,
-							cursor: 'default'
-						}} 
-						onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
-					/>
-					
-					{/* Simple subtle gradients */}
-					<div style={{
-						position: 'absolute', top: 0, left: 0, right: 0, height: 40,
-						background: 'linear-gradient(to bottom, rgba(0,0,0,0.4), transparent)',
-						zIndex: 15, pointerEvents: 'none'
-					}} />
-					<div style={{
-						position: 'absolute', bottom: 0, left: 0, right: 0, height: 40,
-						background: 'linear-gradient(to top, rgba(0,0,0,0.4), transparent)',
-						zIndex: 15, pointerEvents: 'none'
-					}} />
-				</div>
 				
 				<div className='flex justify-between items-center h-full max-w-[1800px] mx-auto w-full'>
 					{/* Song info */}
