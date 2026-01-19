@@ -2,15 +2,15 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
-// Firebase config
+// Firebase config - using environment variables for security
 const firebaseConfig = {
-  apiKey: "AIzaSyAdwgEpZXcmoMizEPAbHntAdKb7LYDNCCM",
-  authDomain: "musicflow-86abf.firebaseapp.com",
-  projectId: "musicflow-86abf",
-  storageBucket: "musicflow-86abf.firebasestorage.app",
-  messagingSenderId: "961126954575",
-  appId: "1:961126954575:web:e55ec6e3cc98a96ebc5c3a",
-  measurementId: "G-Q5YRJJQXJF"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase

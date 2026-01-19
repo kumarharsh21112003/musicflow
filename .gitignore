@@ -13,6 +13,7 @@ build/
 .env.local
 .env.*.local
 !.env.sample
+!.env.example
 !.env.production
 
 # IDE
