@@ -107,10 +107,10 @@ export const PlaybackControls = () => {
 				} as any);
 				setDuration(audioEngine.getDuration());
 				
-				if (isPlaying) {
-					audioEngine.play();
-					if (isReady) playerRef.current?.playVideo();
-				}
+				// Always auto-play when new song is loaded (setCurrentSong sets isPlaying: true)
+				audioEngine.play();
+				if (isReady) playerRef.current?.playVideo();
+				
 				setIsPlaybackLoading(false);
 			} catch (error) {
 				console.error("AudioEngine failed, falling back to YouTube:", error);
@@ -119,7 +119,7 @@ export const PlaybackControls = () => {
 				if (isReady && playerRef.current) {
 					playerRef.current.unMute();
 					playerRef.current.setVolume(volume);
-					if (isPlaying) playerRef.current.playVideo();
+					playerRef.current.playVideo();
 				} else {
 					playNext();
 				}
