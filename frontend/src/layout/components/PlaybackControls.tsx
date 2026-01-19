@@ -5,6 +5,7 @@ import { Pause, Play, SkipBack, SkipForward, Volume1, Volume2, VolumeX, Video, V
 import { useState, useEffect, useRef, useCallback } from "react";
 import toast from "react-hot-toast";
 import { audioEngine } from "@/lib/audioEngine";
+import { MobilePlayer } from "./MobilePlayer";
 
 declare global {
 	interface Window {
@@ -326,12 +327,16 @@ export const PlaybackControls = () => {
 		document.addEventListener('mouseup', handleMouseUp);
 	};
 
+	const [showMobilePlayer, setShowMobilePlayer] = useState(false);
+
 	return (
 		<>
+			<MobilePlayer isOpen={showMobilePlayer} onClose={() => setShowMobilePlayer(false)} />
+
 			{/* MOBILE FLOATING PLAYER (Spotify Style) */}
 			<div 
 				className={`md:hidden fixed bottom-[70px] left-2 right-2 bg-[#262626] rounded-md p-2 flex flex-col z-[45] shadow-xl border-b border-zinc-800 transition-transform duration-300 ${!currentSong ? 'translate-y-[200%]' : 'translate-y-0'}`}
-				onClick={() => setShowVideo(true)}
+				onClick={() => setShowMobilePlayer(true)}
 			>
 				<div className="flex items-center gap-3">
 					<img 
