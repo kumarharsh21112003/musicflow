@@ -4,11 +4,148 @@ import ytsr from 'ytsr';
 import ytdl from '@distube/ytdl-core';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+const httpServer = createServer(app);
+
+// Socket.io for Room Mode
+const io = new Server(httpServer, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"],
+        credentials: false,
+    },
+    allowEIO3: true,
+    transports: ['polling', 'websocket'],
+    pingTimeout: 60000,
+    pingInterval: 25000,
+});
+
+console.log("🔌 Socket.io server initialized");
+
+// Room Mode state
+const rooms = new Map();
+const userRooms = new Map();
+
+const generateRoomCode = () => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code = '';
+    for (let i = 0; i < 6; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return code;
+};
+
+io.on("connection", (socket) => {
+    console.log("👤 User connected:", socket.id);
+
+    socket.on("create_room", ({ userId, username }) => {
+        const roomCode = generateRoomCode();
+        const room = {
+            host: userId,
+            hostName: username || 'DJ',
+            members: [{ id: userId, name: username || 'DJ', isHost: true }],
+            currentSong: null,
+            isPlaying: false,
+            currentTime: 0,
+            createdAt: Date.now()
+        };
+        
+        rooms.set(roomCode, room);
+        userRooms.set(userId, roomCode);
+        socket.join(roomCode);
+        
+        console.log(`🎉 Room created: ${roomCode} by ${username}`);
+        socket.emit("room_created", { roomCode, room });
+    });
+
+    socket.on("join_room", ({ userId, username, roomCode }) => {
+        const room = rooms.get(roomCode);
+        
+        if (!room) {
+            socket.emit("room_error", { message: "Room not found! Check the code." });
+            return;
+        }
+        
+        if (!room.members.find(m => m.id === userId)) {
+            room.members.push({ id: userId, name: username || 'Guest', isHost: false });
+        }
+        
+        userRooms.set(userId, roomCode);
+        socket.join(roomCode);
+        
+        io.to(roomCode).emit("member_joined", { 
+            userId, username, members: room.members,
+            currentSong: room.currentSong, isPlaying: room.isPlaying, currentTime: room.currentTime
+        });
+        
+        console.log(`👋 ${username} joined room: ${roomCode}`);
+        socket.emit("room_joined", { roomCode, room });
+    });
+
+    socket.on("leave_room", ({ userId }) => {
+        const roomCode = userRooms.get(userId);
+        if (!roomCode) return;
+        
+        const room = rooms.get(roomCode);
+        if (!room) return;
+        
+        room.members = room.members.filter(m => m.id !== userId);
+        userRooms.delete(userId);
+        socket.leave(roomCode);
+        
+        if (room.host === userId) {
+            if (room.members.length > 0) {
+                room.host = room.members[0].id;
+                room.members[0].isHost = true;
+                io.to(roomCode).emit("host_changed", { newHost: room.members[0] });
+            } else {
+                rooms.delete(roomCode);
+                console.log(`🗑️ Room ${roomCode} deleted`);
+                return;
+            }
+        }
+        
+        io.to(roomCode).emit("member_left", { userId, members: room.members });
+    });
+
+    socket.on("room_play_song", ({ roomCode, song, userId }) => {
+        const room = rooms.get(roomCode);
+        if (!room || room.host !== userId) return;
+        
+        room.currentSong = song;
+        room.isPlaying = true;
+        room.currentTime = 0;
+        
+        io.to(roomCode).emit("room_song_changed", { song, isPlaying: true, currentTime: 0 });
+        console.log(`🎵 Room ${roomCode}: Playing "${song.title}"`);
+    });
+
+    socket.on("room_sync_playback", ({ roomCode, isPlaying, currentTime, userId }) => {
+        const room = rooms.get(roomCode);
+        if (!room || room.host !== userId) return;
+        
+        room.isPlaying = isPlaying;
+        room.currentTime = currentTime;
+        socket.to(roomCode).emit("room_playback_sync", { isPlaying, currentTime });
+    });
+
+    socket.on("room_chat", ({ roomCode, userId, username, message }) => {
+        io.to(roomCode).emit("room_chat_message", {
+            userId, username, message, timestamp: Date.now()
+        });
+    });
+
+    socket.on("disconnect", () => {
+        console.log("👤 User disconnected:", socket.id);
+    });
+});
+
 app.use(cors());
 app.use(express.json());
 
@@ -38,7 +175,7 @@ const parseDuration = (duration) => {
 
 // Health check - fast response
 app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', uptime: process.uptime(), cache: cache.size });
+    res.json({ status: 'ok', uptime: process.uptime(), cache: cache.size, rooms: rooms.size });
 });
 
 // Search songs
@@ -155,7 +292,6 @@ app.get('/api/trending', async (req, res) => {
         res.json(songs);
     } catch (error) {
         console.error('❌ Trending error:', error.message);
-        // Return empty but don't crash
         res.json([]);
     }
 });
@@ -235,8 +371,9 @@ process.on('unhandledRejection', (err) => {
 
 const PORT = parseInt(process.env.PORT) || 3002;
 
-app.listen(PORT, '0.0.0.0', () => {
+httpServer.listen(PORT, '0.0.0.0', () => {
     console.log(`\n🎵 MusicFlow Backend Ready!`);
     console.log(`   URL: http://localhost:${PORT}`);
     console.log(`   Mode: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`   Socket.io: enabled ✅`);
 });
