@@ -7,6 +7,7 @@ interface AudioSettings {
 	trebleBoost: number;
 	loudness: number;
 	spatialAudio: boolean;
+	audioOnlyMode: boolean; // NEW: Use our audio engine instead of YouTube for EQ to work
 	qualityMode: 'auto' | 'high' | 'ultra';
 	crossfadeEnabled: boolean;
 	crossfadeDuration: number; // seconds (5-12)
@@ -68,6 +69,7 @@ export const usePlayerStore = create<PlayerStore>()(
 				trebleBoost: 50,
 				loudness: 70,
 				spatialAudio: false,
+				audioOnlyMode: false, // Default off - use YouTube
 				qualityMode: 'high',
 				crossfadeEnabled: false,
 				crossfadeDuration: 8,

@@ -115,7 +115,9 @@ export const PlaybackControls = () => {
 		audioEngine.setTrebleBoost(audioSettings.trebleBoost);
 		audioEngine.setLoudness(audioSettings.loudness);
 		audioEngine.setSpatialAudio(audioSettings.spatialAudio);
-		console.log('🎛️ Audio Settings Updated:', { 
+		
+		// Show feedback that settings are applied
+		console.log('🎛️ Audio Settings Applied:', { 
 			bass: audioSettings.bassBoost, 
 			treble: audioSettings.trebleBoost, 
 			loudness: audioSettings.loudness,
@@ -781,6 +783,23 @@ export const PlaybackControls = () => {
 											${audioSettings.spatialAudio ? 'right-1' : 'left-1'}`} />
 									</button>
 								</div>
+
+							{/* Audio-Only Mode Toggle - EQ Works! */}
+							<div className='flex items-center justify-between p-2 bg-gradient-to-r from-purple-500/10 to-cyan-500/10 rounded border border-purple-500/20 mt-2'>
+								<div>
+									<p className='text-sm font-medium text-purple-300'>🎧 Audio-Only</p>
+									<p className='text-xs text-zinc-400'>EQ works in this mode</p>
+								</div>
+								<button
+									onClick={() => {
+										updateAudioSettings({ audioOnlyMode: !audioSettings.audioOnlyMode });
+										toast.success(audioSettings.audioOnlyMode ? 'Video Mode' : 'Audio Mode - EQ On! 🎛️', { duration: 2000 });
+									}}
+									className={`w-10 h-6 rounded-full relative transition-colors ${audioSettings.audioOnlyMode ? 'bg-purple-500' : 'bg-zinc-600'}`}
+								>
+									<div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${audioSettings.audioOnlyMode ? 'right-1' : 'left-1'}`} />
+								</button>
+							</div>
 
 								{/* Sleep Timer */}
 								<div className='mt-3 pt-3 border-t border-zinc-700'>
