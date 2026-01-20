@@ -42,12 +42,63 @@ interface RoomStore {
   sendMessage: (userId: string, username: string, message: string) => void;
 }
 
-// Try multiple backend URLs
-const getBackendUrl = () => {
-  if (import.meta.env.VITE_BACKEND_URL) {
-    return import.meta.env.VITE_BACKEND_URL;
-  }
-  return "http://localhost:3003";
+// Try multiple backend URLs - Production first!
+const BACKEND_URLS = [
+  "https://musicflow-s9jn.onrender.com", // Production - try first
+  import.meta.env.VITE_BACKEND_URL,
+  "http://localhost:3003",
+].filter(Boolean);
+
+// Helper to setup socket listeners
+const setupSocketListeners = (socket: Socket, set: any, get: any) => {
+  socket.on("disconnect", () => {
+    console.log("🔌 Room socket disconnected");
+    set({ isConnected: false });
+  });
+
+  socket.on("room_created", ({ roomCode, room }: any) => {
+    console.log("🎉 Room created:", roomCode);
+    set({ roomCode, isHost: true, members: room.members });
+    toast.success(`Room created! Code: ${roomCode}`, { icon: '🎉', duration: 3000 });
+  });
+
+  socket.on("room_joined", ({ roomCode, room }: any) => {
+    console.log("👋 Joined room:", roomCode);
+    set({ 
+      roomCode, isHost: false, members: room.members,
+      currentSong: room.currentSong, isPlaying: room.isPlaying
+    });
+    toast.success(`Joined room: ${roomCode}`, { icon: '👋' });
+  });
+
+  socket.on("room_error", ({ message }: any) => {
+    console.error("Room error:", message);
+    toast.error(message, { icon: '❌' });
+  });
+
+  socket.on("member_joined", ({ username, members, currentSong, isPlaying }: any) => {
+    set({ members, currentSong, isPlaying });
+    toast.success(`${username} joined!`, { icon: '👋' });
+  });
+
+  socket.on("member_left", ({ members }: any) => set({ members }));
+
+  socket.on("host_changed", ({ newHost }: any) => {
+    const isNewHost = newHost.id === socket.id;
+    set({ isHost: isNewHost });
+    if (isNewHost) toast.success("You are now the DJ!", { icon: '🎧' });
+  });
+
+  socket.on("room_song_changed", ({ song, isPlaying }: any) => {
+    set({ currentSong: song, isPlaying });
+    toast.success(`Now playing: ${song.title}`, { icon: '🎵', duration: 2000 });
+  });
+
+  socket.on("room_playback_sync", ({ isPlaying }: any) => set({ isPlaying }));
+
+  socket.on("room_chat_message", (message: RoomMessage) => {
+    set((state: any) => ({ messages: [...state.messages.slice(-99), message] }));
+  });
 };
 
 export const useRoomStore = create<RoomStore>((set, get) => ({
@@ -64,94 +115,53 @@ export const useRoomStore = create<RoomStore>((set, get) => ({
     const { socket } = get();
     if (socket?.connected) return;
 
-    const backendUrl = getBackendUrl();
-    console.log("🔌 Connecting to Room socket:", backendUrl);
-
-    const newSocket = io(backendUrl, {
-      withCredentials: true,
-      transports: ['websocket', 'polling'],
-      reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
-    });
-
-    newSocket.on("connect", () => {
-      console.log("✅ Room socket connected!");
-      set({ isConnected: true });
-    });
-
-    newSocket.on("connect_error", (err) => {
-      console.error("❌ Socket connection error:", err.message);
-      set({ isConnected: false });
-    });
-
-    newSocket.on("disconnect", () => {
-      console.log("🔌 Room socket disconnected");
-      set({ isConnected: false });
-    });
-
-    // Room events
-    newSocket.on("room_created", ({ roomCode, room }) => {
-      console.log("🎉 Room created:", roomCode);
-      set({ 
-        roomCode, 
-        isHost: true, 
-        members: room.members 
-      });
-      toast.success(`Room created! Code: ${roomCode}`, { icon: '🎉', duration: 3000 });
-    });
-
-    newSocket.on("room_joined", ({ roomCode, room }) => {
-      console.log("👋 Joined room:", roomCode);
-      set({ 
-        roomCode, 
-        isHost: false, 
-        members: room.members,
-        currentSong: room.currentSong,
-        isPlaying: room.isPlaying
-      });
-      toast.success(`Joined room: ${roomCode}`, { icon: '👋' });
-    });
-
-    newSocket.on("room_error", ({ message }) => {
-      console.error("Room error:", message);
-      toast.error(message, { icon: '❌' });
-    });
-
-    newSocket.on("member_joined", ({ username, members, currentSong, isPlaying }) => {
-      set({ members, currentSong, isPlaying });
-      toast.success(`${username} joined!`, { icon: '👋' });
-    });
-
-    newSocket.on("member_left", ({ members }) => {
-      set({ members });
-    });
-
-    newSocket.on("host_changed", ({ newHost }) => {
-      const userId = newSocket.id;
-      const isNewHost = newHost.id === userId;
-      set({ isHost: isNewHost });
-      if (isNewHost) {
-        toast.success("You are now the DJ!", { icon: '🎧' });
+    // Try to connect to multiple URLs
+    const tryConnect = (urlIndex: number) => {
+      if (urlIndex >= BACKEND_URLS.length) {
+        console.error("❌ All backend URLs failed");
+        toast.error("Backend server not running. Start it with: cd backend && npm run dev", { 
+          duration: 5000,
+          icon: '⚠️'
+        });
+        return;
       }
-    });
 
-    newSocket.on("room_song_changed", ({ song, isPlaying }) => {
-      set({ currentSong: song, isPlaying });
-      toast.success(`Now playing: ${song.title}`, { icon: '🎵', duration: 2000 });
-    });
+      const backendUrl = BACKEND_URLS[urlIndex];
+      console.log(`🔌 Trying to connect to: ${backendUrl}`);
 
-    newSocket.on("room_playback_sync", ({ isPlaying }) => {
-      set({ isPlaying });
-    });
+      const newSocket = io(backendUrl as string, {
+        withCredentials: false, // Changed to false for local dev
+        transports: ['websocket', 'polling'],
+        reconnection: true,
+        reconnectionAttempts: 2,
+        reconnectionDelay: 500,
+        timeout: 3000,
+      });
 
-    newSocket.on("room_chat_message", (message: RoomMessage) => {
-      set(state => ({ 
-        messages: [...state.messages.slice(-99), message]
-      }));
-    });
+      const connectTimeout = setTimeout(() => {
+        if (!newSocket.connected) {
+          newSocket.disconnect();
+          tryConnect(urlIndex + 1);
+        }
+      }, 3000);
 
-    set({ socket: newSocket });
+      newSocket.on("connect", () => {
+        clearTimeout(connectTimeout);
+        console.log("✅ Room socket connected to:", backendUrl);
+        set({ isConnected: true, socket: newSocket });
+        toast.success("Connected to server!", { icon: '✅', duration: 2000 });
+        setupSocketListeners(newSocket, set, get);
+      });
+
+      newSocket.on("connect_error", (err) => {
+        clearTimeout(connectTimeout);
+        console.error(`❌ Connection failed for ${backendUrl}:`, err.message);
+        newSocket.disconnect();
+        tryConnect(urlIndex + 1);
+      });
+    };
+
+    tryConnect(0);
   },
 
   disconnect: () => {
