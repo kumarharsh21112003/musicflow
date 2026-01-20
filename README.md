@@ -5,7 +5,7 @@
 ### _Where Engineering Meets Audiophile Experience_
 
 <img src="https://img.shields.io/badge/Status-Production_Ready-00C853?style=for-the-badge&logo=checkmarx&logoColor=white" alt="Status"/>
-<img src="https://img.shields.io/badge/Version-1.0.0-667eea?style=for-the-badge&logo=git&logoColor=white" alt="Version"/>
+<img src="https://img.shields.io/badge/Version-1.5.0-667eea?style=for-the-badge&logo=git&logoColor=white" alt="Version"/>
 <img src="https://img.shields.io/badge/License-ISC-764ba2?style=for-the-badge&logo=open-source-initiative&logoColor=white" alt="License"/>
 
 <br/>
@@ -13,6 +13,7 @@
 ![React](https://img.shields.io/badge/React_18-61DAFB?style=flat-square&logo=react&logoColor=black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=node.js&logoColor=white)
+![Socket.io](https://img.shields.io/badge/Socket.io-010101?style=flat-square&logo=socket.io&logoColor=white)
 ![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=flat-square&logo=firebase&logoColor=black)
 ![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=vite&logoColor=white)
 ![PWA](https://img.shields.io/badge/PWA-5A0FC8?style=flat-square&logo=pwa&logoColor=white)
@@ -21,7 +22,7 @@
 
 **A production-grade music streaming platform that goes beyond being a "clone" — featuring a custom Web Audio Engine, intelligent caching, DJ-style transitions, and native mobile integration.**
 
-[🚀 Live Demo](#) · [📖 Documentation](#-table-of-contents) · [🐛 Report Bug](https://github.com/kumarharsh21112003/musicflow/issues) · [✨ Request Feature](https://github.com/kumarharsh21112003/musicflow/issues)
+[🚀 Live Demo](https://musicflow-six.vercel.app/) · [📖 Documentation](#-table-of-contents) · [🐛 Report Bug](https://github.com/kumarharsh21112003/musicflow/issues) · [✨ Request Feature](https://github.com/kumarharsh21112003/musicflow/issues)
 
 ---
 
@@ -319,9 +320,9 @@ Reactive UI elements that respond to music state.
 </td>
 <td align="center">
 
-### 👥 Social Sync
+### 🎉 Room Mode
 
-Real-time user activity via Firebase integration.
+**NEW!** Listen together with friends in real-time. Create rooms, share codes, sync playback!
 
 </td>
 </tr>
@@ -342,9 +343,9 @@ Clerk authentication with OAuth support.
 </td>
 <td align="center">
 
-### 💬 Live Chat
+### 🤖 AI Recommendations
 
-Real-time messaging between users.
+**NEW!** Smart song suggestions based on your listening history and time of day.
 
 </td>
 </tr>
@@ -560,20 +561,24 @@ VITE_CLERK_PUBLISHABLE_KEY=your-clerk-key
 <td>✅ Complete</td>
 </tr>
 <tr>
-<td rowspan="3"><b>🚀 V1.5</b><br/><small>Next</small></td>
-<td>AI-Powered Recommendations (TensorFlow.js)</td>
-<td>🔄 In Progress</td>
+<td rowspan="3"><b>🚀 V1.5</b><br/><small>Current</small></td>
+<td>AI-Powered Recommendations</td>
+<td>✅ Complete</td>
 </tr>
 <tr>
-<td>Room Mode (Socket.io Group Sessions)</td>
+<td>Room Mode (Socket.io Group Listening)</td>
+<td>✅ Complete</td>
+</tr>
+<tr>
+<td>Any Member Can DJ (Song Control)</td>
+<td>✅ Complete</td>
+</tr>
+<tr>
+<td rowspan="3"><b>🌟 V2.0</b><br/><small>Future</small></td>
+<td>Canvas Frequency Visualizer</td>
 <td>📋 Planned</td>
 </tr>
 <tr>
-<td>Canvas-based Frequency Visualizer</td>
-<td>📋 Planned</td>
-</tr>
-<tr>
-<td rowspan="2"><b>🌟 V2.0</b><br/><small>Future</small></td>
 <td>Docker Containerization</td>
 <td>📋 Planned</td>
 </tr>
