@@ -281,8 +281,16 @@ const RoomMode = ({ isOpen, onClose }: RoomModeProps) => {
         {/* Connection Status */}
         <div className="px-4 pb-4">
           <div className="flex items-center gap-2 text-xs text-zinc-500">
-            <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-500' : 'bg-red-500'}`} />
+            <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-500' : 'bg-red-500 animate-pulse'}`} />
             {isConnected ? 'Connected' : 'Connecting...'}
+            {!isConnected && (
+              <button 
+                onClick={() => connect()} 
+                className="ml-2 text-emerald-400 hover:text-emerald-300 underline"
+              >
+                Retry
+              </button>
+            )}
             {isHost && <span className="ml-auto text-amber-400">👑 You are the DJ</span>}
           </div>
         </div>
