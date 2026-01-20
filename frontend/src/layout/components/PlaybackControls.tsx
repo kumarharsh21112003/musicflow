@@ -419,11 +419,11 @@ export const PlaybackControls = () => {
 			<MobilePlayer isOpen={showMobilePlayer} onClose={() => setShowMobilePlayer(false)} />
 			<RoomMode isOpen={showRoomMode} onClose={() => setShowRoomMode(false)} />
 
-			{/* Video Container - GLOBAL (Required for audio even on mobile) */}
+			{/* Video Container - GLOBAL (Hidden when audioOnlyMode is ON for EQ to work) */}
 			<div 
 				style={{
 					position: 'fixed',
-					...(showVideo 
+					...((showVideo && !audioSettings.audioOnlyMode) 
 						? (isFullscreen 
 							? { inset: 0, zIndex: 9999 }
 							: { 
@@ -568,7 +568,13 @@ export const PlaybackControls = () => {
 									src={`https://i.ytimg.com/vi/${currentSong.videoId}/mqdefault.jpg`}
 									alt={currentSong.title}
 									className='w-14 h-14 object-cover rounded cursor-pointer hover:opacity-80 transition'
-									onClick={() => setShowVideo(!showVideo)}
+									onClick={() => {
+										if (audioSettings.audioOnlyMode) {
+											toast.error('Turn off Audio-Only mode to watch video', { icon: '🎧', duration: 2000 });
+										} else {
+											setShowVideo(!showVideo);
+										}
+									}}
 								/>
 								<div className='flex-1 min-w-0'>
 									<div className='font-medium truncate text-sm'>{currentSong.title}</div>
