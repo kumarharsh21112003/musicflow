@@ -115,13 +115,29 @@ export const useRoomStore = create<RoomStore>((set, get) => ({
     const { socket } = get();
     if (socket?.connected) return;
 
-    // Try to connect to multiple URLs
-    const tryConnect = (urlIndex: number) => {
+    // Wake up Render server first (free tier sleeps)
+    const wakeUpServer = async () => {
+      toast.loading("Connecting to server...", { id: 'connecting' });
+      
+      try {
+        // Ping the server to wake it up
+        await fetch("https://musicflow-s9jn.onrender.com/api/trending", {
+          method: 'GET',
+          signal: AbortSignal.timeout(10000)
+        });
+      } catch (e) {
+        console.log("Wake-up ping sent (may timeout, that's ok)");
+      }
+    };
+
+    // Try to connect to socket
+    const tryConnect = async (urlIndex: number) => {
       if (urlIndex >= BACKEND_URLS.length) {
         console.error("❌ All backend URLs failed");
-        toast.error("Backend server not running. Start it with: cd backend && npm run dev", { 
+        toast.error("Server is waking up... Try again in 30 seconds!", { 
+          id: 'connecting',
           duration: 5000,
-          icon: '⚠️'
+          icon: '⏳'
         });
         return;
       }
@@ -130,12 +146,12 @@ export const useRoomStore = create<RoomStore>((set, get) => ({
       console.log(`🔌 Trying to connect to: ${backendUrl}`);
 
       const newSocket = io(backendUrl as string, {
-        withCredentials: false, // Changed to false for local dev
+        withCredentials: false,
         transports: ['websocket', 'polling'],
         reconnection: true,
-        reconnectionAttempts: 2,
-        reconnectionDelay: 500,
-        timeout: 3000,
+        reconnectionAttempts: 3,
+        reconnectionDelay: 1000,
+        timeout: 10000, // 10 second timeout for Render wake-up
       });
 
       const connectTimeout = setTimeout(() => {
@@ -143,13 +159,13 @@ export const useRoomStore = create<RoomStore>((set, get) => ({
           newSocket.disconnect();
           tryConnect(urlIndex + 1);
         }
-      }, 3000);
+      }, 10000); // 10 seconds for Render to wake up
 
       newSocket.on("connect", () => {
         clearTimeout(connectTimeout);
         console.log("✅ Room socket connected to:", backendUrl);
         set({ isConnected: true, socket: newSocket });
-        toast.success("Connected to server!", { icon: '✅', duration: 2000 });
+        toast.success("Connected!", { id: 'connecting', icon: '✅', duration: 2000 });
         setupSocketListeners(newSocket, set, get);
       });
 
@@ -161,7 +177,7 @@ export const useRoomStore = create<RoomStore>((set, get) => ({
       });
     };
 
-    tryConnect(0);
+    wakeUpServer().then(() => tryConnect(0));
   },
 
   disconnect: () => {

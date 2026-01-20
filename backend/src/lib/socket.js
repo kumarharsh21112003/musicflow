@@ -4,8 +4,9 @@ import { Message } from "../models/message.model.js";
 export const initializeSocket = (server) => {
 	const io = new Server(server, {
 		cors: {
-			origin: ["http://localhost:3000", "https://music-flow-gamma.vercel.app"],
-			credentials: true,
+			origin: "*", // Accept all origins for production
+			methods: ["GET", "POST"],
+			credentials: false,
 		},
 	});
 
