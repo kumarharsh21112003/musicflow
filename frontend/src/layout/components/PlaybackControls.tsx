@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import { audioEngine } from "@/lib/audioEngine";
 import { MobilePlayer } from "./MobilePlayer";
 import RoomMode from "@/components/RoomMode";
+import AudioVisualizer from "@/components/AudioVisualizer";
 
 declare global {
 	interface Window {
