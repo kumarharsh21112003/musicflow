@@ -42,7 +42,13 @@ interface RoomStore {
   sendMessage: (userId: string, username: string, message: string) => void;
 }
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3003";
+// Try multiple backend URLs
+const getBackendUrl = () => {
+  if (import.meta.env.VITE_BACKEND_URL) {
+    return import.meta.env.VITE_BACKEND_URL;
+  }
+  return "http://localhost:3003";
+};
 
 export const useRoomStore = create<RoomStore>((set, get) => ({
   socket: null,
@@ -55,35 +61,47 @@ export const useRoomStore = create<RoomStore>((set, get) => ({
   messages: [],
 
   connect: () => {
-    if (get().socket?.connected) return;
+    const { socket } = get();
+    if (socket?.connected) return;
 
-    const socket = io(BACKEND_URL, {
+    const backendUrl = getBackendUrl();
+    console.log("🔌 Connecting to Room socket:", backendUrl);
+
+    const newSocket = io(backendUrl, {
       withCredentials: true,
-      transports: ['websocket', 'polling']
+      transports: ['websocket', 'polling'],
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
     });
 
-    socket.on("connect", () => {
-      console.log("🔌 Room socket connected");
+    newSocket.on("connect", () => {
+      console.log("✅ Room socket connected!");
       set({ isConnected: true });
     });
 
-    socket.on("disconnect", () => {
+    newSocket.on("connect_error", (err) => {
+      console.error("❌ Socket connection error:", err.message);
+      set({ isConnected: false });
+    });
+
+    newSocket.on("disconnect", () => {
       console.log("🔌 Room socket disconnected");
       set({ isConnected: false });
     });
 
     // Room events
-    socket.on("room_created", ({ roomCode, room }) => {
+    newSocket.on("room_created", ({ roomCode, room }) => {
       console.log("🎉 Room created:", roomCode);
       set({ 
         roomCode, 
         isHost: true, 
         members: room.members 
       });
-      toast.success(`Room created! Code: ${roomCode}`, { icon: '🎉' });
+      toast.success(`Room created! Code: ${roomCode}`, { icon: '🎉', duration: 3000 });
     });
 
-    socket.on("room_joined", ({ roomCode, room }) => {
+    newSocket.on("room_joined", ({ roomCode, room }) => {
       console.log("👋 Joined room:", roomCode);
       set({ 
         roomCode, 
@@ -95,44 +113,45 @@ export const useRoomStore = create<RoomStore>((set, get) => ({
       toast.success(`Joined room: ${roomCode}`, { icon: '👋' });
     });
 
-    socket.on("room_error", ({ message }) => {
+    newSocket.on("room_error", ({ message }) => {
+      console.error("Room error:", message);
       toast.error(message, { icon: '❌' });
     });
 
-    socket.on("member_joined", ({ username, members, currentSong, isPlaying }) => {
+    newSocket.on("member_joined", ({ username, members, currentSong, isPlaying }) => {
       set({ members, currentSong, isPlaying });
-      toast.success(`${username} joined the room!`, { icon: '👋' });
+      toast.success(`${username} joined!`, { icon: '👋' });
     });
 
-    socket.on("member_left", ({ members }) => {
+    newSocket.on("member_left", ({ members }) => {
       set({ members });
     });
 
-    socket.on("host_changed", ({ newHost }) => {
-      const state = get();
-      const isNewHost = newHost.id === state.socket?.id;
+    newSocket.on("host_changed", ({ newHost }) => {
+      const userId = newSocket.id;
+      const isNewHost = newHost.id === userId;
       set({ isHost: isNewHost });
       if (isNewHost) {
         toast.success("You are now the DJ!", { icon: '🎧' });
       }
     });
 
-    socket.on("room_song_changed", ({ song, isPlaying }) => {
+    newSocket.on("room_song_changed", ({ song, isPlaying }) => {
       set({ currentSong: song, isPlaying });
       toast.success(`Now playing: ${song.title}`, { icon: '🎵', duration: 2000 });
     });
 
-    socket.on("room_playback_sync", ({ isPlaying }) => {
+    newSocket.on("room_playback_sync", ({ isPlaying }) => {
       set({ isPlaying });
     });
 
-    socket.on("room_chat_message", (message: RoomMessage) => {
+    newSocket.on("room_chat_message", (message: RoomMessage) => {
       set(state => ({ 
-        messages: [...state.messages.slice(-99), message] // Keep last 100 messages
+        messages: [...state.messages.slice(-99), message]
       }));
     });
 
-    set({ socket });
+    set({ socket: newSocket });
   },
 
   disconnect: () => {
@@ -151,14 +170,21 @@ export const useRoomStore = create<RoomStore>((set, get) => ({
   },
 
   createRoom: (userId, username) => {
-    const { socket } = get();
-    if (!socket) return;
+    const { socket, isConnected } = get();
+    if (!socket || !isConnected) {
+      toast.error("Not connected. Please wait...");
+      return;
+    }
+    console.log("Creating room for:", userId, username);
     socket.emit("create_room", { userId, username });
   },
 
   joinRoom: (userId, username, roomCode) => {
-    const { socket } = get();
-    if (!socket) return;
+    const { socket, isConnected } = get();
+    if (!socket || !isConnected) {
+      toast.error("Not connected. Please wait...");
+      return;
+    }
     socket.emit("join_room", { userId, username, roomCode: roomCode.toUpperCase() });
   },
 

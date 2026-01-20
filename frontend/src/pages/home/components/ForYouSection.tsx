@@ -6,8 +6,9 @@
 import { useEffect, useState } from "react";
 import { usePlayerStore } from "@/stores/usePlayerStore";
 import { useMusicStore } from "@/stores/useMusicStore";
-import { Sparkles, Brain, Clock, TrendingUp, RefreshCw } from "lucide-react";
+import { Sparkles, Brain, Clock, TrendingUp, RefreshCw, Play, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import toast from "react-hot-toast";
 
 interface Recommendation {
   query: string;
@@ -16,11 +17,11 @@ interface Recommendation {
 }
 
 const ForYouSection = () => {
-  const { listeningHistory, getTopArtists, setQueue } = usePlayerStore();
+  const { listeningHistory, getTopArtists, setQueue, setCurrentSong, setIsPlaying } = usePlayerStore();
   const { searchSongs, searchResults, isLoading } = useMusicStore();
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [greeting, setGreeting] = useState("");
-  const [loadingRecs, setLoadingRecs] = useState(false);
+  const [activeQuery, setActiveQuery] = useState<string | null>(null);
 
   // Get personalized greeting based on time
   const getGreeting = () => {
@@ -37,28 +38,28 @@ const ForYouSection = () => {
     
     if (hour >= 5 && hour < 9) {
       return [
-        { query: "morning motivational songs 2024", reason: "Perfect for your morning energy", icon: <Sparkles className="h-4 w-4" /> },
-        { query: "upbeat workout music hindi", reason: "Start your day active", icon: <TrendingUp className="h-4 w-4" /> }
+        { query: "morning motivational songs hindi", reason: "Perfect for mornings", icon: <Sparkles className="h-4 w-4" /> },
+        { query: "upbeat workout music", reason: "Start active", icon: <TrendingUp className="h-4 w-4" /> }
       ];
     } else if (hour >= 9 && hour < 12) {
       return [
-        { query: "focus music instrumental", reason: "Boost your productivity", icon: <Brain className="h-4 w-4" /> },
-        { query: "lofi hip hop beats", reason: "Concentrate better", icon: <Clock className="h-4 w-4" /> }
+        { query: "focus music instrumental", reason: "Boost productivity", icon: <Brain className="h-4 w-4" /> },
+        { query: "lofi hip hop beats", reason: "Concentrate", icon: <Clock className="h-4 w-4" /> }
       ];
     } else if (hour >= 12 && hour < 17) {
       return [
-        { query: "chill bollywood songs", reason: "Afternoon relaxation", icon: <Sparkles className="h-4 w-4" /> },
-        { query: "indie pop music 2024", reason: "Discover new vibes", icon: <TrendingUp className="h-4 w-4" /> }
+        { query: "chill bollywood songs", reason: "Afternoon vibes", icon: <Sparkles className="h-4 w-4" /> },
+        { query: "indie pop music 2024", reason: "Discover new", icon: <TrendingUp className="h-4 w-4" /> }
       ];
     } else if (hour >= 17 && hour < 21) {
       return [
-        { query: "evening chill songs hindi", reason: "Wind down your day", icon: <Clock className="h-4 w-4" /> },
+        { query: "evening chill songs hindi", reason: "Wind down", icon: <Clock className="h-4 w-4" /> },
         { query: "romantic songs bollywood", reason: "Evening mood", icon: <Sparkles className="h-4 w-4" /> }
       ];
     } else {
       return [
-        { query: "late night hindi songs", reason: "Night owl vibes", icon: <Clock className="h-4 w-4" /> },
-        { query: "lofi chill night music", reason: "Relax before sleep", icon: <Brain className="h-4 w-4" /> }
+        { query: "late night hindi songs", reason: "Night vibes", icon: <Clock className="h-4 w-4" /> },
+        { query: "lofi chill night music", reason: "Relax", icon: <Brain className="h-4 w-4" /> }
       ];
     }
   };
@@ -75,47 +76,57 @@ const ForYouSection = () => {
     if (topArtists.length > 0) {
       allRecs.unshift({
         query: `${topArtists[0]} latest songs`,
-        reason: `Because you love ${topArtists[0]}`,
+        reason: `You love ${topArtists[0]}`,
         icon: <Sparkles className="h-4 w-4 text-emerald-400" />
       });
       
       if (topArtists.length > 1) {
         allRecs.push({
-          query: `songs like ${topArtists[0]} ${topArtists[1]}`,
-          reason: "Based on your favorites",
+          query: `${topArtists[1]} top songs`,
+          reason: "Your favorite",
           icon: <Brain className="h-4 w-4 text-purple-400" />
         });
       }
     }
     
-    // Add trending recommendation
+    // Add trending
     allRecs.push({
       query: "trending songs india 2024",
-      reason: "What's hot right now",
+      reason: "What's hot",
       icon: <TrendingUp className="h-4 w-4 text-orange-400" />
     });
     
     setRecommendations(allRecs.slice(0, 6));
   }, [listeningHistory]);
 
+  // Handle search results - play when loaded
+  useEffect(() => {
+    if (activeQuery && searchResults.length > 0 && !isLoading) {
+      // Set queue and play first song
+      setQueue(searchResults);
+      setCurrentSong(searchResults[0]);
+      setIsPlaying(true);
+      toast.success(`Playing: ${searchResults[0].title}`, { icon: '🎵', duration: 2000 });
+      setActiveQuery(null);
+    }
+  }, [searchResults, isLoading, activeQuery]);
+
   // Play a recommendation
   const playRecommendation = async (query: string) => {
-    setLoadingRecs(true);
+    if (isLoading) return;
+    
+    setActiveQuery(query);
+    toast.loading("Loading songs...", { id: 'loading-rec' });
+    
     try {
       await searchSongs(query);
-      // searchResults will be updated in the store, we'll use effect to handle it
+      toast.dismiss('loading-rec');
     } catch (error) {
-      console.error("Failed to load recommendation:", error);
+      console.error("Failed to load:", error);
+      toast.error("Failed to load songs", { id: 'loading-rec' });
+      setActiveQuery(null);
     }
-    setLoadingRecs(false);
   };
-
-  // Set queue when search results change
-  useEffect(() => {
-    if (searchResults.length > 0 && loadingRecs === false) {
-      setQueue(searchResults);
-    }
-  }, [searchResults]);
 
   // Refresh recommendations
   const refreshRecommendations = () => {
@@ -125,14 +136,16 @@ const ForYouSection = () => {
     const shuffled = [...moodRecs].sort(() => Math.random() - 0.5);
     
     if (topArtists.length > 0) {
+      const randomArtist = topArtists[Math.floor(Math.random() * topArtists.length)];
       shuffled.unshift({
-        query: `${topArtists[Math.floor(Math.random() * topArtists.length)]} top songs`,
-        reason: "Your favorite artist",
+        query: `${randomArtist} best songs`,
+        reason: "Your favorite",
         icon: <Sparkles className="h-4 w-4 text-emerald-400" />
       });
     }
     
     setRecommendations(shuffled.slice(0, 6));
+    toast.success("Recommendations refreshed!", { icon: '🔄' });
   };
 
   return (
@@ -152,9 +165,10 @@ const ForYouSection = () => {
           variant="ghost" 
           size="sm" 
           onClick={refreshRecommendations}
+          disabled={isLoading}
           className="text-zinc-400 hover:text-white"
         >
-          <RefreshCw className={`h-4 w-4 mr-2 ${loadingRecs ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
           Refresh
         </Button>
       </div>
@@ -165,21 +179,31 @@ const ForYouSection = () => {
           <button
             key={index}
             onClick={() => playRecommendation(rec.query)}
-            disabled={loadingRecs || isLoading}
+            disabled={isLoading}
             className="group p-4 bg-zinc-800/50 hover:bg-zinc-700/50 rounded-xl transition-all duration-300 
                        border border-transparent hover:border-emerald-500/30 text-left
-                       hover:shadow-lg hover:shadow-emerald-500/10"
+                       hover:shadow-lg hover:shadow-emerald-500/10 relative overflow-hidden
+                       disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <div className="flex items-center gap-2 mb-2">
+            {/* Play overlay on hover */}
+            <div className="absolute inset-0 bg-emerald-500/0 group-hover:bg-emerald-500/5 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+              {activeQuery === rec.query ? (
+                <Loader2 className="h-8 w-8 text-emerald-400 animate-spin" />
+              ) : (
+                <Play className="h-8 w-8 text-emerald-400 fill-emerald-400" />
+              )}
+            </div>
+            
+            <div className="flex items-center gap-2 mb-2 relative z-10">
               {rec.icon}
               <span className="text-xs text-zinc-500 group-hover:text-emerald-400 transition-colors">
                 AI Pick
               </span>
             </div>
-            <p className="text-sm font-medium text-white mb-1 line-clamp-2">
-              {rec.query.split(' ').slice(0, 4).join(' ')}...
+            <p className="text-sm font-medium text-white mb-1 line-clamp-2 relative z-10">
+              {rec.query.split(' ').slice(0, 3).join(' ')}...
             </p>
-            <p className="text-xs text-zinc-500 line-clamp-1">
+            <p className="text-xs text-zinc-500 line-clamp-1 relative z-10">
               {rec.reason}
             </p>
           </button>
