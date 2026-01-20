@@ -574,13 +574,13 @@ VITE_CLERK_PUBLISHABLE_KEY=your-clerk-key
 <td>✅ Complete</td>
 </tr>
 <tr>
-<td rowspan="3"><b>🌟 V2.0</b><br/><small>Future</small></td>
+<td rowspan="3"><b>🌟 V2.0</b><br/><small>Current</small></td>
 <td>Canvas Frequency Visualizer</td>
-<td>📋 Planned</td>
+<td>✅ Complete</td>
 </tr>
 <tr>
 <td>Docker Containerization</td>
-<td>📋 Planned</td>
+<td>✅ Complete</td>
 </tr>
 <tr>
 <td>Kubernetes Deployment</td>
