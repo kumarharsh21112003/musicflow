@@ -56,25 +56,34 @@ const RoomMode = ({ isOpen, onClose }: RoomModeProps) => {
     }
   }, [isOpen, isConnected, connect]);
 
-  // Sync room song to player
+  // Sync room song to player - when room song changes, play it!
   useEffect(() => {
     if (roomSong && !isHost) {
+      console.log("🎵 Syncing room song:", roomSong.title);
       setCurrentSong(roomSong);
+      // Actually start playing
+      setTimeout(() => {
+        const playerStore = usePlayerStore.getState();
+        playerStore.setIsPlaying(true);
+      }, 500);
     }
-  }, [roomSong, isHost, setCurrentSong]);
+  }, [roomSong?._id, isHost]);
 
-  // Host syncs playback to room
+  // When room isPlaying changes, sync playback state
   useEffect(() => {
-    if (isHost && currentSong && user) {
+    if (!isHost && roomCode) {
+      const roomPlaying = useRoomStore.getState().isPlaying;
+      const playerStore = usePlayerStore.getState();
+      playerStore.setIsPlaying(roomPlaying);
+    }
+  }, [useRoomStore.getState().isPlaying]);
+
+  // Host syncs playback to room when they play a song
+  useEffect(() => {
+    if (isHost && currentSong && user && roomCode) {
       playSong(currentSong, user.uid);
     }
-  }, [currentSong?._id]);
-
-  useEffect(() => {
-    if (isHost && user) {
-      syncPlayback(isPlaying, 0, user.uid);
-    }
-  }, [isPlaying]);
+  }, [currentSong?._id, isHost, roomCode]);
 
   const handleCreateRoom = () => {
     if (user) {
