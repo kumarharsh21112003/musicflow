@@ -121,17 +121,23 @@ const RoomMode = ({ isOpen, onClose }: RoomModeProps) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-zinc-900 rounded-2xl w-full max-w-md border border-zinc-800 shadow-2xl overflow-hidden">
+    <div 
+      className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      onClick={onClose} // Click outside to close
+    >
+      <div 
+        className="bg-zinc-900 rounded-2xl w-full max-w-md border border-zinc-800 shadow-2xl overflow-hidden max-h-[85vh] flex flex-col"
+        onClick={(e) => e.stopPropagation()} // Prevent close when clicking modal
+      >
         {/* Header */}
-        <div className="p-4 border-b border-zinc-800 flex items-center justify-between bg-gradient-to-r from-emerald-500/10 to-purple-500/10">
+        <div className="p-4 border-b border-zinc-800 flex items-center justify-between bg-gradient-to-r from-emerald-500/10 to-purple-500/10 flex-shrink-0">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-gradient-to-br from-emerald-500 to-purple-500 rounded-lg">
               <Radio className="h-5 w-5 text-white" />
             </div>
             <div>
               <h2 className="font-bold text-lg">Room Mode</h2>
-              <p className="text-xs text-zinc-400">Listen together with friends</p>
+              <p className="text-xs text-zinc-400">{roomCode ? `Room: ${roomCode}` : 'Listen together with friends'}</p>
             </div>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose}>
@@ -139,8 +145,8 @@ const RoomMode = ({ isOpen, onClose }: RoomModeProps) => {
           </Button>
         </div>
 
-        {/* Content */}
-        <div className="p-4">
+        {/* Content - Scrollable */}
+        <div className="p-4 overflow-y-auto flex-1">
           {!roomCode ? (
             // No room - Show create/join options
             <div className="space-y-4">
