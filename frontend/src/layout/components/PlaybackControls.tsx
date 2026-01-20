@@ -1,11 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { usePlayerStore } from "@/stores/usePlayerStore";
-import { Pause, Play, SkipBack, SkipForward, Volume1, Volume2, VolumeX, Video, VideoOff, Maximize2, Minimize2, X, Headphones, Sparkles, Shuffle, Repeat, Waves, Moon, Timer } from "lucide-react";
+import { Pause, Play, SkipBack, SkipForward, Volume1, Volume2, VolumeX, Video, VideoOff, Maximize2, Minimize2, X, Headphones, Sparkles, Shuffle, Repeat, Waves, Moon, Timer, Users } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 import { audioEngine } from "@/lib/audioEngine";
 import { MobilePlayer } from "./MobilePlayer";
+import RoomMode from "@/components/RoomMode";
 
 declare global {
 	interface Window {
@@ -56,6 +57,7 @@ export const PlaybackControls = () => {
 	const [sleepTimer, setSleepTimer] = useState<number | null>(null);
 	const [sleepTimeRemaining, setSleepTimeRemaining] = useState<number>(0);
 	const [showVisualizer, setShowVisualizer] = useState(false);
+	const [showRoomMode, setShowRoomMode] = useState(false);
 	const dragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
 	const sleepTimerRef = useRef<NodeJS.Timeout | null>(null);
 	const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -412,6 +414,7 @@ export const PlaybackControls = () => {
 	return (
 		<>
 			<MobilePlayer isOpen={showMobilePlayer} onClose={() => setShowMobilePlayer(false)} />
+			<RoomMode isOpen={showRoomMode} onClose={() => setShowRoomMode(false)} />
 
 			{/* Video Container - GLOBAL (Required for audio even on mobile) */}
 			<div 
@@ -665,6 +668,15 @@ export const PlaybackControls = () => {
 							<span>{audioSettings.qualityMode === 'ultra' ? 'ULTRA' : 'HQ'}</span>
 						</div>
 						
+						{/* Room Mode Button */}
+						<Button 
+							size='icon' variant='ghost' 
+							className='h-8 w-8 text-zinc-400 hover:text-purple-400'
+							onClick={() => setShowRoomMode(true)}
+							title='Room Mode - Listen Together'
+						>
+							<Users className='h-4 w-4' />
+						</Button>	
 						{/* Audio Enhancement Button */}
 						<div className='relative'>
 							<Button 

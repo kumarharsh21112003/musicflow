@@ -1,6 +1,7 @@
 import { useMusicStore } from "@/stores/useMusicStore";
 import { useEffect, useState } from "react";
 import FeaturedSection from "./components/FeaturedSection";
+import ForYouSection from "./components/ForYouSection";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import SectionGrid from "./components/SectionGrid";
 import { usePlayerStore } from "@/stores/usePlayerStore";
@@ -245,6 +246,8 @@ const HomePage = () => {
 							))}
 						</div>
 						
+						<ForYouSection />
+
 						<FeaturedSection />
 
 						<div className='space-y-10 pb-32'>
