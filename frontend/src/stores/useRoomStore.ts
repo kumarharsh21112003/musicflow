@@ -89,9 +89,9 @@ const setupSocketListeners = (socket: Socket, set: any, get: any) => {
     if (isNewHost) toast.success("You are now the DJ!", { icon: '🎧' });
   });
 
-  socket.on("room_song_changed", ({ song, isPlaying }: any) => {
+  socket.on("room_song_changed", ({ song, isPlaying, changedBy }: any) => {
     set({ currentSong: song, isPlaying });
-    toast.success(`Now playing: ${song.title}`, { icon: '🎵', duration: 2000 });
+    toast.success(`${changedBy || 'Someone'} is playing: ${song.title}`, { icon: '🎵', duration: 2000 });
   });
 
   socket.on("room_playback_sync", ({ isPlaying }: any) => set({ isPlaying }));

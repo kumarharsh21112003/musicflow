@@ -78,12 +78,12 @@ const RoomMode = ({ isOpen, onClose }: RoomModeProps) => {
     }
   }, [useRoomStore.getState().isPlaying]);
 
-  // Host syncs playback to room when they play a song
+  // Any member can sync their song to room
   useEffect(() => {
-    if (isHost && currentSong && user && roomCode) {
+    if (currentSong && user && roomCode) {
       playSong(currentSong, user.uid);
     }
-  }, [currentSong?._id, isHost, roomCode]);
+  }, [currentSong?._id, roomCode]);
 
   const handleCreateRoom = () => {
     if (user) {

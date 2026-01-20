@@ -116,14 +116,18 @@ io.on("connection", (socket) => {
 
     socket.on("room_play_song", ({ roomCode, song, userId }) => {
         const room = rooms.get(roomCode);
-        if (!room || room.host !== userId) return;
+        if (!room) return;
+        
+        // Any member can change songs!
+        const member = room.members.find(m => m.id === userId);
+        if (!member) return;
         
         room.currentSong = song;
         room.isPlaying = true;
         room.currentTime = 0;
         
-        io.to(roomCode).emit("room_song_changed", { song, isPlaying: true, currentTime: 0 });
-        console.log(`🎵 Room ${roomCode}: Playing "${song.title}"`);
+        io.to(roomCode).emit("room_song_changed", { song, isPlaying: true, currentTime: 0, changedBy: member.name });
+        console.log(`🎵 Room ${roomCode}: ${member.name} playing "${song.title}"`);
     });
 
     socket.on("room_sync_playback", ({ roomCode, isPlaying, currentTime, userId }) => {
