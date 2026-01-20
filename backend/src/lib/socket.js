@@ -4,11 +4,17 @@ import { Message } from "../models/message.model.js";
 export const initializeSocket = (server) => {
 	const io = new Server(server, {
 		cors: {
-			origin: "*", // Accept all origins for production
+			origin: "*",
 			methods: ["GET", "POST"],
 			credentials: false,
 		},
+		allowEIO3: true, // Support older socket.io clients
+		transports: ['polling', 'websocket'], // Polling first for reliability
+		pingTimeout: 60000,
+		pingInterval: 25000,
 	});
+
+	console.log("🔌 Socket.io server initialized");
 
 	const userSockets = new Map(); // { userId: socketId }
 	const userActivities = new Map(); // { userId: activity }

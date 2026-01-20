@@ -147,11 +147,11 @@ export const useRoomStore = create<RoomStore>((set, get) => ({
 
       const newSocket = io(backendUrl as string, {
         withCredentials: false,
-        transports: ['websocket', 'polling'],
+        transports: ['polling', 'websocket'], // Polling first for better reliability
         reconnection: true,
-        reconnectionAttempts: 3,
-        reconnectionDelay: 1000,
-        timeout: 10000, // 10 second timeout for Render wake-up
+        reconnectionAttempts: 5,
+        reconnectionDelay: 2000,
+        timeout: 20000, // 20 second timeout for Render
       });
 
       const connectTimeout = setTimeout(() => {
