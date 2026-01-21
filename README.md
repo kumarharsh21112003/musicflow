@@ -26,6 +26,12 @@
 
 ---
 
+> ⚠️ **DISCLAIMER: This project is for EDUCATIONAL PURPOSES ONLY.**
+>
+> MusicFlow is a personal learning project created to demonstrate web development skills including React, Node.js, Web Audio API, Socket.io, and modern frontend technologies. This project is NOT intended for commercial use or distribution. The developer does not encourage or support any form of copyright infringement or illegal streaming. All music content is sourced through publicly available APIs for demonstration purposes only. Use this project responsibly and in compliance with all applicable laws and regulations.
+
+---
+
 </div>
 
 ## 📑 Table of Contents
