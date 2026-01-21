@@ -10,6 +10,7 @@ class AudioEngine {
     private spatialConvolver: ConvolverNode | null = null;
     private spatialGain: GainNode | null = null;
     private dryGain: GainNode | null = null;
+    private analyserNode: AnalyserNode | null = null; // For visualizer
     private isSpatialEnabled = false;
     private isInitialized = false;
     private wakeLock: any = null;
@@ -70,23 +71,31 @@ class AudioEngine {
         this.spatialConvolver = this.audioContext.createConvolver();
         this.createSpatialImpulse();
         
-        // Connect: source -> bass -> treble -> gain -> panner -> [dry + spatial] -> output
+        // Analyser for visualizer - REAL frequency data!
+        this.analyserNode = this.audioContext.createAnalyser();
+        this.analyserNode.fftSize = 256;
+        this.analyserNode.smoothingTimeConstant = 0.8;
+        
+        // Connect: source -> bass -> treble -> gain -> panner -> analyser -> [dry + spatial] -> output
         this.sourceNode.connect(this.bassFilter);
         this.bassFilter.connect(this.trebleFilter);
         this.trebleFilter.connect(this.gainNode);
         this.gainNode.connect(this.stereoPanner);
         
-        // Dry path (direct)
-        this.stereoPanner.connect(this.dryGain);
+        // Connect analyser after panner
+        this.stereoPanner.connect(this.analyserNode);
+        
+        // Dry path (direct) - from analyser
+        this.analyserNode.connect(this.dryGain);
         this.dryGain.connect(this.audioContext.destination);
         
-        // Wet/Spatial path (through convolver)
-        this.stereoPanner.connect(this.spatialConvolver);
+        // Wet/Spatial path (through convolver) - also from analyser
+        this.analyserNode.connect(this.spatialConvolver);
         this.spatialConvolver.connect(this.spatialGain);
         this.spatialGain.connect(this.audioContext.destination);
         
         this.isInitialized = true;
-        console.log('🎧 Audio Engine initialized with EQ, Spatial Audio & Background Support');
+        console.log('🎧 Audio Engine initialized with EQ, Spatial Audio, Visualizer & Background Support');
     }
 
     // Create spatial impulse response for 3D surround effect
@@ -334,6 +343,21 @@ class AudioEngine {
 
     isPlaying() {
         return this.audioElement && !this.audioElement.paused;
+    }
+
+    // Get real frequency data for visualizer
+    getFrequencyData(): Uint8Array {
+        if (!this.analyserNode) {
+            return new Uint8Array(128).fill(0);
+        }
+        const dataArray = new Uint8Array(this.analyserNode.frequencyBinCount);
+        this.analyserNode.getByteFrequencyData(dataArray);
+        return dataArray;
+    }
+
+    // Get analyser node for external use
+    getAnalyser(): AnalyserNode | null {
+        return this.analyserNode;
     }
 
     onTimeUpdate(callback: (time: number, duration: number) => void) {

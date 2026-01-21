@@ -783,7 +783,7 @@ export const PlaybackControls = () => {
 	);
 };
 
-// Audio Visualizer Effect Component
+// Audio Visualizer Effect Component - Uses REAL audio frequency data!
 const AudioVisualizerEffect = ({ 
 	canvasRef, 
 	isPlaying,
@@ -804,20 +804,21 @@ const AudioVisualizerEffect = ({
 
 		const barCount = 32;
 		const barWidth = canvas.width / barCount - 2;
-		let bars = Array(barCount).fill(0);
 
 		const animate = () => {
 			ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-			// Simulate audio data with random values (smooth transitions)
-			bars = bars.map((bar) => {
-				const target = isPlaying ? Math.random() * 80 + 20 : 5;
-				return bar + (target - bar) * 0.15;
-			});
+			// Get REAL frequency data from audioEngine
+			const frequencyData = audioEngine.getFrequencyData();
+			const step = Math.floor(frequencyData.length / barCount);
 
-			// Draw gradient bars
-			bars.forEach((height, i) => {
+			// Draw bars based on real audio data
+			for (let i = 0; i < barCount; i++) {
+				const value = frequencyData[i * step] || 0;
+				const height = (value / 255) * canvas.height * 0.9;
 				const x = i * (barWidth + 2);
+				
+				// Create gradient
 				const gradient = ctx.createLinearGradient(0, canvas.height, 0, canvas.height - height);
 				gradient.addColorStop(0, '#10b981');
 				gradient.addColorStop(0.5, '#34d399');
@@ -827,7 +828,7 @@ const AudioVisualizerEffect = ({
 				ctx.beginPath();
 				ctx.roundRect(x, canvas.height - height, barWidth, height, 2);
 				ctx.fill();
-			});
+			}
 
 			animationRef.current = requestAnimationFrame(animate);
 		};
