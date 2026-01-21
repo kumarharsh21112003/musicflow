@@ -1,13 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { usePlayerStore } from "@/stores/usePlayerStore";
-import { Pause, Play, SkipBack, SkipForward, Volume1, Volume2, VolumeX, Video, VideoOff, Maximize2, Minimize2, X, Headphones, Sparkles, Shuffle, Repeat, Waves, Moon, Timer, Users } from "lucide-react";
+import { Pause, Play, SkipBack, SkipForward, Volume1, Volume2, VolumeX, Video, VideoOff, Maximize2, Minimize2, X, Headphones, Shuffle, Repeat, Waves, Moon, Timer, Users } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 import { audioEngine } from "@/lib/audioEngine";
 import { MobilePlayer } from "./MobilePlayer";
 import RoomMode from "@/components/RoomMode";
-import AudioVisualizer from "@/components/AudioVisualizer";
 
 declare global {
 	interface Window {
@@ -419,11 +418,11 @@ export const PlaybackControls = () => {
 			<MobilePlayer isOpen={showMobilePlayer} onClose={() => setShowMobilePlayer(false)} />
 			<RoomMode isOpen={showRoomMode} onClose={() => setShowRoomMode(false)} />
 
-			{/* Video Container - GLOBAL (Hidden when audioOnlyMode is ON for EQ to work) */}
+			{/* Video Container - GLOBAL */}
 			<div 
 				style={{
 					position: 'fixed',
-					...((showVideo && !audioSettings.audioOnlyMode) 
+					...(showVideo 
 						? (isFullscreen 
 							? { inset: 0, zIndex: 9999 }
 							: { 
@@ -568,13 +567,7 @@ export const PlaybackControls = () => {
 									src={`https://i.ytimg.com/vi/${currentSong.videoId}/mqdefault.jpg`}
 									alt={currentSong.title}
 									className='w-14 h-14 object-cover rounded cursor-pointer hover:opacity-80 transition'
-									onClick={() => {
-										if (audioSettings.audioOnlyMode) {
-											toast.error('Turn off Audio-Only mode to watch video', { icon: '🎧', duration: 2000 });
-										} else {
-											setShowVideo(!showVideo);
-										}
-									}}
+									onClick={() => setShowVideo(!showVideo)}
 								/>
 								<div className='flex-1 min-w-0'>
 									<div className='font-medium truncate text-sm'>{currentSong.title}</div>
@@ -669,13 +662,8 @@ export const PlaybackControls = () => {
 						</div>
 					</div>
 					
-					{/* Volume & Audio Quality */}
+					{/* Volume & Controls */}
 					<div className='hidden sm:flex items-center gap-3 min-w-[200px] w-[30%] justify-end'>
-						{/* Audio Quality Badge */}
-						<div className='flex items-center gap-1 px-2 py-1 bg-emerald-500/20 rounded text-emerald-400 text-xs font-bold'>
-							<Sparkles className='h-3 w-3' />
-							<span>{audioSettings.qualityMode === 'ultra' ? 'ULTRA' : 'HQ'}</span>
-						</div>
 						
 						{/* Room Mode Button */}
 						<Button 
@@ -697,149 +685,45 @@ export const PlaybackControls = () => {
 								<Headphones className='h-4 w-4' />
 							</Button>
 
-							{/* Audio Settings Dropdown */}
+							{/* Sleep Timer Dropdown */}
 							{showAudioMenu && (
 								<>
 									<div className='fixed inset-0 z-40' onClick={() => setShowAudioMenu(false)} />
-									<div className='absolute bottom-12 right-0 bg-zinc-800 rounded-lg shadow-xl z-50 p-4 w-[280px] border border-zinc-700'>
-										<div className='flex items-center justify-between mb-4'>
-											<h3 className='font-bold text-sm'>Audio Enhancement</h3>
-											<div className='flex items-center gap-1 px-2 py-0.5 bg-emerald-500/20 rounded text-emerald-400 text-xs'>
-												<Sparkles className='h-3 w-3' />
-												PREMIUM
-											</div>
-										</div>
+									<div className='absolute bottom-12 right-0 bg-zinc-800 rounded-lg shadow-xl z-50 p-4 w-[240px] border border-zinc-700'>
+										<div className='flex items-center gap-2 mb-3'>
+									<Moon className='h-4 w-4 text-emerald-400' />
+									<span className='text-sm font-bold'>Sleep Timer</span>
+								</div>
 
-										{/* Quality Mode */}
-										<div className='mb-4'>
-											<label className='text-xs text-zinc-400 mb-2 block'>Quality Mode</label>
-											<div className='flex gap-2'>
-												{(['auto', 'high', 'ultra'] as const).map((mode) => (
-													<button
-														key={mode}
-														onClick={() => {
-															updateAudioSettings({ qualityMode: mode });
-															toast.success(`Quality: ${mode.toUpperCase()}`, { icon: '✨', duration: 1500 });
-														}}
-														className={`flex-1 py-2 rounded text-xs font-medium transition-all
-															${audioSettings.qualityMode === mode 
-																? 'bg-emerald-500 text-black' 
-																: 'bg-zinc-700 text-zinc-300 hover:bg-zinc-600'}`}
-													>
-														{mode.toUpperCase()}
-													</button>
-												))}
-											</div>
-										</div>
-
-										{/* Bass Boost */}
-										<div className='mb-3'>
-											<div className='flex justify-between text-xs mb-1'>
-												<span className='text-zinc-400'>Bass Boost</span>
-												<span className='text-emerald-400'>{audioSettings.bassBoost}%</span>
-											</div>
-											<Slider 
-												value={[audioSettings.bassBoost]} 
-												max={100} 
-												onValueChange={(v) => updateAudioSettings({ bassBoost: v[0] })}
-												className='w-full'
-											/>
-										</div>
-
-										{/* Treble */}
-										<div className='mb-3'>
-											<div className='flex justify-between text-xs mb-1'>
-												<span className='text-zinc-400'>Treble</span>
-												<span className='text-emerald-400'>{audioSettings.trebleBoost}%</span>
-											</div>
-											<Slider 
-												value={[audioSettings.trebleBoost]} 
-												max={100} 
-												onValueChange={(v) => updateAudioSettings({ trebleBoost: v[0] })}
-												className='w-full'
-											/>
-										</div>
-
-										{/* Loudness */}
-										<div className='mb-4'>
-											<div className='flex justify-between text-xs mb-1'>
-												<span className='text-zinc-400'>Loudness</span>
-												<span className='text-emerald-400'>{audioSettings.loudness}%</span>
-											</div>
-											<Slider 
-												value={[audioSettings.loudness]} 
-												max={100} 
-												onValueChange={(v) => updateAudioSettings({ loudness: v[0] })}
-												className='w-full'
-											/>
-										</div>
-
-										{/* Spatial Audio Toggle */}
-								<div className='flex items-center justify-between p-2 bg-zinc-700/50 rounded'>
-									<div>
-										<p className='text-sm font-medium'>Spatial Audio</p>
-										<p className='text-xs text-zinc-400'>3D surround effect</p>
+								{sleepTimer && (
+									<div className='mb-3 text-center'>
+										<span className='text-xs bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded-full'>
+											<Timer className='h-3 w-3 inline mr-1' />
+											{formatSleepTime(sleepTimeRemaining)}
+										</span>
 									</div>
+								)}
+
+								{sleepTimer ? (
 									<button
-										onClick={() => updateAudioSettings({ spatialAudio: !audioSettings.spatialAudio })}
-										className={`w-10 h-6 rounded-full relative transition-colors
-											${audioSettings.spatialAudio ? 'bg-emerald-500' : 'bg-zinc-600'}`}
+										onClick={cancelSleepTimer}
+										className='w-full py-2 text-xs font-medium bg-red-500/20 text-red-400 rounded hover:bg-red-500/30 transition-colors'
 									>
-										<div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all
-											${audioSettings.spatialAudio ? 'right-1' : 'left-1'}`} />
+										Cancel Timer
 									</button>
-								</div>
-
-							{/* Audio-Only Mode Toggle - EQ Works! */}
-							<div className='flex items-center justify-between p-2 bg-gradient-to-r from-purple-500/10 to-cyan-500/10 rounded border border-purple-500/20 mt-2'>
-								<div>
-									<p className='text-sm font-medium text-purple-300'>🎧 Audio-Only</p>
-									<p className='text-xs text-zinc-400'>EQ works in this mode</p>
-								</div>
-								<button
-									onClick={() => {
-										updateAudioSettings({ audioOnlyMode: !audioSettings.audioOnlyMode });
-										toast.success(audioSettings.audioOnlyMode ? 'Video Mode' : 'Audio Mode - EQ On! 🎛️', { duration: 2000 });
-									}}
-									className={`w-10 h-6 rounded-full relative transition-colors ${audioSettings.audioOnlyMode ? 'bg-purple-500' : 'bg-zinc-600'}`}
-								>
-									<div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${audioSettings.audioOnlyMode ? 'right-1' : 'left-1'}`} />
-								</button>
-							</div>
-
-								{/* Sleep Timer */}
-								<div className='mt-3 pt-3 border-t border-zinc-700'>
-									<div className='flex items-center gap-2 mb-2'>
-										<Moon className='h-4 w-4 text-emerald-400' />
-										<span className='text-sm font-medium'>Sleep Timer</span>
-										{sleepTimer && (
-											<span className='ml-auto text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full'>
-												<Timer className='h-3 w-3 inline mr-1' />
-												{formatSleepTime(sleepTimeRemaining)}
-											</span>
-										)}
+								) : (
+									<div className='grid grid-cols-4 gap-2'>
+										{[15, 30, 60, 90].map(mins => (
+											<button
+												key={mins}
+												onClick={() => startSleepTimer(mins)}
+												className='py-2 text-xs font-medium bg-zinc-700 rounded hover:bg-zinc-600 transition-colors'
+											>
+												{mins}m
+											</button>
+										))}
 									</div>
-									{sleepTimer ? (
-										<button
-											onClick={cancelSleepTimer}
-											className='w-full py-2 text-xs font-medium bg-red-500/20 text-red-400 rounded hover:bg-red-500/30 transition-colors'
-										>
-											Cancel Timer
-										</button>
-									) : (
-										<div className='grid grid-cols-4 gap-2'>
-											{[15, 30, 60, 90].map(mins => (
-												<button
-													key={mins}
-													onClick={() => startSleepTimer(mins)}
-													className='py-2 text-xs font-medium bg-zinc-700 rounded hover:bg-zinc-600 transition-colors'
-												>
-													{mins}m
-												</button>
-											))}
-										</div>
-									)}
-								</div>
+								)}
 							</div>
 								</>
 							)}
