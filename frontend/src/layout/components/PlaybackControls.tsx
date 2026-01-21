@@ -804,18 +804,38 @@ const AudioVisualizerEffect = ({
 
 		const barCount = 32;
 		const barWidth = canvas.width / barCount - 2;
+		let demoBars = Array(barCount).fill(0).map(() => Math.random() * 50);
 
 		const animate = () => {
 			ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-			// Get REAL frequency data from audioEngine
+			// Try to get REAL frequency data from audioEngine
 			const frequencyData = audioEngine.getFrequencyData();
 			const step = Math.floor(frequencyData.length / barCount);
+			
+			// Check if we have real audio data (sum > threshold)
+			const sum = frequencyData.reduce((a, b) => a + b, 0);
+			const hasRealData = sum > 100;
 
-			// Draw bars based on real audio data
+			// Draw bars
 			for (let i = 0; i < barCount; i++) {
-				const value = frequencyData[i * step] || 0;
-				const height = (value / 255) * canvas.height * 0.9;
+				let height: number;
+				
+				if (hasRealData) {
+					// Use REAL frequency data
+					const value = frequencyData[i * step] || 0;
+					height = (value / 255) * canvas.height * 0.9;
+				} else {
+					// Fallback: Dynamic demo animation when playing
+					if (isPlaying) {
+						const target = 20 + Math.random() * 60 + Math.sin(Date.now() / 200 + i) * 20;
+						demoBars[i] = demoBars[i] + (target - demoBars[i]) * 0.15;
+					} else {
+						demoBars[i] = demoBars[i] * 0.9; // Fade out when paused
+					}
+					height = demoBars[i];
+				}
+				
 				const x = i * (barWidth + 2);
 				
 				// Create gradient
@@ -826,7 +846,7 @@ const AudioVisualizerEffect = ({
 				
 				ctx.fillStyle = gradient;
 				ctx.beginPath();
-				ctx.roundRect(x, canvas.height - height, barWidth, height, 2);
+				ctx.roundRect(x, canvas.height - height, barWidth, Math.max(height, 2), 2);
 				ctx.fill();
 			}
 
