@@ -25,7 +25,6 @@ export const MobilePlayer = ({ isOpen, onClose }: MobilePlayerProps) => {
     } = usePlayerStore();
 
     const [isLiked, setIsLiked] = useState(false);
-    const [showLyrics, setShowLyrics] = useState(false);
 
     // Generate adaptive gradient colors based on song
     const gradientColors = useMemo(() => {

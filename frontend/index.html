@@ -31,16 +31,12 @@
 
     <title>MusicFlow - Free Music Player</title>
 
-    <!-- Splash Screen for iOS -->
+    <!-- iOS Optimizations -->
     <style>
       html,
       body {
         background: #000;
-        overscroll-behavior: none;
         -webkit-tap-highlight-color: transparent;
-        -webkit-touch-callout: none;
-        -webkit-user-select: none;
-        user-select: none;
       }
       /* iOS safe areas - PWA */
       @supports (padding: max(0px)) {
@@ -50,10 +46,6 @@
           padding-left: max(0px, env(safe-area-inset-left));
           padding-right: max(0px, env(safe-area-inset-right));
         }
-      }
-      /* Disable pull-to-refresh on iOS */
-      body {
-        overscroll-behavior-y: contain;
       }
     </style>
   </head>
