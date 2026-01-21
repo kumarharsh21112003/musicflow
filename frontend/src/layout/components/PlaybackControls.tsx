@@ -680,9 +680,9 @@ export const PlaybackControls = () => {
 								size='icon' variant='ghost' 
 								className={`h-8 w-8 ${showAudioMenu ? 'text-emerald-400' : 'text-zinc-400 hover:text-emerald-400'}`}
 								onClick={() => setShowAudioMenu(!showAudioMenu)}
-								title='Audio Enhancement'
+								title='Sleep Timer'
 							>
-								<Headphones className='h-4 w-4' />
+								<Moon className='h-4 w-4' />
 							</Button>
 
 							{/* Sleep Timer Dropdown */}
