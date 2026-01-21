@@ -37,12 +37,23 @@
       body {
         background: #000;
         overscroll-behavior: none;
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
       }
-      /* iOS splash screen */
-      @media (display-mode: standalone) {
+      /* iOS safe areas - PWA */
+      @supports (padding: max(0px)) {
         body {
-          padding-top: env(safe-area-inset-top);
+          padding-top: max(0px, env(safe-area-inset-top));
+          padding-bottom: max(0px, env(safe-area-inset-bottom));
+          padding-left: max(0px, env(safe-area-inset-left));
+          padding-right: max(0px, env(safe-area-inset-right));
         }
+      }
+      /* Disable pull-to-refresh on iOS */
+      body {
+        overscroll-behavior-y: contain;
       }
     </style>
   </head>
