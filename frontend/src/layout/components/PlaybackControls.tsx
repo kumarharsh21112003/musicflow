@@ -253,8 +253,55 @@ export const PlaybackControls = () => {
 	// Sync Play/Pause status
 	useEffect(() => {
 		if (isPlaying) {
-			audioEngine.play();
-			if (isReady) playerRef.current?.playVideo();
+			// If track isn't loaded yet (happens with persisted songs after reload)
+			if (!audioEngine.isPlaying() && audioEngine.getCurrentTime() === 0 && currentSong?.videoId && lastVideoId.current !== currentSong.videoId) {
+				// Need to load the track first
+				const loadFirst = async () => {
+					setIsPlaybackLoading(true);
+					try {
+						lastVideoId.current = currentSong.videoId!;
+						if (isReady && playerRef.current) {
+							playerRef.current.loadVideoById(currentSong.videoId);
+							playerRef.current.mute();
+						}
+						await audioEngine.loadTrack({ ...currentSong, videoId: currentSong.videoId! } as any);
+
+						// Seek to saved position if any
+						const savedTime = currentTime;
+						if (savedTime > 0) {
+							audioEngine.seek(savedTime);
+						}
+
+						setTimeout(() => {
+							const dur = audioEngine.getDuration();
+							if (dur > 0) setDuration(dur);
+						}, 500);
+
+						audioEngine.play();
+						if (isReady) playerRef.current?.playVideo();
+						setIsPlaybackLoading(false);
+					} catch (err) {
+						console.error("Failed to load persisted song:", err);
+						// Try YouTube fallback
+						if (isReady && playerRef.current) {
+							try {
+								playerRef.current.unMute();
+								playerRef.current.setVolume(volume);
+								playerRef.current.playVideo();
+							} catch {
+								toast.error('Could not play this song', { icon: '⚠️', duration: 2000 });
+							}
+						} else {
+							toast.error('Could not play this song', { icon: '⚠️', duration: 2000 });
+						}
+						setIsPlaybackLoading(false);
+					}
+				};
+				loadFirst();
+			} else {
+				audioEngine.play();
+				if (isReady) playerRef.current?.playVideo();
+			}
 		} else {
 			audioEngine.pause();
 			if (isReady) playerRef.current?.pauseVideo();
