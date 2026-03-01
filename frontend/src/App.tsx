@@ -37,7 +37,33 @@ function App() {
 		return (
 			<>
 				<AuthPage />
-				<Toaster />
+				<Toaster
+					position='bottom-center'
+					toastOptions={{
+						style: {
+							background: 'rgba(23, 23, 23, 0.95)',
+							color: '#fff',
+							borderRadius: '12px',
+							border: '1px solid rgba(255,255,255,0.1)',
+							backdropFilter: 'blur(12px)',
+							padding: '12px 16px',
+							fontSize: '14px',
+							fontWeight: '500',
+							boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+						},
+						success: {
+							iconTheme: { primary: '#ec5b13', secondary: '#fff' },
+							duration: 2000,
+						},
+						error: {
+							iconTheme: { primary: '#ef4444', secondary: '#fff' },
+							duration: 3000,
+						},
+						loading: {
+							iconTheme: { primary: '#ec5b13', secondary: '#333' },
+						},
+					}}
+				/>
 			</>
 		);
 	}
@@ -53,7 +79,33 @@ function App() {
 					<Route path="*" element={<NotFoundPage />} />
 				</Route>
 			</Routes>
-			<Toaster />
+			<Toaster
+				position='bottom-center'
+				toastOptions={{
+					style: {
+						background: 'rgba(23, 23, 23, 0.95)',
+						color: '#fff',
+						borderRadius: '12px',
+						border: '1px solid rgba(255,255,255,0.1)',
+						backdropFilter: 'blur(12px)',
+						padding: '12px 16px',
+						fontSize: '14px',
+						fontWeight: '500',
+						boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+					},
+					success: {
+						iconTheme: { primary: '#ec5b13', secondary: '#fff' },
+						duration: 2000,
+					},
+					error: {
+						iconTheme: { primary: '#ef4444', secondary: '#fff' },
+						duration: 3000,
+					},
+					loading: {
+						iconTheme: { primary: '#ec5b13', secondary: '#333' },
+					},
+				}}
+			/>
 		</>
 	);
 }
