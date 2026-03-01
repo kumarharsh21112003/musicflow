@@ -1,6 +1,5 @@
 import { ChevronLeft, ChevronRight, Search, X, LogOut, User, Home, Library } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
-import { createPortal } from "react-dom";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useMusicStore } from "@/stores/useMusicStore";
 import { usePlayerStore } from "@/stores/usePlayerStore";
@@ -18,13 +17,11 @@ const Topbar = () => {
 	const { setCurrentSong, setQueue } = usePlayerStore();
 	const { user, logout } = useAuthStore();
 
-	// Load recent searches from localStorage
 	useEffect(() => {
 		const saved = localStorage.getItem('musicflow_recent_searches_songs');
 		if (saved) setRecentSearches(JSON.parse(saved));
 	}, []);
 
-	// Close dropdown when clicking outside
 	useEffect(() => {
 		const handleClickOutside = (e: MouseEvent) => {
 			if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
@@ -35,12 +32,9 @@ const Topbar = () => {
 		return () => document.removeEventListener('mousedown', handleClickOutside);
 	}, []);
 
-	// Search as user types
 	useEffect(() => {
 		if (searchQuery.trim().length > 0) {
-			const timer = setTimeout(() => {
-				searchSongs(searchQuery);
-			}, 300);
+			const timer = setTimeout(() => { searchSongs(searchQuery); }, 300);
 			return () => clearTimeout(timer);
 		}
 	}, [searchQuery, searchSongs]);
@@ -55,24 +49,13 @@ const Topbar = () => {
 	};
 
 	const handlePlaySong = async (song: any) => {
-		console.log('Playing song:', song.title, song);
-
-		// Save to recent searches (full song object)
 		const updated = [song, ...recentSearches.filter(s => s._id !== song._id)].slice(0, 10);
 		setRecentSearches(updated);
 		localStorage.setItem('musicflow_recent_searches_songs', JSON.stringify(updated));
-
-		// Close dropdown first
 		setShowDropdown(false);
-
-		// Set queue and play
 		const queue = searchResults.length > 0 ? searchResults : [song];
 		setQueue(queue);
-
-		// Small delay to ensure state updates
-		setTimeout(() => {
-			setCurrentSong(song);
-		}, 50);
+		setTimeout(() => { setCurrentSong(song); }, 50);
 	};
 
 	const clearRecent = (id: string) => {
@@ -83,7 +66,7 @@ const Topbar = () => {
 
 	return (
 		<div className='flex items-center justify-between px-4 py-2 sticky top-0 bg-black z-50 gap-4 h-16'>
-			{/* Left - Navigation & Home */}
+			{/* Left - Navigation */}
 			<div className='flex gap-2 items-center'>
 				<div className="flex items-center gap-2 mr-2">
 					<button
@@ -104,7 +87,7 @@ const Topbar = () => {
 				</div>
 			</div>
 
-			{/* Center - Premium Search Bar */}
+			{/* Center - Search Bar */}
 			<div className='flex-1 flex items-center justify-center max-w-2xl'>
 				<div ref={searchRef} className='flex-1 relative max-w-[500px]'>
 					<form onSubmit={handleSearch} className="relative group">
@@ -124,109 +107,76 @@ const Topbar = () => {
 						</div>
 					</form>
 
-					{/* Search Dropdown - Dark Premium */}
-					{showDropdown && (searchQuery || recentSearches.length > 0) && createPortal(
-						<div className="fixed inset-0" style={{ zIndex: 2147483647 }}>
-							{/* Backdrop with blur */}
-							<div
-								className='absolute inset-0 bg-black/50 backdrop-blur-sm'
-								onClick={() => setShowDropdown(false)}
-							/>
-
-							{/* Results Container */}
-							<div
-								className='absolute left-1/2 -translate-x-1/2 w-[95%] max-w-[500px] overflow-hidden'
-								style={{ top: '60px', background: 'rgba(18, 18, 18, 0.98)', backdropFilter: 'blur(20px)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 16px 48px rgba(0,0,0,0.7)' }}
-								onMouseDown={(e) => e.stopPropagation()}
-							>
-								{/* Section: Recent Searches */}
-								{!searchQuery && recentSearches.length > 0 && (
-									<div className="py-2">
-										<div className='px-4 py-3 font-bold text-base text-white'>Recent searches</div>
-										<div className="max-h-[60vh] overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
-											{recentSearches.map((song) => (
-												<div
-													key={song._id}
-													className='flex items-center justify-between px-4 py-2 hover:bg-white/10 cursor-pointer group'
-													onClick={(e) => { e.stopPropagation(); handlePlaySong(song); }}
-												>
-													<div className='flex items-center gap-3 min-w-0'>
-														<img
-															src={song.imageUrl}
-															className="w-10 h-10 rounded shadow-lg object-cover"
-															alt=""
-														/>
-														<div className="truncate">
-															<p className='font-medium text-white truncate'>{song.title}</p>
-															<p className='text-xs text-neutral-400 truncate'>Song • {song.artist}</p>
-														</div>
+					{/* Dropdown - directly below search, perfectly aligned */}
+					{showDropdown && (searchQuery || recentSearches.length > 0) && (
+						<div
+							className='absolute top-full left-0 right-0 mt-2 overflow-hidden'
+							style={{ background: '#1a1a1a', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 20px 60px rgba(0,0,0,0.9)', zIndex: 9999 }}
+						>
+							{/* Recent Searches */}
+							{!searchQuery && recentSearches.length > 0 && (
+								<div className="py-2">
+									<div className='px-4 py-3 font-bold text-base text-white'>Recent searches</div>
+									<div className="max-h-[60vh] overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
+										{recentSearches.map((song) => (
+											<div key={song._id} className='flex items-center justify-between px-4 py-2.5 hover:bg-white/[0.08] cursor-pointer group transition-colors' onClick={(e) => { e.stopPropagation(); handlePlaySong(song); }}>
+												<div className='flex items-center gap-3 min-w-0'>
+													<img src={song.imageUrl} className="w-11 h-11 rounded-lg object-cover" alt="" />
+													<div className="truncate">
+														<p className='font-semibold text-white truncate text-sm'>{song.title}</p>
+														<p className='text-xs text-neutral-500 truncate'>Song • {song.artist}</p>
 													</div>
-													<button
-														onClick={(e) => { e.stopPropagation(); clearRecent(song._id); }}
-														className='p-2 text-neutral-400 hover:text-white opacity-0 group-hover:opacity-100 transition-all'
-													>
-														<X className='size-5' />
-													</button>
 												</div>
-											))}
+												<button onClick={(e) => { e.stopPropagation(); clearRecent(song._id); }} className='p-2 text-neutral-500 hover:text-white opacity-0 group-hover:opacity-100 transition-all rounded-full hover:bg-white/10'>
+													<X className='size-4' />
+												</button>
+											</div>
+										))}
+									</div>
+								</div>
+							)}
+
+							{/* Search Results */}
+							{searchQuery && (
+								<div className="py-2">
+									{isLoading ? (
+										<div className='px-5 py-8 text-center text-neutral-400 text-sm'>
+											<div className="size-5 border-2 border-neutral-600 border-t-orange-500 rounded-full animate-spin mx-auto mb-3" />
+											Searching...
 										</div>
-									</div>
-								)}
-
-								{/* Section: Live Search Results */}
-								{searchQuery && (
-									<div className="py-2">
-										{isLoading ? (
-											<div className='px-5 py-8 text-center text-neutral-400 text-sm'>
-												<div className="size-5 border-2 border-neutral-600 border-t-orange-500 rounded-full animate-spin mx-auto mb-3" />
-												Searching...
-											</div>
-										) : searchResults.length > 0 ? (
-											<>
-												<div className='px-4 py-2 font-bold text-sm text-white opacity-60 uppercase tracking-wider'>Results</div>
-												<div className="max-h-[60vh] overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
-													{searchResults.slice(0, 8).map((song) => (
-														<div
-															key={song._id}
-															className='flex items-center gap-3 px-4 py-2 hover:bg-white/10 cursor-pointer transition-colors'
-															onClick={(e) => { e.stopPropagation(); handlePlaySong(song); }}
-														>
-															<img
-																src={song.imageUrl}
-																alt={song.title}
-																className='w-12 h-12 rounded shadow-md object-cover'
-															/>
-															<div className='flex-1 min-w-0'>
-																<p className='font-medium truncate text-white'>{song.title}</p>
-																<p className='text-sm text-neutral-400 truncate'>Song • {song.artist}</p>
-															</div>
+									) : searchResults.length > 0 ? (
+										<>
+											<div className='px-4 py-2 font-bold text-xs text-neutral-400 uppercase tracking-wider'>Results</div>
+											<div className="max-h-[60vh] overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
+												{searchResults.slice(0, 8).map((song) => (
+													<div key={song._id} className='flex items-center gap-3 px-4 py-2.5 hover:bg-white/[0.08] cursor-pointer transition-colors' onClick={(e) => { e.stopPropagation(); handlePlaySong(song); }}>
+														<img src={song.imageUrl} alt={song.title} className='w-11 h-11 rounded-lg object-cover' />
+														<div className='flex-1 min-w-0'>
+															<p className='font-semibold truncate text-white text-sm'>{song.title}</p>
+															<p className='text-xs text-neutral-500 truncate'>Song • {song.artist}</p>
 														</div>
-													))}
-													<div
-														className='px-4 py-4 text-sm text-white font-bold hover:bg-white/10 cursor-pointer text-center border-t border-white/5 mt-2'
-														onClick={() => { navigate("/search"); setShowDropdown(false); }}
-													>
-														See all results for "{searchQuery}"
 													</div>
+												))}
+												<div className='px-4 py-3.5 text-sm text-orange-400 font-bold hover:bg-white/[0.08] cursor-pointer text-center border-t border-white/5 mt-1 transition-colors' onClick={() => { navigate("/search"); setShowDropdown(false); }}>
+													See all results for "{searchQuery}"
 												</div>
-											</>
-										) : (
-											<div className='px-4 py-12 text-center'>
-												<Search className="size-10 text-zinc-600 mx-auto mb-3" />
-												<p className="text-white font-bold">No results found for "{searchQuery}"</p>
-												<p className="text-sm text-neutral-400">Please check your spelling or try another search.</p>
 											</div>
-										)}
-									</div>
-								)}
-							</div>
-						</div>,
-						document.body
+										</>
+									) : (
+										<div className='px-5 py-10 text-center'>
+											<Search className="size-10 text-neutral-700 mx-auto mb-3" />
+											<p className="text-white font-bold text-sm">No results for "{searchQuery}"</p>
+											<p className="text-xs text-neutral-500 mt-1">Check spelling or try another search</p>
+										</div>
+									)}
+								</div>
+							)}
+						</div>
 					)}
 				</div>
 			</div>
 
-			{/* Right - Profile & Actions */}
+			{/* Right - Profile */}
 			<div className='flex gap-4 items-center relative'>
 				<button
 					onClick={() => setShowProfile(!showProfile)}
@@ -244,8 +194,8 @@ const Topbar = () => {
 				{showProfile && (
 					<>
 						<div className='fixed inset-0 z-[2147483640]' onClick={() => setShowProfile(false)} />
-						<div className='absolute top-12 right-0 bg-[#282828] rounded shadow-2xl z-[2147483641] py-1 min-w-[190px] border border-[#3e3e3e] animate-in fade-in slide-in-from-top-2 duration-150'>
-							<div className='px-3 py-2 border-b border-[#3e3e3e] mb-1'>
+						<div className='absolute top-12 right-0 bg-[#1a1a1a] rounded-xl shadow-2xl z-[2147483641] py-1 min-w-[190px] border border-neutral-700/50'>
+							<div className='px-3 py-2 border-b border-neutral-700/50 mb-1'>
 								<p className='font-bold text-white text-sm truncate'>{user?.displayName || 'User'}</p>
 								<p className='text-[11px] text-neutral-400 truncate'>{user?.email || 'Logged in'}</p>
 							</div>
