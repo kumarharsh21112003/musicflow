@@ -55,35 +55,35 @@ io.on("connection", (socket) => {
             currentTime: 0,
             createdAt: Date.now()
         };
-        
+
         rooms.set(roomCode, room);
         userRooms.set(userId, roomCode);
         socket.join(roomCode);
-        
+
         console.log(`🎉 Room created: ${roomCode} by ${username}`);
         socket.emit("room_created", { roomCode, room });
     });
 
     socket.on("join_room", ({ userId, username, roomCode }) => {
         const room = rooms.get(roomCode);
-        
+
         if (!room) {
             socket.emit("room_error", { message: "Room not found! Check the code." });
             return;
         }
-        
+
         if (!room.members.find(m => m.id === userId)) {
             room.members.push({ id: userId, name: username || 'Guest', isHost: false });
         }
-        
+
         userRooms.set(userId, roomCode);
         socket.join(roomCode);
-        
-        io.to(roomCode).emit("member_joined", { 
+
+        io.to(roomCode).emit("member_joined", {
             userId, username, members: room.members,
             currentSong: room.currentSong, isPlaying: room.isPlaying, currentTime: room.currentTime
         });
-        
+
         console.log(`👋 ${username} joined room: ${roomCode}`);
         socket.emit("room_joined", { roomCode, room });
     });
@@ -91,14 +91,14 @@ io.on("connection", (socket) => {
     socket.on("leave_room", ({ userId }) => {
         const roomCode = userRooms.get(userId);
         if (!roomCode) return;
-        
+
         const room = rooms.get(roomCode);
         if (!room) return;
-        
+
         room.members = room.members.filter(m => m.id !== userId);
         userRooms.delete(userId);
         socket.leave(roomCode);
-        
+
         if (room.host === userId) {
             if (room.members.length > 0) {
                 room.host = room.members[0].id;
@@ -110,22 +110,22 @@ io.on("connection", (socket) => {
                 return;
             }
         }
-        
+
         io.to(roomCode).emit("member_left", { userId, members: room.members });
     });
 
     socket.on("room_play_song", ({ roomCode, song, userId }) => {
         const room = rooms.get(roomCode);
         if (!room) return;
-        
+
         // Any member can change songs!
         const member = room.members.find(m => m.id === userId);
         if (!member) return;
-        
+
         room.currentSong = song;
         room.isPlaying = true;
         room.currentTime = 0;
-        
+
         io.to(roomCode).emit("room_song_changed", { song, isPlaying: true, currentTime: 0, changedBy: member.name });
         console.log(`🎵 Room ${roomCode}: ${member.name} playing "${song.title}"`);
     });
@@ -133,7 +133,7 @@ io.on("connection", (socket) => {
     socket.on("room_sync_playback", ({ roomCode, isPlaying, currentTime, userId }) => {
         const room = rooms.get(roomCode);
         if (!room || room.host !== userId) return;
-        
+
         room.isPlaying = isPlaying;
         room.currentTime = currentTime;
         socket.to(roomCode).emit("room_playback_sync", { isPlaying, currentTime });
@@ -209,7 +209,7 @@ app.get('/api/search', async (req, res) => {
                 imageUrl: item.bestThumbnail?.url || `https://i.ytimg.com/vi/${item.id}/mqdefault.jpg`,
                 duration: parseDuration(item.duration),
             }));
-        
+
         setCache(cacheKey, songs);
         console.log(`✅ Found ${songs.length}`);
         res.json(songs);
@@ -225,15 +225,15 @@ app.post('/api/artists-songs', async (req, res) => {
         const { artists } = req.body;
         if (!artists || !artists.length) return res.json([]);
 
-        const cacheKey = `artists:${artists.slice(0,5).sort().join(',')}`;
+        const cacheKey = `artists:${artists.slice(0, 5).sort().join(',')}`;
         const cached = getFromCache(cacheKey);
         if (cached) {
             console.log(`⚡ Cache: artists`);
             return res.json(cached);
         }
 
-        console.log(`🎤 Artists: ${artists.slice(0,3).join(', ')}...`);
-        
+        console.log(`🎤 Artists: ${artists.slice(0, 3).join(', ')}...`);
+
         // Only fetch 3 artists max for speed
         const promises = artists.slice(0, 3).map(async (artist) => {
             try {
@@ -257,7 +257,7 @@ app.post('/api/artists-songs', async (req, res) => {
 
         const results = await Promise.all(promises);
         const allSongs = results.flat();
-        
+
         setCache(cacheKey, allSongs);
         console.log(`✅ Total: ${allSongs.length}`);
         res.json(allSongs);
@@ -290,7 +290,7 @@ app.get('/api/trending', async (req, res) => {
                 imageUrl: item.bestThumbnail?.url || `https://i.ytimg.com/vi/${item.id}/mqdefault.jpg`,
                 duration: parseDuration(item.duration),
             }));
-        
+
         setCache('trending', songs);
         console.log(`✅ Trending: ${songs.length} songs`);
         res.json(songs);
@@ -305,15 +305,15 @@ app.get('/api/stream/:videoId', async (req, res) => {
     try {
         const { videoId } = req.params;
         const range = req.headers.range;
-        
+
         const info = await ytdl.getInfo(videoId);
-        const format = ytdl.chooseFormat(info.formats, { 
-            filter: 'audioonly', 
-            quality: 'highestaudio' 
+        const format = ytdl.chooseFormat(info.formats, {
+            filter: 'audioonly',
+            quality: 'highestaudio'
         });
 
         if (!format) throw new Error('No audio format found');
-        
+
         const totalSize = parseInt(format.contentLength);
 
         if (range) {
@@ -330,7 +330,7 @@ app.get('/api/stream/:videoId', async (req, res) => {
                 'Cache-Control': 'public, max-age=3600',
             });
 
-            const stream = ytdl(videoId, { 
+            const stream = ytdl(videoId, {
                 format: format,
                 range: { start, end },
                 highWaterMark: 1 << 25,
@@ -345,7 +345,7 @@ app.get('/api/stream/:videoId', async (req, res) => {
                 'Cache-Control': 'public, max-age=3600',
             });
 
-            const stream = ytdl(videoId, { 
+            const stream = ytdl(videoId, {
                 format: format,
                 highWaterMark: 1 << 25,
                 dlChunkSize: 0
@@ -355,6 +355,51 @@ app.get('/api/stream/:videoId', async (req, res) => {
     } catch (error) {
         console.error('❌ Stream error:', error.message);
         if (!res.headersSent) res.status(500).send('Streaming failed: ' + error.message);
+    }
+});
+
+// Download audio as MP3
+app.get('/api/download/:videoId', async (req, res) => {
+    try {
+        const { videoId } = req.params;
+
+        const info = await ytdl.getInfo(videoId);
+        const format = ytdl.chooseFormat(info.formats, {
+            filter: 'audioonly',
+            quality: 'highestaudio'
+        });
+
+        if (!format) throw new Error('No audio format found');
+
+        // Clean title for filename
+        const title = info.videoDetails.title
+            .replace(/[^a-zA-Z0-9\s\-]/g, '')
+            .trim()
+            .substring(0, 100);
+
+        res.writeHead(200, {
+            'Content-Type': 'audio/mpeg',
+            'Content-Disposition': `attachment; filename="${title}.mp3"`,
+            'Content-Length': format.contentLength,
+        });
+
+        const stream = ytdl(videoId, {
+            format: format,
+            highWaterMark: 1 << 25,
+            dlChunkSize: 0
+        });
+
+        stream.pipe(res);
+
+        stream.on('error', (err) => {
+            console.error('❌ Download stream error:', err.message);
+            if (!res.headersSent) res.status(500).send('Download failed');
+        });
+
+        console.log(`⬇️ Download: ${title}`);
+    } catch (error) {
+        console.error('❌ Download error:', error.message);
+        if (!res.headersSent) res.status(500).send('Download failed: ' + error.message);
     }
 });
 
