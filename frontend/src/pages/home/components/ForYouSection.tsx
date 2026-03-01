@@ -119,7 +119,7 @@ const ForYouSection = () => {
     // 4. Trending
     recs.push({ title: "Trending Now 🔥", subtitle: "What India is playing", query: "trending songs india 2025 viral", coverImg: MIX_COVERS[5], gradient: "from-red-500/80 to-orange-500/80" });
 
-    setSmartRecs(recs.slice(0, 6));
+    setSmartRecs(recs.slice(0, 8));
   }, [listeningHistory, getTopArtists]);
 
   useEffect(() => { buildRecommendations(); }, [buildRecommendations]);
@@ -147,9 +147,39 @@ const ForYouSection = () => {
     }
   };
 
+  // Extra recommendation sections data
+  const DISCOVER_WEEKLY = [
+    { title: "Discover Weekly", subtitle: "New music, just for you", query: "new indie songs 2025 underrated", img: "https://images.unsplash.com/photo-1506157786151-b8491531f063?w=300", gradient: "from-green-600/80 to-emerald-500/80" },
+    { title: "Release Radar", subtitle: "Catch the latest drops", query: "new releases hindi songs 2025 latest", img: "https://images.unsplash.com/photo-1526142684086-16ce9e5c9bd3?w=300", gradient: "from-blue-600/80 to-cyan-500/80" },
+    { title: "On Repeat", subtitle: "Songs you can't stop playing", query: "most played hindi songs 2025", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300", gradient: "from-violet-600/80 to-purple-500/80" },
+    { title: "Repeat Rewind", subtitle: "Past favorites comeback", query: "old hindi songs remix 2024 best", img: "https://images.unsplash.com/photo-1483412033650-1015ddeb83d1?w=300", gradient: "from-amber-600/80 to-orange-500/80" },
+    { title: "Blend Mix", subtitle: "Music that brings people together", query: "popular party songs india 2025", img: "https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=300", gradient: "from-pink-600/80 to-rose-500/80" },
+    { title: "Fresh Finds", subtitle: "Emerging artists you'll love", query: "new artists hindi indie 2025", img: "https://images.unsplash.com/photo-1460723237483-7a6dc9d0b212?w=300", gradient: "from-teal-600/80 to-green-500/80" },
+  ];
+
+  const MOOD_PLAYLISTS = [
+    { name: "💆 Relax", query: "relaxing calm hindi songs peaceful", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200", gradient: "from-teal-600 to-cyan-500" },
+    { name: "🔥 Energy", query: "high energy workout gym songs hindi", img: "https://images.unsplash.com/photo-1534258936925-c58bed479fcb?w=200", gradient: "from-red-600 to-orange-500" },
+    { name: "💜 Romance", query: "romantic love songs hindi 2025 best", img: "https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=200", gradient: "from-pink-600 to-rose-500" },
+    { name: "🎉 Party", query: "party dance songs bollywood 2025", img: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=200", gradient: "from-purple-600 to-violet-500" },
+    { name: "😔 Sad", query: "sad emotional songs hindi heartbreak", img: "https://images.unsplash.com/photo-1499084732479-de2c02d45fcc?w=200", gradient: "from-blue-700 to-indigo-600" },
+    { name: "🌙 Sleep", query: "sleep lullaby lofi instrumental calm", img: "https://images.unsplash.com/photo-1489549132488-d00b7eee80f1?w=200", gradient: "from-indigo-700 to-slate-700" },
+    { name: "☀️ Happy", query: "happy upbeat bollywood songs feel good", img: "https://images.unsplash.com/photo-1506157786151-b8491531f063?w=200", gradient: "from-yellow-500 to-amber-500" },
+    { name: "🎸 Rock", query: "rock songs hindi english best", img: "https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=200", gradient: "from-gray-700 to-zinc-600" },
+  ];
+
+  const NEW_RELEASES = [
+    { title: "Today's Hits", subtitle: "Updated daily", query: "today new hindi songs 2025", img: "https://images.unsplash.com/photo-1614680376593-902f74cf0d41?w=300", gradient: "from-emerald-600/80 to-green-500/80" },
+    { title: "New In Bollywood", subtitle: "Fresh from the studios", query: "latest bollywood songs march 2025", img: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300", gradient: "from-rose-600/80 to-pink-500/80" },
+    { title: "Punjabi New", subtitle: "Latest Punjabi drops", query: "new punjabi songs 2025 latest this week", img: "https://images.unsplash.com/photo-1504898770365-14faca6a7320?w=300", gradient: "from-amber-600/80 to-yellow-500/80" },
+    { title: "Global Top 50", subtitle: "World's most played", query: "global top 50 songs 2025 most played", img: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=300", gradient: "from-sky-600/80 to-blue-500/80" },
+    { title: "Viral Hits", subtitle: "Trending on social media", query: "viral instagram reels songs 2025", img: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300", gradient: "from-fuchsia-600/80 to-pink-500/80" },
+    { title: "Throwback Hits", subtitle: "Nostalgic gems", query: "best old hindi songs evergreen classics", img: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=300", gradient: "from-orange-600/80 to-red-500/80" },
+  ];
+
   return (
-    <div className="mb-10 space-y-8">
-      {/* Made For You - with images */}
+    <div className="mb-10 space-y-10">
+      {/* 1. Made For You - AI Personalized */}
       <div>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
@@ -166,37 +196,17 @@ const ForYouSection = () => {
             Refresh
           </Button>
         </div>
-
-        {/* Premium cards with cover images */}
         <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar">
           {smartRecs.map((rec, i) => (
-            <button
-              key={i}
-              onClick={() => playRec(rec.query)}
-              disabled={isLoading}
-              className="flex-shrink-0 w-44 group relative overflow-hidden rounded-xl transition-all duration-300 hover:scale-105 disabled:opacity-50"
-            >
-              {/* Cover Image */}
+            <button key={i} onClick={() => playRec(rec.query)} disabled={isLoading} className="flex-shrink-0 w-44 group relative overflow-hidden rounded-xl transition-all duration-300 hover:scale-105 disabled:opacity-50">
               <div className="relative h-44 w-full">
-                <img
-                  src={rec.coverImg}
-                  alt={rec.title}
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                />
+                <img src={rec.coverImg} alt={rec.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                 <div className={`absolute inset-0 bg-gradient-to-t ${rec.gradient} via-transparent to-transparent`} />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-
-                {/* Play button overlay */}
                 <div className="absolute bottom-3 right-3 w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center text-white shadow-lg opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
-                  {activeQuery === rec.query ? (
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                  ) : (
-                    <Play className="h-5 w-5 fill-white" />
-                  )}
+                  {activeQuery === rec.query ? <Loader2 className="h-5 w-5 animate-spin" /> : <Play className="h-5 w-5 fill-white" />}
                 </div>
               </div>
-
-              {/* Text */}
               <div className="p-3 text-left bg-neutral-900/50">
                 <p className="text-sm font-bold text-white truncate">{rec.title}</p>
                 <p className="text-xs text-neutral-400 truncate mt-0.5">{rec.subtitle}</p>
@@ -206,7 +216,7 @@ const ForYouSection = () => {
         </div>
       </div>
 
-      {/* Quick Picks with images */}
+      {/* 2. Quick Picks - Genre */}
       <div>
         <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
           <Radio className="h-5 w-5 text-orange-400" />
@@ -216,16 +226,9 @@ const ForYouSection = () => {
           {GENRE_MIXES.map((mix) => {
             const Icon = mix.icon;
             return (
-              <button
-                key={mix.name}
-                onClick={() => playRec(mix.query)}
-                disabled={isLoading}
-                className="group relative h-16 rounded-xl overflow-hidden hover:scale-[1.02] transition-all disabled:opacity-50"
-              >
-                {/* Background image */}
+              <button key={mix.name} onClick={() => playRec(mix.query)} disabled={isLoading} className="group relative h-16 rounded-xl overflow-hidden hover:scale-[1.02] transition-all disabled:opacity-50">
                 <img src={mix.img} alt={mix.name} className="absolute inset-0 w-full h-full object-cover" />
                 <div className={`absolute inset-0 bg-gradient-to-r ${mix.gradient} opacity-85`} />
-
                 <div className="relative flex items-center gap-3 h-full px-4">
                   <Icon className="h-5 w-5 text-white/90 flex-shrink-0" />
                   <span className="text-white font-bold text-sm truncate">{mix.name}</span>
@@ -238,6 +241,126 @@ const ForYouSection = () => {
               </button>
             );
           })}
+        </div>
+      </div>
+
+      {/* 3. Discover Weekly */}
+      <div>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-2 bg-gradient-to-br from-green-500 to-teal-500 rounded-lg">
+            <Brain className="h-5 w-5 text-white" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold">Discover Weekly</h2>
+            <p className="text-sm text-neutral-500">Fresh picks every Monday</p>
+          </div>
+        </div>
+        <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar">
+          {DISCOVER_WEEKLY.map((item, i) => (
+            <button key={i} onClick={() => playRec(item.query)} disabled={isLoading} className="flex-shrink-0 w-44 group relative overflow-hidden rounded-xl transition-all duration-300 hover:scale-105 disabled:opacity-50">
+              <div className="relative h-44 w-full">
+                <img src={item.img} alt={item.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                <div className={`absolute inset-0 bg-gradient-to-t ${item.gradient} via-transparent to-transparent`} />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                <div className="absolute bottom-3 right-3 w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white shadow-lg opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+                  {activeQuery === item.query ? <Loader2 className="h-5 w-5 animate-spin" /> : <Play className="h-5 w-5 fill-white" />}
+                </div>
+              </div>
+              <div className="p-3 text-left bg-neutral-900/50">
+                <p className="text-sm font-bold text-white truncate">{item.title}</p>
+                <p className="text-xs text-neutral-400 truncate mt-0.5">{item.subtitle}</p>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* 4. Mood Radio */}
+      <div>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg">
+            <Headphones className="h-5 w-5 text-white" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold">Mood Radio</h2>
+            <p className="text-sm text-neutral-500">Music for every feeling</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {MOOD_PLAYLISTS.map((mood) => (
+            <button key={mood.name} onClick={() => playRec(mood.query)} disabled={isLoading} className="group relative h-20 rounded-xl overflow-hidden hover:scale-[1.02] transition-all disabled:opacity-50">
+              <img src={mood.img} alt={mood.name} className="absolute inset-0 w-full h-full object-cover" />
+              <div className={`absolute inset-0 bg-gradient-to-r ${mood.gradient} opacity-80`} />
+              <div className="relative flex items-center justify-center h-full px-4">
+                <span className="text-white font-bold text-base">{mood.name}</span>
+                {activeQuery === mood.query && <Loader2 className="h-4 w-4 text-white animate-spin ml-2" />}
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* 5. New Releases */}
+      <div>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-2 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg">
+            <Clock className="h-5 w-5 text-white" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold">New Releases</h2>
+            <p className="text-sm text-neutral-500">Latest drops for you</p>
+          </div>
+        </div>
+        <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar">
+          {NEW_RELEASES.map((item, i) => (
+            <button key={i} onClick={() => playRec(item.query)} disabled={isLoading} className="flex-shrink-0 w-44 group relative overflow-hidden rounded-xl transition-all duration-300 hover:scale-105 disabled:opacity-50">
+              <div className="relative h-44 w-full">
+                <img src={item.img} alt={item.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                <div className={`absolute inset-0 bg-gradient-to-t ${item.gradient} via-transparent to-transparent`} />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                <div className="absolute bottom-3 right-3 w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white shadow-lg opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+                  {activeQuery === item.query ? <Loader2 className="h-5 w-5 animate-spin" /> : <Play className="h-5 w-5 fill-white" />}
+                </div>
+              </div>
+              <div className="p-3 text-left bg-neutral-900/50">
+                <p className="text-sm font-bold text-white truncate">{item.title}</p>
+                <p className="text-xs text-neutral-400 truncate mt-0.5">{item.subtitle}</p>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* 6. Charts */}
+      <div>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-2 bg-gradient-to-br from-red-500 to-orange-500 rounded-lg">
+            <TrendingUp className="h-5 w-5 text-white" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold">Charts</h2>
+            <p className="text-sm text-neutral-500">What's trending right now</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          {[
+            { name: "Top India", query: "top songs india 2025 charts", gradient: "from-orange-600 to-red-500", emoji: "🇮🇳" },
+            { name: "Top Global", query: "top global songs 2025 worldwide hits", gradient: "from-blue-600 to-purple-500", emoji: "🌍" },
+            { name: "Top Bollywood", query: "top bollywood songs 2025 charts", gradient: "from-pink-600 to-rose-500", emoji: "🎬" },
+            { name: "Top Punjabi", query: "top punjabi songs 2025 charts bhangra", gradient: "from-amber-600 to-yellow-500", emoji: "🎤" },
+            { name: "Top Hip Hop", query: "top hip hop rap songs 2025 india", gradient: "from-gray-700 to-zinc-600", emoji: "🎤" },
+            { name: "Top EDM", query: "top edm electronic dance songs 2025", gradient: "from-cyan-600 to-teal-500", emoji: "🎧" },
+          ].map((chart) => (
+            <button key={chart.name} onClick={() => playRec(chart.query)} disabled={isLoading} className={`group relative h-24 rounded-xl overflow-hidden hover:scale-[1.02] transition-all disabled:opacity-50 bg-gradient-to-br ${chart.gradient}`}>
+              <div className="relative flex flex-col items-start justify-end h-full p-4">
+                <span className="text-2xl mb-1">{chart.emoji}</span>
+                <span className="text-white font-bold text-sm">{chart.name}</span>
+              </div>
+              <div className="absolute top-3 right-3 w-8 h-8 bg-white/20 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                {activeQuery === chart.query ? <Loader2 className="h-4 w-4 text-white animate-spin" /> : <Play className="h-4 w-4 text-white fill-white" />}
+              </div>
+            </button>
+          ))}
         </div>
       </div>
     </div>
