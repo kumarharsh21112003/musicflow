@@ -1,16 +1,16 @@
 /**
  * Smart AI Recommendations - Spotify/YouTube Music style
- * Generates personalized mixes, discover sections, and mood-based playlists
+ * Personalized mixes with cover images, genre Quick Picks
  */
 
 import { useEffect, useState, useCallback } from "react";
 import { usePlayerStore } from "@/stores/usePlayerStore";
 import { useMusicStore } from "@/stores/useMusicStore";
-import { Sparkles, Brain, Clock, TrendingUp, RefreshCw, Play, Loader2, Radio, Disc3, Headphones, Music2, Zap, Heart } from "lucide-react";
+import { Brain, RefreshCw, Play, Loader2, Radio, Disc3, Headphones, Music2, Zap, Heart, TrendingUp, Clock, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
 
-// Related artists map - when user listens to one, suggest similar
+// Related artists map
 const RELATED_ARTISTS: Record<string, string[]> = {
   "Arijit Singh": ["Atif Aslam", "Jubin Nautiyal", "B Praak", "Darshan Raval", "Vishal Mishra"],
   "Atif Aslam": ["Arijit Singh", "Rahat Fateh Ali Khan", "Ali Zafar", "Mustafa Zahid"],
@@ -33,29 +33,34 @@ const RELATED_ARTISTS: Record<string, string[]> = {
   "Nav Haryanvi": ["Masoom Sharma", "Raju Punjabi", "Sapna Choudhary", "Gulzaar Chhaniwala"],
 };
 
-// Genre categories for discovery
+// Cover images for mixes
+const MIX_COVERS = [
+  "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300",
+  "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300",
+  "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=300",
+  "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300",
+  "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=300",
+  "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=300",
+];
+
+// Genre categories with images
 const GENRE_MIXES = [
-  { name: "Bollywood Hits", query: "bollywood hits 2025 latest", gradient: "from-pink-600 to-rose-500", icon: Heart },
-  { name: "Punjabi Fire", query: "latest punjabi songs 2025", gradient: "from-orange-500 to-amber-500", icon: Zap },
-  { name: "Chill Vibes", query: "chill lofi hindi songs", gradient: "from-cyan-600 to-teal-500", icon: Headphones },
-  { name: "Hip Hop", query: "indian hip hop rap 2025", gradient: "from-purple-600 to-violet-500", icon: Disc3 },
-  { name: "Party Mix", query: "party songs hindi 2025 dance", gradient: "from-red-600 to-pink-500", icon: Music2 },
-  { name: "Workout", query: "workout motivation songs hindi", gradient: "from-green-600 to-emerald-500", icon: TrendingUp },
-  { name: "Sad Songs", query: "sad heartbreak songs hindi 2025", gradient: "from-blue-600 to-indigo-500", icon: Heart },
-  { name: "English Pop", query: "top english pop songs 2025", gradient: "from-yellow-500 to-orange-500", icon: Radio },
-  { name: "Romantic", query: "romantic love songs hindi latest", gradient: "from-rose-500 to-pink-400", icon: Heart },
-  { name: "Old Gold", query: "90s bollywood hits best songs", gradient: "from-amber-600 to-yellow-500", icon: Sparkles },
-  { name: "Haryanvi", query: "latest haryanvi songs 2025 hits", gradient: "from-lime-600 to-green-500", icon: Music2 },
-  { name: "K-Pop", query: "kpop trending songs 2025", gradient: "from-fuchsia-500 to-pink-500", icon: Sparkles },
+  { name: "Bollywood Hits", query: "bollywood hits 2025 latest", gradient: "from-pink-600 to-rose-500", icon: Heart, img: "https://images.unsplash.com/photo-1598387846148-47e82ee120cc?w=200" },
+  { name: "Punjabi Fire", query: "latest punjabi songs 2025", gradient: "from-orange-500 to-amber-500", icon: Zap, img: "https://images.unsplash.com/photo-1504898770365-14faca6a7320?w=200" },
+  { name: "Chill Vibes", query: "chill lofi hindi songs", gradient: "from-cyan-600 to-teal-500", icon: Headphones, img: "https://images.unsplash.com/photo-1487180144351-b8472da7d491?w=200" },
+  { name: "Hip Hop", query: "indian hip hop rap 2025", gradient: "from-purple-600 to-violet-500", icon: Disc3, img: "https://images.unsplash.com/photo-1571330735066-03aaa9429d89?w=200" },
+  { name: "Party Mix", query: "party songs hindi 2025 dance", gradient: "from-red-600 to-pink-500", icon: Music2, img: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=200" },
+  { name: "Workout", query: "workout motivation songs hindi", gradient: "from-green-600 to-emerald-500", icon: TrendingUp, img: "https://images.unsplash.com/photo-1534258936925-c58bed479fcb?w=200" },
+  { name: "Sad Songs", query: "sad heartbreak songs hindi 2025", gradient: "from-blue-600 to-indigo-500", icon: Heart, img: "https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=200" },
+  { name: "English Pop", query: "top english pop songs 2025", gradient: "from-yellow-500 to-orange-500", icon: Radio, img: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=200" },
 ];
 
 interface SmartRec {
   title: string;
   subtitle: string;
   query: string;
-  type: "artist-mix" | "mood" | "discover" | "genre";
+  coverImg: string;
   gradient: string;
-  icon: any;
 }
 
 const ForYouSection = () => {
@@ -64,21 +69,12 @@ const ForYouSection = () => {
   const [smartRecs, setSmartRecs] = useState<SmartRec[]>([]);
   const [activeQuery, setActiveQuery] = useState<string | null>(null);
 
-  const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour >= 5 && hour < 12) return "Good morning";
-    if (hour >= 12 && hour < 17) return "Good afternoon";
-    if (hour >= 17 && hour < 21) return "Good evening";
-    return "Good night";
-  };
-
-  // build smart recommendations
   const buildRecommendations = useCallback(() => {
     const topArtists = getTopArtists();
     const hour = new Date().getHours();
     const recs: SmartRec[] = [];
 
-    // 1. Artist-based Daily Mixes (like Spotify)
+    // 1. Artist Daily Mixes
     topArtists.slice(0, 3).forEach((artist, i) => {
       const related = RELATED_ARTISTS[artist] || [];
       const mixArtists = related.slice(0, 2).join(", ");
@@ -86,13 +82,12 @@ const ForYouSection = () => {
         title: `Daily Mix ${i + 1}`,
         subtitle: `${artist}, ${mixArtists}`,
         query: `${artist} ${related[0] || ""} songs mix`,
-        type: "artist-mix",
-        gradient: i === 0 ? "from-orange-600 to-red-500" : i === 1 ? "from-blue-600 to-purple-500" : "from-teal-500 to-cyan-500",
-        icon: Disc3,
+        coverImg: MIX_COVERS[i],
+        gradient: i === 0 ? "from-orange-600/80 to-red-600/80" : i === 1 ? "from-blue-600/80 to-purple-600/80" : "from-teal-500/80 to-cyan-600/80",
       });
     });
 
-    // 2. "Because you listened to X" recommendation
+    // 2. "Because you listened to X"
     if (listeningHistory.length > 0) {
       const lastArtist = listeningHistory[0]?.artist;
       if (lastArtist) {
@@ -100,61 +95,35 @@ const ForYouSection = () => {
         if (related && related.length > 0) {
           const suggestion = related[Math.floor(Math.random() * related.length)];
           recs.push({
-            title: `Because you listened to ${lastArtist}`,
-            subtitle: `Try ${suggestion}`,
+            title: `Because you like ${lastArtist}`,
+            subtitle: `Try ${suggestion} and more`,
             query: `${suggestion} best songs`,
-            type: "discover",
-            gradient: "from-purple-600 to-pink-500",
-            icon: Brain,
+            coverImg: MIX_COVERS[3],
+            gradient: "from-purple-600/80 to-pink-600/80",
           });
         }
       }
     }
 
-    // 3. Time-based mood mix
-    let moodMix: SmartRec;
-    if (hour >= 5 && hour < 9) {
-      moodMix = { title: "Morning Boost", subtitle: "Start your day right", query: "morning motivational hindi songs 2025", type: "mood", gradient: "from-yellow-500 to-orange-400", icon: Sparkles };
-    } else if (hour >= 9 && hour < 12) {
-      moodMix = { title: "Focus Flow", subtitle: "Deep work mode", query: "focus study music lofi beats", type: "mood", gradient: "from-blue-500 to-indigo-500", icon: Brain };
+    // 3. Time-based mood
+    if (hour >= 5 && hour < 12) {
+      recs.push({ title: "Morning Boost", subtitle: "Start your day right", query: "morning motivational hindi songs 2025", coverImg: MIX_COVERS[4], gradient: "from-yellow-500/80 to-orange-500/80" });
     } else if (hour >= 12 && hour < 17) {
-      moodMix = { title: "Afternoon Chill", subtitle: "Relax and unwind", query: "chill afternoon bollywood songs", type: "mood", gradient: "from-green-500 to-teal-500", icon: Clock };
+      recs.push({ title: "Afternoon Chill", subtitle: "Relax & unwind", query: "chill afternoon bollywood songs", coverImg: MIX_COVERS[4], gradient: "from-green-500/80 to-teal-500/80" });
     } else if (hour >= 17 && hour < 21) {
-      moodMix = { title: "Evening Vibes", subtitle: "Wind down", query: "evening romantic hindi songs", type: "mood", gradient: "from-orange-500 to-rose-500", icon: Headphones };
+      recs.push({ title: "Evening Vibes", subtitle: "Wind down with music", query: "evening romantic hindi songs", coverImg: MIX_COVERS[4], gradient: "from-orange-500/80 to-rose-500/80" });
     } else {
-      moodMix = { title: "Late Night", subtitle: "Night owl mode", query: "late night lofi chill songs", type: "mood", gradient: "from-indigo-600 to-purple-600", icon: Clock };
+      recs.push({ title: "Late Night", subtitle: "Night owl mode", query: "late night lofi chill songs", coverImg: MIX_COVERS[4], gradient: "from-indigo-600/80 to-purple-600/80" });
     }
-    recs.push(moodMix);
 
-    // 4. Trending mix
-    recs.push({
-      title: "Trending Now",
-      subtitle: "What everyone's listening to",
-      query: "trending songs india 2025 viral",
-      type: "genre",
-      gradient: "from-red-500 to-orange-500",
-      icon: TrendingUp,
-    });
-
-    // 5. Discover Weekly (random genre the user hasn't explored)
-    const randomGenre = GENRE_MIXES[Math.floor(Math.random() * GENRE_MIXES.length)];
-    recs.push({
-      title: `Discover: ${randomGenre.name}`,
-      subtitle: "Something new for you",
-      query: randomGenre.query,
-      type: "discover",
-      gradient: randomGenre.gradient,
-      icon: Radio,
-    });
+    // 4. Trending
+    recs.push({ title: "Trending Now 🔥", subtitle: "What India is playing", query: "trending songs india 2025 viral", coverImg: MIX_COVERS[5], gradient: "from-red-500/80 to-orange-500/80" });
 
     setSmartRecs(recs.slice(0, 6));
   }, [listeningHistory, getTopArtists]);
 
-  useEffect(() => {
-    buildRecommendations();
-  }, [buildRecommendations]);
+  useEffect(() => { buildRecommendations(); }, [buildRecommendations]);
 
-  // play when results arrive
   useEffect(() => {
     if (activeQuery && searchResults.length > 0 && !isLoading) {
       setQueue(searchResults);
@@ -178,124 +147,99 @@ const ForYouSection = () => {
     }
   };
 
-  const playGenre = async (mix: typeof GENRE_MIXES[0]) => {
-    if (isLoading) return;
-    setActiveQuery(mix.query);
-    toast.loading(`Loading ${mix.name}...`, { id: "loading-rec" });
-    try {
-      await searchSongs(mix.query);
-      toast.dismiss("loading-rec");
-    } catch {
-      toast.error("Failed to load", { id: "loading-rec" });
-      setActiveQuery(null);
-    }
-  };
-
   return (
     <div className="mb-10 space-y-8">
-      {/* Smart Mixes Section */}
+      {/* Made For You - with images */}
       <div>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-gradient-to-br from-orange-500 to-pink-500 rounded-lg">
-              <Brain className="h-5 w-5 text-white" />
+              <Sparkles className="h-5 w-5 text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-bold">{getGreeting()} 👋 Made For You</h2>
-              <p className="text-sm text-neutral-500">AI-powered recommendations based on your taste</p>
+              <h2 className="text-xl font-bold">Made For You</h2>
+              <p className="text-sm text-neutral-500">Based on your recent listening</p>
             </div>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={buildRecommendations}
-            disabled={isLoading}
-            className="text-neutral-400 hover:text-white"
-          >
+          <Button variant="ghost" size="sm" onClick={buildRecommendations} disabled={isLoading} className="text-neutral-400 hover:text-white">
             <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`} />
             Refresh
           </Button>
         </div>
 
-        {/* Recommendation Cards - Spotify style horizontal scroll */}
+        {/* Spotify-style cards with cover images */}
         <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar">
-          {smartRecs.map((rec, i) => {
-            const Icon = rec.icon;
+          {smartRecs.map((rec, i) => (
+            <button
+              key={i}
+              onClick={() => playRec(rec.query)}
+              disabled={isLoading}
+              className="flex-shrink-0 w-44 group relative overflow-hidden rounded-xl transition-all duration-300 hover:scale-105 disabled:opacity-50"
+            >
+              {/* Cover Image */}
+              <div className="relative h-44 w-full">
+                <img
+                  src={rec.coverImg}
+                  alt={rec.title}
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+                <div className={`absolute inset-0 bg-gradient-to-t ${rec.gradient} via-transparent to-transparent`} />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+
+                {/* Play button overlay */}
+                <div className="absolute bottom-3 right-3 w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center text-white shadow-lg opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+                  {activeQuery === rec.query ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <Play className="h-5 w-5 fill-white" />
+                  )}
+                </div>
+              </div>
+
+              {/* Text */}
+              <div className="p-3 text-left bg-neutral-900/50">
+                <p className="text-sm font-bold text-white truncate">{rec.title}</p>
+                <p className="text-xs text-neutral-400 truncate mt-0.5">{rec.subtitle}</p>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Quick Picks with images */}
+      <div>
+        <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+          <Radio className="h-5 w-5 text-orange-400" />
+          Quick Picks
+        </h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {GENRE_MIXES.map((mix) => {
+            const Icon = mix.icon;
             return (
               <button
-                key={i}
-                onClick={() => playRec(rec.query)}
+                key={mix.name}
+                onClick={() => playRec(mix.query)}
                 disabled={isLoading}
-                className="flex-shrink-0 w-44 group relative overflow-hidden rounded-xl transition-all duration-300 hover:scale-105 disabled:opacity-50"
+                className="group relative h-16 rounded-xl overflow-hidden hover:scale-[1.02] transition-all disabled:opacity-50"
               >
-                <div className={`absolute inset-0 bg-gradient-to-br ${rec.gradient} opacity-90`} />
-                <div className="relative p-4 h-48 flex flex-col justify-between text-left">
-                  <div className="flex items-center justify-between">
-                    <div className="p-1.5 bg-white/20 rounded-lg backdrop-blur-sm">
-                      <Icon className="h-4 w-4 text-white" />
-                    </div>
-                    {activeQuery === rec.query ? (
-                      <Loader2 className="h-5 w-5 text-white animate-spin" />
-                    ) : (
-                      <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm">
-                        <Play className="h-4 w-4 text-white fill-white" />
-                      </div>
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-white font-bold text-sm leading-tight mb-1">{rec.title}</p>
-                    <p className="text-white/70 text-xs line-clamp-2">{rec.subtitle}</p>
-                  </div>
+                {/* Background image */}
+                <img src={mix.img} alt={mix.name} className="absolute inset-0 w-full h-full object-cover" />
+                <div className={`absolute inset-0 bg-gradient-to-r ${mix.gradient} opacity-85`} />
+
+                <div className="relative flex items-center gap-3 h-full px-4">
+                  <Icon className="h-5 w-5 text-white/90 flex-shrink-0" />
+                  <span className="text-white font-bold text-sm truncate">{mix.name}</span>
+                  {activeQuery === mix.query ? (
+                    <Loader2 className="h-4 w-4 text-white animate-spin ml-auto flex-shrink-0" />
+                  ) : (
+                    <Play className="h-4 w-4 text-white/60 ml-auto opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+                  )}
                 </div>
               </button>
             );
           })}
         </div>
       </div>
-
-      {/* Browse Genres - like Spotify/YouTube Music */}
-      <div>
-        <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-          <Radio className="h-5 w-5 text-orange-400" />
-          Quick Picks
-        </h3>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-          {GENRE_MIXES.slice(0, 8).map((mix) => {
-            const Icon = mix.icon;
-            return (
-              <button
-                key={mix.name}
-                onClick={() => playGenre(mix)}
-                disabled={isLoading}
-                className={`group flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r ${mix.gradient} 
-									hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 text-left`}
-              >
-                <Icon className="h-5 w-5 text-white/80 flex-shrink-0" />
-                <span className="text-white font-semibold text-sm truncate">{mix.name}</span>
-                {activeQuery === mix.query ? (
-                  <Loader2 className="h-4 w-4 text-white animate-spin ml-auto flex-shrink-0" />
-                ) : (
-                  <Play className="h-4 w-4 text-white/60 ml-auto opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Listening Stats */}
-      {listeningHistory.length > 0 && (
-        <div className="flex items-center gap-4 text-xs text-neutral-500">
-          <span className="flex items-center gap-1">
-            <Clock className="h-3 w-3" />
-            {listeningHistory.length} songs in history
-          </span>
-          <span className="flex items-center gap-1">
-            <TrendingUp className="h-3 w-3" />
-            {getTopArtists().length} favorite artists
-          </span>
-        </div>
-      )}
     </div>
   );
 };
