@@ -213,7 +213,6 @@ export const PlaybackControls = () => {
 						playerRef.current.unMute();
 						playerRef.current.setVolume(volume);
 						playerRef.current.playVideo();
-						toast.success('Playing via YouTube', { icon: '▶️', duration: 1500 });
 					} catch (ytError) {
 						console.error("YouTube fallback also failed:", ytError);
 						toast.error('Could not play this song', { icon: '⚠️', duration: 2000 });
