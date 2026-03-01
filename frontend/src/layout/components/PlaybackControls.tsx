@@ -81,7 +81,7 @@ export const PlaybackControls = () => {
 			if (playerRef.current) return;
 			playerRef.current = new window.YT.Player('yt-player-element', {
 				height: '100%', width: '100%',
-				playerVars: { autoplay: 0, controls: 0, modestbranding: 1, rel: 0, showinfo: 0, iv_load_policy: 3, playsinline: 1 },
+				playerVars: { autoplay: 0, controls: 0, modestbranding: 1, rel: 0, showinfo: 0, iv_load_policy: 3, playsinline: 1, vq: 'hd720' },
 				events: {
 					onReady: (e: any) => {
 						setIsReady(true);
@@ -90,12 +90,13 @@ export const PlaybackControls = () => {
 					},
 					onStateChange: (e: any) => {
 						// When video starts playing, force highest quality
-						if (e.data === window.YT.PlayerState.PLAYING) {
+						if (e.data === window.YT.PlayerState.PLAYING || e.data === window.YT.PlayerState.BUFFERING) {
 							const availableQuals = e.target.getAvailableQualityLevels();
 							if (availableQuals && availableQuals.length > 0) {
-								// Set to highest available quality
-								const highest = availableQuals[0]; // First is highest
-								e.target.setPlaybackQuality(highest);
+								// Prefer HD: hd1080 > hd720 > large > medium
+								const preferred = ['hd1080', 'hd720', 'large'];
+								const best = preferred.find(q => availableQuals.includes(q)) || availableQuals[0];
+								e.target.setPlaybackQuality(best);
 							}
 						}
 						// Sync video state if needed, but audio is handled by audioEngine
@@ -435,10 +436,10 @@ export const PlaybackControls = () => {
 							: {
 								bottom: 112 - videoPosition.y,
 								right: 16 - videoPosition.x,
-								width: 384,
-								height: 216,
+								width: 480,
+								height: 270,
 								zIndex: 9999,
-								borderRadius: 12,
+								borderRadius: 16,
 								cursor: isDragging ? 'grabbing' : 'default'
 							})
 						: { top: -9999, left: -9999, width: 1, height: 1, opacity: 0 }
