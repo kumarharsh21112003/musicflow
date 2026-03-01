@@ -253,51 +253,64 @@ export const PlaybackControls = () => {
 	// Sync Play/Pause status
 	useEffect(() => {
 		if (isPlaying) {
-			// If track isn't loaded yet (happens with persisted songs after reload)
-			if (!audioEngine.isPlaying() && audioEngine.getCurrentTime() === 0 && currentSong?.videoId && lastVideoId.current !== currentSong.videoId) {
-				// Need to load the track first
-				const loadFirst = async () => {
+			// If track isn't loaded yet (persisted song after reload)
+			if (currentSong?.videoId && lastVideoId.current !== currentSong.videoId) {
+				const resumePersistedSong = async () => {
 					setIsPlaybackLoading(true);
+					lastVideoId.current = currentSong.videoId!;
+
+					// Strategy 1: Try audioEngine (needs backend)
 					try {
-						lastVideoId.current = currentSong.videoId!;
-						if (isReady && playerRef.current) {
-							playerRef.current.loadVideoById(currentSong.videoId);
-							playerRef.current.mute();
-						}
 						await audioEngine.loadTrack({ ...currentSong, videoId: currentSong.videoId! } as any);
-
-						// Seek to saved position if any
 						const savedTime = currentTime;
-						if (savedTime > 0) {
-							audioEngine.seek(savedTime);
-						}
-
+						if (savedTime > 0) audioEngine.seek(savedTime);
 						setTimeout(() => {
 							const dur = audioEngine.getDuration();
 							if (dur > 0) setDuration(dur);
 						}, 500);
-
 						audioEngine.play();
-						if (isReady) playerRef.current?.playVideo();
-						setIsPlaybackLoading(false);
-					} catch (err) {
-						console.error("Failed to load persisted song:", err);
-						// Try YouTube fallback
 						if (isReady && playerRef.current) {
-							try {
-								playerRef.current.unMute();
-								playerRef.current.setVolume(volume);
-								playerRef.current.playVideo();
-							} catch {
-								toast.error('Could not play this song', { icon: '⚠️', duration: 2000 });
-							}
-						} else {
-							toast.error('Could not play this song', { icon: '⚠️', duration: 2000 });
+							playerRef.current.loadVideoById(currentSong.videoId);
+							playerRef.current.mute();
 						}
 						setIsPlaybackLoading(false);
+						return; // Success!
+					} catch {
+						console.log("AudioEngine failed, using YouTube...");
+					}
+
+					// Strategy 2: YouTube iframe (no backend needed)
+					// Wait for YouTube to be ready (max 5 seconds)
+					let waitMs = 0;
+					while (!isReady && waitMs < 5000) {
+						await new Promise(r => setTimeout(r, 200));
+						waitMs += 200;
+					}
+
+					if (playerRef.current) {
+						try {
+							playerRef.current.loadVideoById(currentSong.videoId);
+							playerRef.current.unMute();
+							playerRef.current.setVolume(volume);
+							setTimeout(() => {
+								playerRef.current?.playVideo();
+								const savedTime = currentTime;
+								if (savedTime > 0) playerRef.current?.seekTo(savedTime, true);
+							}, 1000);
+							setIsPlaybackLoading(false);
+						} catch {
+							toast.error('Tap play again in a moment', { icon: '🔄', duration: 2000 });
+							setIsPlaybackLoading(false);
+							lastVideoId.current = ''; // Allow retry
+						}
+					} else {
+						toast.error('Loading player, try again...', { icon: '🔄', duration: 2000 });
+						setIsPlaybackLoading(false);
+						lastVideoId.current = ''; // Allow retry
+						setIsPlaying(false);
 					}
 				};
-				loadFirst();
+				resumePersistedSong();
 			} else {
 				audioEngine.play();
 				if (isReady) playerRef.current?.playVideo();
