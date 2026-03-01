@@ -56,7 +56,7 @@ const Topbar = () => {
 
 	const handlePlaySong = async (song: any) => {
 		console.log('Playing song:', song.title, song);
-		
+
 		// Save to recent searches (full song object)
 		const updated = [song, ...recentSearches.filter(s => s._id !== song._id)].slice(0, 10);
 		setRecentSearches(updated);
@@ -64,11 +64,11 @@ const Topbar = () => {
 
 		// Close dropdown first
 		setShowDropdown(false);
-		
+
 		// Set queue and play
 		const queue = searchResults.length > 0 ? searchResults : [song];
 		setQueue(queue);
-		
+
 		// Small delay to ensure state updates
 		setTimeout(() => {
 			setCurrentSong(song);
@@ -86,14 +86,14 @@ const Topbar = () => {
 			{/* Left - Navigation & Home */}
 			<div className='flex gap-2 items-center'>
 				<div className="flex items-center gap-2 mr-2">
-					<button 
-						onClick={() => navigate("/")} 
+					<button
+						onClick={() => navigate("/")}
 						className={`p-3 rounded-full transition-all ${location.pathname === '/' ? 'bg-neutral-900 text-white' : 'bg-transparent text-neutral-400 hover:text-white'}`}
 					>
 						<Home className='size-6' fill={location.pathname === '/' ? "currentColor" : "none"} />
 					</button>
 				</div>
-				
+
 				<div className="hidden md:flex items-center gap-2">
 					<button onClick={() => navigate(-1)} className='p-1.5 bg-black rounded-full text-neutral-400 hover:text-white transition-colors'>
 						<ChevronLeft className='size-6' />
@@ -124,19 +124,20 @@ const Topbar = () => {
 						</div>
 					</form>
 
-					{/* Spotify Style Search Dropdown */}
+					{/* Search Dropdown - Dark Premium */}
 					{showDropdown && (searchQuery || recentSearches.length > 0) && createPortal(
 						<div className="fixed inset-0" style={{ zIndex: 2147483647 }}>
-							{/* Subtle backdrop */}
-							<div 
-								className='absolute inset-0 bg-black/40'
+							{/* Backdrop with blur */}
+							<div
+								className='absolute inset-0 bg-black/50 backdrop-blur-sm'
 								onClick={() => setShowDropdown(false)}
 							/>
-							
+
 							{/* Results Container */}
-							<div 
-								className='absolute left-1/2 -translate-x-1/2 w-[95%] max-w-[500px] bg-[#282828] rounded-lg shadow-[0_8px_24px_rgba(0,0,0,0.5)] overflow-hidden animate-in fade-in zoom-in-95 duration-200'
-								style={{ top: '64px' }} onMouseDown={(e) => e.stopPropagation()}
+							<div
+								className='absolute left-1/2 -translate-x-1/2 w-[95%] max-w-[500px] overflow-hidden'
+								style={{ top: '60px', background: 'rgba(18, 18, 18, 0.98)', backdropFilter: 'blur(20px)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 16px 48px rgba(0,0,0,0.7)' }}
+								onMouseDown={(e) => e.stopPropagation()}
 							>
 								{/* Section: Recent Searches */}
 								{!searchQuery && recentSearches.length > 0 && (
@@ -144,23 +145,23 @@ const Topbar = () => {
 										<div className='px-4 py-3 font-bold text-base text-white'>Recent searches</div>
 										<div className="max-h-[60vh] overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
 											{recentSearches.map((song) => (
-												<div 
+												<div
 													key={song._id}
 													className='flex items-center justify-between px-4 py-2 hover:bg-white/10 cursor-pointer group'
 													onClick={(e) => { e.stopPropagation(); handlePlaySong(song); }}
 												>
 													<div className='flex items-center gap-3 min-w-0'>
-														<img 
-															src={song.imageUrl} 
-															className="w-10 h-10 rounded shadow-lg object-cover" 
-															alt="" 
+														<img
+															src={song.imageUrl}
+															className="w-10 h-10 rounded shadow-lg object-cover"
+															alt=""
 														/>
 														<div className="truncate">
 															<p className='font-medium text-white truncate'>{song.title}</p>
 															<p className='text-xs text-neutral-400 truncate'>Song • {song.artist}</p>
 														</div>
 													</div>
-													<button 
+													<button
 														onClick={(e) => { e.stopPropagation(); clearRecent(song._id); }}
 														className='p-2 text-neutral-400 hover:text-white opacity-0 group-hover:opacity-100 transition-all'
 													>
@@ -176,8 +177,8 @@ const Topbar = () => {
 								{searchQuery && (
 									<div className="py-2">
 										{isLoading ? (
-											<div className='px-4 py-8 text-center text-neutral-400 text-sm'>
-												<div className="size-5 border-2 border-zinc-500 border-t-white rounded-full animate-spin mx-auto mb-2" />
+											<div className='px-5 py-8 text-center text-neutral-400 text-sm'>
+												<div className="size-5 border-2 border-neutral-600 border-t-orange-500 rounded-full animate-spin mx-auto mb-3" />
 												Searching...
 											</div>
 										) : searchResults.length > 0 ? (
@@ -185,13 +186,13 @@ const Topbar = () => {
 												<div className='px-4 py-2 font-bold text-sm text-white opacity-60 uppercase tracking-wider'>Results</div>
 												<div className="max-h-[60vh] overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
 													{searchResults.slice(0, 8).map((song) => (
-														<div 
+														<div
 															key={song._id}
 															className='flex items-center gap-3 px-4 py-2 hover:bg-white/10 cursor-pointer transition-colors'
 															onClick={(e) => { e.stopPropagation(); handlePlaySong(song); }}
 														>
-															<img 
-																src={song.imageUrl} 
+															<img
+																src={song.imageUrl}
 																alt={song.title}
 																className='w-12 h-12 rounded shadow-md object-cover'
 															/>
@@ -201,7 +202,7 @@ const Topbar = () => {
 															</div>
 														</div>
 													))}
-													<div 
+													<div
 														className='px-4 py-4 text-sm text-white font-bold hover:bg-white/10 cursor-pointer text-center border-t border-white/5 mt-2'
 														onClick={() => { navigate("/search"); setShowDropdown(false); }}
 													>
@@ -227,7 +228,7 @@ const Topbar = () => {
 
 			{/* Right - Profile & Actions */}
 			<div className='flex gap-4 items-center relative'>
-				<button 
+				<button
 					onClick={() => setShowProfile(!showProfile)}
 					className='flex items-center gap-2 p-1 bg-black hover:scale-105 transition-transform'
 				>
@@ -248,7 +249,7 @@ const Topbar = () => {
 								<p className='font-bold text-white text-sm truncate'>{user?.displayName || 'User'}</p>
 								<p className='text-[11px] text-neutral-400 truncate'>{user?.email || 'Logged in'}</p>
 							</div>
-							<button 
+							<button
 								onClick={(e) => {
 									e.stopPropagation();
 									e.preventDefault();
