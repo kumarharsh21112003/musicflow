@@ -241,13 +241,13 @@ export const usePlayerStore = create<PlayerStore>()(
 				currentSong: state.currentSong,
 				queue: state.queue,
 				currentIndex: state.currentIndex,
+				currentTime: state.currentTime,
+				duration: state.duration,
 			}),
 			onRehydrateStorage: () => (state) => {
-				// Don't auto-play on reload — just show last song
+				// Don't auto-play on reload — just show last song with progress
 				if (state) {
 					state.isPlaying = false;
-					state.currentTime = 0;
-					state.duration = 0;
 				}
 			},
 		}
