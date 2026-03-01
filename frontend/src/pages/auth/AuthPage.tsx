@@ -62,7 +62,7 @@ const AuthPage = () => {
                     className='absolute inset-0 w-full h-full object-cover opacity-50'
                   />
                   <div className='relative z-10 text-white font-bold text-xs tracking-widest text-center'>
-                    SONIC<br />FLOW
+                    MUSIC<br />FLOW
                   </div>
                   <div className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-zinc-900 rounded-full border border-zinc-700' />
                 </div>
@@ -98,7 +98,7 @@ const AuthPage = () => {
                     <circle cx='10' cy='12' fill='currentColor' r='2' />
                   </svg>
                   <span className='text-3xl font-extrabold tracking-tight'>
-                    Sonic<span className='text-orange-500'>Flow</span>
+                    Music<span className='text-orange-500'>Flow</span>
                   </span>
                 </div>
                 <h1 className='text-4xl font-extrabold text-white mb-2'>
@@ -230,7 +230,7 @@ const AuthPage = () => {
               {/* Footer Link */}
               <div className='mt-10 text-center relative z-10'>
                 <p className='text-zinc-400 text-sm'>
-                  {isLogin ? 'New to SonicFlow?' : 'Already have an account?'}
+                  {isLogin ? 'New to MusicFlow?' : 'Already have an account?'}
                   <button
                     type='button'
                     className='text-orange-500 font-bold hover:underline ml-1'
