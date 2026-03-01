@@ -23,11 +23,11 @@ const formatTime = (seconds: number) => {
 };
 
 export const PlaybackControls = () => {
-	const { 
-		currentSong, 
+	const {
+		currentSong,
 		isPlaying,
 		setIsPlaying,
-		playNext, 
+		playNext,
 		playPrevious,
 		queue,
 		setCurrentSong,
@@ -63,7 +63,7 @@ export const PlaybackControls = () => {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const analyserRef = useRef<AnalyserNode | null>(null);
 	const animationRef = useRef<number | null>(null);
-	
+
 	const playerRef = useRef<any>(null);
 	const lastVideoId = useRef<string>("");
 
@@ -114,11 +114,11 @@ export const PlaybackControls = () => {
 		audioEngine.setTrebleBoost(audioSettings.trebleBoost);
 		audioEngine.setLoudness(audioSettings.loudness);
 		audioEngine.setSpatialAudio(audioSettings.spatialAudio);
-		
+
 		// Show feedback that settings are applied
-		console.log('🎛️ Audio Settings Applied:', { 
-			bass: audioSettings.bassBoost, 
-			treble: audioSettings.trebleBoost, 
+		console.log('🎛️ Audio Settings Applied:', {
+			bass: audioSettings.bassBoost,
+			treble: audioSettings.trebleBoost,
 			loudness: audioSettings.loudness,
 			spatial: audioSettings.spatialAudio
 		});
@@ -128,7 +128,7 @@ export const PlaybackControls = () => {
 	useEffect(() => {
 		if (sleepTimer && sleepTimer > 0) {
 			setSleepTimeRemaining(sleepTimer * 60); // Convert minutes to seconds
-			
+
 			sleepTimerRef.current = setInterval(() => {
 				setSleepTimeRemaining(prev => {
 					if (prev <= 1) {
@@ -144,7 +144,7 @@ export const PlaybackControls = () => {
 				});
 			}, 1000);
 		}
-		
+
 		return () => {
 			if (sleepTimerRef.current) clearInterval(sleepTimerRef.current);
 		};
@@ -172,48 +172,56 @@ export const PlaybackControls = () => {
 	// Sync Audio Engine with Store State
 	useEffect(() => {
 		if (!currentSong) return;
-		
+
 		const loadAndPlay = async () => {
 			if (lastVideoId.current === currentSong.videoId) return;
-			
+
 			setIsPlaybackLoading(true);
 			try {
 				const videoId = currentSong.videoId!;
 				lastVideoId.current = videoId;
-				
+
 				// Sync YouTube Video if visible
 				if (isReady && playerRef.current) {
 					playerRef.current.loadVideoById(videoId);
 					playerRef.current.mute(); // Always mute video, audioEngine provides sound
 				}
 
-			// Global Audio Engine load
+				// Global Audio Engine load
 				await audioEngine.loadTrack({
 					...currentSong,
 					videoId: videoId
 				} as any);
-				
+
 				// Wait for metadata to load and get duration
 				setTimeout(() => {
 					const dur = audioEngine.getDuration();
 					if (dur > 0) setDuration(dur);
 				}, 500);
-				
+
 				// Always auto-play when new song is loaded (setCurrentSong sets isPlaying: true)
 				audioEngine.play();
 				if (isReady) playerRef.current?.playVideo();
-				
+
 				setIsPlaybackLoading(false);
 			} catch (error) {
-				console.error("AudioEngine failed, falling back to YouTube:", error);
-				
-				// Fallback Strategy: Use YouTube IFrame audio if direct stream fails
+				console.error("AudioEngine failed, trying YouTube fallback:", error);
+
+				// Fallback: Use YouTube IFrame for audio
 				if (isReady && playerRef.current) {
-					playerRef.current.unMute();
-					playerRef.current.setVolume(volume);
-					playerRef.current.playVideo();
+					try {
+						playerRef.current.unMute();
+						playerRef.current.setVolume(volume);
+						playerRef.current.playVideo();
+						toast.success('Playing via YouTube', { icon: '▶️', duration: 1500 });
+					} catch (ytError) {
+						console.error("YouTube fallback also failed:", ytError);
+						toast.error('Could not play this song', { icon: '⚠️', duration: 2000 });
+						// Don't auto-skip, let user decide
+					}
 				} else {
-					playNext();
+					toast.error('Could not play this song', { icon: '⚠️', duration: 2000 });
+					// Don't auto-skip
 				}
 				setIsPlaybackLoading(false);
 			}
@@ -286,12 +294,12 @@ export const PlaybackControls = () => {
 			const adjustedVolume = Math.min(100, volume * boostMultiplier);
 			playerRef.current.setVolume?.(adjustedVolume);
 		}
-		
+
 		// Apply REAL EQ to Web Audio Engine
 		audioEngine.setBassBoost(audioSettings.bassBoost);
 		audioEngine.setTrebleBoost(audioSettings.trebleBoost);
 		audioEngine.setLoudness(audioSettings.loudness);
-		
+
 	}, [audioSettings.bassBoost, audioSettings.trebleBoost, audioSettings.loudness, volume]);
 
 	// Media Session API (Background Play Controls)
@@ -325,7 +333,7 @@ export const PlaybackControls = () => {
 			});
 			navigator.mediaSession.setActionHandler('previoustrack', playPrevious);
 			navigator.mediaSession.setActionHandler('nexttrack', playNext);
-			
+
 			navigator.mediaSession.setActionHandler('seekto', (details) => {
 				if (details.seekTime !== undefined) {
 					audioEngine.seek(details.seekTime);
@@ -391,7 +399,7 @@ export const PlaybackControls = () => {
 			posX: videoPosition.x,
 			posY: videoPosition.y
 		};
-		
+
 		const handleMouseMove = (e: MouseEvent) => {
 			const dx = e.clientX - dragStartRef.current.x;
 			const dy = e.clientY - dragStartRef.current.y;
@@ -400,13 +408,13 @@ export const PlaybackControls = () => {
 				y: dragStartRef.current.posY + dy
 			});
 		};
-		
+
 		const handleMouseUp = () => {
 			setIsDragging(false);
 			document.removeEventListener('mousemove', handleMouseMove);
 			document.removeEventListener('mouseup', handleMouseUp);
 		};
-		
+
 		document.addEventListener('mousemove', handleMouseMove);
 		document.addEventListener('mouseup', handleMouseUp);
 	};
@@ -419,18 +427,18 @@ export const PlaybackControls = () => {
 			<RoomMode isOpen={showRoomMode} onClose={() => setShowRoomMode(false)} />
 
 			{/* Video Container - GLOBAL */}
-			<div 
+			<div
 				style={{
 					position: 'fixed',
-					...(showVideo 
-						? (isFullscreen 
+					...(showVideo
+						? (isFullscreen
 							? { inset: 0, zIndex: 9999 }
-							: { 
-								bottom: 112 - videoPosition.y, 
-								right: 16 - videoPosition.x, 
-								width: 384, 
-								height: 216, 
-								zIndex: 9999, 
+							: {
+								bottom: 112 - videoPosition.y,
+								right: 16 - videoPosition.x,
+								width: 384,
+								height: 216,
+								zIndex: 9999,
 								borderRadius: 12,
 								cursor: isDragging ? 'grabbing' : 'default'
 							})
@@ -443,8 +451,8 @@ export const PlaybackControls = () => {
 				}}
 			>
 				{/* DRAG HANDLE - Top bar is draggable */}
-				<div 
-					style={{ 
+				<div
+					style={{
 						display: showVideo ? 'flex' : 'none',
 						position: 'absolute', top: 0, left: 0, right: 0, zIndex: 20,
 						justifyContent: 'space-between', alignItems: 'center', padding: 12,
@@ -457,14 +465,14 @@ export const PlaybackControls = () => {
 						{currentSong?.title}
 					</span>
 					<div style={{ display: 'flex', gap: 8 }}>
-						<button 
+						<button
 							onClick={() => setIsFullscreen(!isFullscreen)}
 							onMouseDown={(e) => e.stopPropagation()}
 							style={{ padding: 8, borderRadius: 9999, background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', cursor: 'pointer' }}
 						>
 							{isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
 						</button>
-						<button 
+						<button
 							onClick={() => { setShowVideo(false); setIsFullscreen(false); setVideoPosition({ x: 0, y: 0 }); }}
 							onMouseDown={(e) => e.stopPropagation()}
 							style={{ padding: 8, borderRadius: 9999, background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', cursor: 'pointer' }}
@@ -473,17 +481,17 @@ export const PlaybackControls = () => {
 						</button>
 					</div>
 				</div>
-				
+
 				<div id="yt-player-element" style={{ width: '100%', height: '100%' }} />
-				
+
 				{/* FULL OVERLAY - Blocks clicks but allows dragging */}
-				<div 
+				<div
 					style={{
 						position: 'absolute',
 						top: 0, left: 0, right: 0, bottom: 0,
 						zIndex: 14,
 						cursor: isFullscreen ? 'default' : (isDragging ? 'grabbing' : 'grab')
-					}} 
+					}}
 					onMouseDown={(e) => {
 						if (!isFullscreen) {
 							handleDragStart(e);
@@ -491,7 +499,7 @@ export const PlaybackControls = () => {
 					}}
 					onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
 				/>
-				
+
 				{/* Simple subtle gradients */}
 				<div style={{
 					position: 'absolute', top: 0, left: 0, right: 0, height: 40,
@@ -506,15 +514,15 @@ export const PlaybackControls = () => {
 			</div>
 
 			{/* MOBILE FLOATING PLAYER (Spotify Style) */}
-			<div 
+			<div
 				className={`md:hidden fixed bottom-[80px] left-2 right-2 bg-neutral-950 shadow-[0_4px_32px_rgba(0,0,0,0.8)] rounded-lg flex flex-col z-[100] border border-white/5 transition-all duration-300 ease-out active:scale-[0.98] ${!currentSong ? 'translate-y-[200%]' : 'translate-y-0'}`}
 				onClick={() => setShowMobilePlayer(true)}
 			>
 				<div className="flex items-center gap-3 p-2 h-[56px]">
-					<img 
-						src={currentSong?.imageUrl} 
-						alt="Album Art" 
-						className="w-10 h-10 rounded-md bg-neutral-900 object-cover flex-shrink-0 shadow-md" 
+					<img
+						src={currentSong?.imageUrl}
+						alt="Album Art"
+						className="w-10 h-10 rounded-md bg-neutral-900 object-cover flex-shrink-0 shadow-md"
 						onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.png' }}
 					/>
 					<div className="flex-1 min-w-0 flex flex-col justify-center">
@@ -525,14 +533,14 @@ export const PlaybackControls = () => {
 							{currentSong?.artist}
 						</div>
 					</div>
-					
+
 					{/* Mobile Controls */}
 					<div className="flex items-center gap-5 px-2">
-                        <button className="text-neutral-400 hidden sm:block">
-                            <Headphones size={20} />
-                        </button>
-						<button 
-							onClick={(e) => { e.stopPropagation(); handlePlayPause(); }} 
+						<button className="text-neutral-400 hidden sm:block">
+							<Headphones size={20} />
+						</button>
+						<button
+							onClick={(e) => { e.stopPropagation(); handlePlayPause(); }}
 							className="text-white hover:scale-105 active:scale-90 transition-transform disabled:opacity-50"
 							disabled={isPlaybackLoading}
 						>
@@ -548,16 +556,16 @@ export const PlaybackControls = () => {
 				</div>
 				{/* Razor-thin Progress Bar at the bottom */}
 				<div className="absolute bottom-0 left-[8px] right-[8px] h-[2px] bg-white/10 rounded-full overflow-hidden">
-					<div 
-						className="h-full bg-white rounded-full transition-all duration-300 linear" 
-						style={{ width: `${(currentTime / (duration || 1)) * 100}%` }} 
+					<div
+						className="h-full bg-white rounded-full transition-all duration-300 linear"
+						style={{ width: `${(currentTime / (duration || 1)) * 100}%` }}
 					/>
 				</div>
 			</div>
 
 			{/* DESKTOP FOOTER PLAYER */}
 			<footer className='hidden md:flex h-24 bg-neutral-950 border-t border-neutral-800 px-4 flex-col justify-center relative z-50'>
-				
+
 				<div className='flex justify-between items-center h-full max-w-[1800px] mx-auto w-full'>
 					{/* Song info */}
 					<div className='hidden sm:flex items-center gap-4 min-w-[200px] w-[30%]'>
@@ -582,51 +590,51 @@ export const PlaybackControls = () => {
 					{/* Controls */}
 					<div className='flex flex-col items-center gap-1 flex-1 max-w-[600px]'>
 						<div className='flex items-center gap-4'>
-						<Button 
-							size='icon' 
-							variant='ghost' 
-							className={`hidden sm:inline-flex h-8 w-8 ${isShuffled ? 'text-orange-400' : 'text-neutral-400 hover:text-white'}`}
-							onClick={() => {
-								toggleShuffle();
-								toast.success(isShuffled ? 'Shuffle off' : 'Shuffle on', { icon: '🔀', duration: 1500 });
-							}}
-							title={isShuffled ? 'Shuffle: On' : 'Shuffle: Off'}
-						>
-							<Shuffle className='h-4 w-4' />
-						</Button>
-						<Button size='icon' variant='ghost' className='text-neutral-400 hover:text-white h-8 w-8' onClick={playPrevious}>
-							<SkipBack className='h-4 w-4' />
-						</Button>
-						<Button size='icon' className='bg-white hover:bg-white/90 text-black rounded-full h-9 w-9' onClick={handlePlayPause}>
-							{isPlaying ? <Pause className='h-5 w-5' /> : <Play className='h-5 w-5 ml-0.5' />}
-						</Button>
-						<Button size='icon' variant='ghost' className='text-neutral-400 hover:text-white h-8 w-8' onClick={playNext}>
-							<SkipForward className='h-4 w-4' />
-						</Button>
-						<Button 
-							size='icon' 
-							variant='ghost' 
-							className={`hidden sm:inline-flex h-8 w-8 relative ${repeatMode !== 'off' ? 'text-orange-400' : 'text-neutral-400 hover:text-white'}`}
-							onClick={() => {
-								toggleRepeat();
-								const nextMode = repeatMode === 'off' ? 'all' : repeatMode === 'all' ? 'one' : 'off';
-								toast.success(
-									nextMode === 'off' ? 'Repeat off' : nextMode === 'one' ? 'Repeat one' : 'Repeat all',
-									{ icon: '🔁', duration: 1500 }
-								);
-							}}
-							title={`Repeat: ${repeatMode}`}
-						>
-							<Repeat className='h-4 w-4' />
-							{repeatMode === 'one' && (
-								<span className='absolute -top-0.5 -right-0.5 text-[8px] font-bold bg-orange-500 text-black rounded-full w-3 h-3 flex items-center justify-center'>1</span>
-							)}
-						</Button>
+							<Button
+								size='icon'
+								variant='ghost'
+								className={`hidden sm:inline-flex h-8 w-8 ${isShuffled ? 'text-orange-400' : 'text-neutral-400 hover:text-white'}`}
+								onClick={() => {
+									toggleShuffle();
+									toast.success(isShuffled ? 'Shuffle off' : 'Shuffle on', { icon: '🔀', duration: 1500 });
+								}}
+								title={isShuffled ? 'Shuffle: On' : 'Shuffle: Off'}
+							>
+								<Shuffle className='h-4 w-4' />
+							</Button>
+							<Button size='icon' variant='ghost' className='text-neutral-400 hover:text-white h-8 w-8' onClick={playPrevious}>
+								<SkipBack className='h-4 w-4' />
+							</Button>
+							<Button size='icon' className='bg-white hover:bg-white/90 text-black rounded-full h-9 w-9' onClick={handlePlayPause}>
+								{isPlaying ? <Pause className='h-5 w-5' /> : <Play className='h-5 w-5 ml-0.5' />}
+							</Button>
+							<Button size='icon' variant='ghost' className='text-neutral-400 hover:text-white h-8 w-8' onClick={playNext}>
+								<SkipForward className='h-4 w-4' />
+							</Button>
+							<Button
+								size='icon'
+								variant='ghost'
+								className={`hidden sm:inline-flex h-8 w-8 relative ${repeatMode !== 'off' ? 'text-orange-400' : 'text-neutral-400 hover:text-white'}`}
+								onClick={() => {
+									toggleRepeat();
+									const nextMode = repeatMode === 'off' ? 'all' : repeatMode === 'all' ? 'one' : 'off';
+									toast.success(
+										nextMode === 'off' ? 'Repeat off' : nextMode === 'one' ? 'Repeat one' : 'Repeat all',
+										{ icon: '🔁', duration: 1500 }
+									);
+								}}
+								title={`Repeat: ${repeatMode}`}
+							>
+								<Repeat className='h-4 w-4' />
+								{repeatMode === 'one' && (
+									<span className='absolute -top-0.5 -right-0.5 text-[8px] font-bold bg-orange-500 text-black rounded-full w-3 h-3 flex items-center justify-center'>1</span>
+								)}
+							</Button>
 							{/* Mix Mode Button with Dropdown */}
 							<div className='relative hidden sm:block'>
-								<Button 
-									size='icon' 
-									variant='ghost' 
+								<Button
+									size='icon'
+									variant='ghost'
 									className={`h-8 w-8 ${(audioSettings.mixMode || 'off') !== 'off' ? 'text-orange-400' : 'text-neutral-400 hover:text-white'}`}
 									onClick={() => {
 										// Cycle through modes
@@ -637,7 +645,7 @@ export const PlaybackControls = () => {
 										const modeNames: Record<string, string> = {
 											off: 'Mix OFF',
 											fade: '🎵 Fade Mode',
-											rise: '🚀 Rise Mode', 
+											rise: '🚀 Rise Mode',
 											blend: '🌊 Blend Mode',
 											party: '🎉 Party Mode'
 										};
@@ -661,23 +669,23 @@ export const PlaybackControls = () => {
 							<span className='text-xs text-neutral-400 w-10 font-mono'>{formatTime(duration)}</span>
 						</div>
 					</div>
-					
+
 					{/* Volume & Controls */}
 					<div className='hidden sm:flex items-center gap-3 min-w-[200px] w-[30%] justify-end'>
-						
+
 						{/* Room Mode Button */}
-						<Button 
-							size='icon' variant='ghost' 
+						<Button
+							size='icon' variant='ghost'
 							className='h-8 w-8 text-neutral-400 hover:text-purple-400'
 							onClick={() => setShowRoomMode(true)}
 							title='Room Mode - Listen Together'
 						>
 							<Users className='h-4 w-4' />
-						</Button>	
+						</Button>
 						{/* Audio Enhancement Button */}
 						<div className='relative'>
-							<Button 
-								size='icon' variant='ghost' 
+							<Button
+								size='icon' variant='ghost'
 								className={`h-8 w-8 ${showAudioMenu ? 'text-orange-400' : 'text-neutral-400 hover:text-orange-400'}`}
 								onClick={() => setShowAudioMenu(!showAudioMenu)}
 								title='Sleep Timer'
@@ -691,60 +699,60 @@ export const PlaybackControls = () => {
 									<div className='fixed inset-0 z-40' onClick={() => setShowAudioMenu(false)} />
 									<div className='absolute bottom-12 right-0 bg-neutral-900 rounded-lg shadow-xl z-50 p-4 w-[240px] border border-neutral-700'>
 										<div className='flex items-center gap-2 mb-3'>
-									<Moon className='h-4 w-4 text-orange-400' />
-									<span className='text-sm font-bold'>Sleep Timer</span>
-								</div>
+											<Moon className='h-4 w-4 text-orange-400' />
+											<span className='text-sm font-bold'>Sleep Timer</span>
+										</div>
 
-								{sleepTimer && (
-									<div className='mb-3 text-center'>
-										<span className='text-xs bg-orange-500/20 text-orange-400 px-3 py-1 rounded-full'>
-											<Timer className='h-3 w-3 inline mr-1' />
-											{formatSleepTime(sleepTimeRemaining)}
-										</span>
-									</div>
-								)}
+										{sleepTimer && (
+											<div className='mb-3 text-center'>
+												<span className='text-xs bg-orange-500/20 text-orange-400 px-3 py-1 rounded-full'>
+													<Timer className='h-3 w-3 inline mr-1' />
+													{formatSleepTime(sleepTimeRemaining)}
+												</span>
+											</div>
+										)}
 
-								{sleepTimer ? (
-									<button
-										onClick={cancelSleepTimer}
-										className='w-full py-2 text-xs font-medium bg-red-500/20 text-red-400 rounded hover:bg-red-500/30 transition-colors'
-									>
-										Cancel Timer
-									</button>
-								) : (
-									<div className='grid grid-cols-4 gap-2'>
-										{[15, 30, 60, 90].map(mins => (
+										{sleepTimer ? (
 											<button
-												key={mins}
-												onClick={() => startSleepTimer(mins)}
-												className='py-2 text-xs font-medium bg-zinc-700 rounded hover:bg-zinc-600 transition-colors'
+												onClick={cancelSleepTimer}
+												className='w-full py-2 text-xs font-medium bg-red-500/20 text-red-400 rounded hover:bg-red-500/30 transition-colors'
 											>
-												{mins}m
+												Cancel Timer
 											</button>
-										))}
+										) : (
+											<div className='grid grid-cols-4 gap-2'>
+												{[15, 30, 60, 90].map(mins => (
+													<button
+														key={mins}
+														onClick={() => startSleepTimer(mins)}
+														className='py-2 text-xs font-medium bg-zinc-700 rounded hover:bg-zinc-600 transition-colors'
+													>
+														{mins}m
+													</button>
+												))}
+											</div>
+										)}
 									</div>
-								)}
-							</div>
 								</>
 							)}
 						</div>
-						
-						<Button 
-						size='icon' variant='ghost' 
-						className={`h-8 w-8 ${showVideo ? 'text-orange-500' : 'text-neutral-400'}`} 
-						onClick={() => setShowVideo(!showVideo)}
-						title='Toggle Video'
-					>
-						{showVideo ? <Video className='h-4 w-4' /> : <VideoOff className='h-4 w-4' />}
-					</Button>
-					<Button 
-						size='icon' variant='ghost' 
-						className={`h-8 w-8 ${showVisualizer ? 'text-orange-500' : 'text-neutral-400'}`} 
-						onClick={() => setShowVisualizer(!showVisualizer)}
-						title='Audio Visualizer'
-					>
-						<Waves className='h-4 w-4' />
-					</Button>
+
+						<Button
+							size='icon' variant='ghost'
+							className={`h-8 w-8 ${showVideo ? 'text-orange-500' : 'text-neutral-400'}`}
+							onClick={() => setShowVideo(!showVideo)}
+							title='Toggle Video'
+						>
+							{showVideo ? <Video className='h-4 w-4' /> : <VideoOff className='h-4 w-4' />}
+						</Button>
+						<Button
+							size='icon' variant='ghost'
+							className={`h-8 w-8 ${showVisualizer ? 'text-orange-500' : 'text-neutral-400'}`}
+							onClick={() => setShowVisualizer(!showVisualizer)}
+							title='Audio Visualizer'
+						>
+							<Waves className='h-4 w-4' />
+						</Button>
 						<Button size='icon' variant='ghost' className='h-8 w-8 text-neutral-400' onClick={handleMute}>
 							{getVolumeIcon()}
 						</Button>
@@ -765,15 +773,15 @@ export const PlaybackControls = () => {
 							<X className='h-4 w-4' />
 						</button>
 					</div>
-					<canvas 
+					<canvas
 						ref={canvasRef}
 						width={280}
 						height={100}
 						className='rounded-lg bg-neutral-900'
 					/>
-					<AudioVisualizerEffect 
-						canvasRef={canvasRef} 
-						isPlaying={isPlaying} 
+					<AudioVisualizerEffect
+						canvasRef={canvasRef}
+						isPlaying={isPlaying}
 						analyserRef={analyserRef}
 						animationRef={animationRef}
 					/>
@@ -784,13 +792,13 @@ export const PlaybackControls = () => {
 };
 
 // Audio Visualizer Effect Component - Uses REAL audio frequency data!
-const AudioVisualizerEffect = ({ 
-	canvasRef, 
+const AudioVisualizerEffect = ({
+	canvasRef,
 	isPlaying,
 	analyserRef,
 	animationRef
-}: { 
-	canvasRef: React.RefObject<HTMLCanvasElement>; 
+}: {
+	canvasRef: React.RefObject<HTMLCanvasElement>;
 	isPlaying: boolean;
 	analyserRef: React.MutableRefObject<AnalyserNode | null>;
 	animationRef: React.MutableRefObject<number | null>;
@@ -812,7 +820,7 @@ const AudioVisualizerEffect = ({
 			// Try to get REAL frequency data from audioEngine
 			const frequencyData = audioEngine.getFrequencyData();
 			const step = Math.floor(frequencyData.length / barCount);
-			
+
 			// Check if we have real audio data (sum > threshold)
 			const sum = frequencyData.reduce((a, b) => a + b, 0);
 			const hasRealData = sum > 100;
@@ -820,7 +828,7 @@ const AudioVisualizerEffect = ({
 			// Draw bars
 			for (let i = 0; i < barCount; i++) {
 				let height: number;
-				
+
 				if (hasRealData) {
 					// Use REAL frequency data
 					const value = frequencyData[i * step] || 0;
@@ -835,15 +843,15 @@ const AudioVisualizerEffect = ({
 					}
 					height = demoBars[i];
 				}
-				
+
 				const x = i * (barWidth + 2);
-				
+
 				// Create gradient
 				const gradient = ctx.createLinearGradient(0, canvas.height, 0, canvas.height - height);
 				gradient.addColorStop(0, '#10b981');
 				gradient.addColorStop(0.5, '#34d399');
 				gradient.addColorStop(1, '#6ee7b7');
-				
+
 				ctx.fillStyle = gradient;
 				ctx.beginPath();
 				ctx.roundRect(x, canvas.height - height, barWidth, Math.max(height, 2), 2);
