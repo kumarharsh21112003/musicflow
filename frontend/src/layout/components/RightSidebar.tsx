@@ -1,6 +1,6 @@
 import { usePlayerStore } from "@/stores/usePlayerStore";
 import { usePlaylistStore } from "@/stores/usePlaylistStore";
-import { Play, Pause, Plus, MoreHorizontal, Heart, ListPlus, Radio, User, Share2, ChevronRight, Check, Mic2, X, Download } from "lucide-react";
+import { Play, Pause, Plus, MoreHorizontal, Heart, ListPlus, Radio, User, Share2, ChevronRight, Check, Mic2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -162,17 +162,6 @@ const RightSidebar = ({ onShowLyrics, onClose }: RightSidebarProps) => {
 						<div className='flex items-center gap-3 px-4 py-2.5 hover:bg-zinc-700 cursor-pointer' onClick={() => setShowMenu(false)}>
 							<User className='h-4 w-4 text-neutral-400' />
 							<span className='text-sm'>Go to artist</span>
-						</div>
-						<div className='flex items-center gap-3 px-4 py-2.5 hover:bg-zinc-700 cursor-pointer' onClick={() => {
-							if (currentSong?.videoId) {
-								const backendUrl = import.meta.env.VITE_API_URL || window.location.origin;
-								window.open(`${backendUrl}/api/download/${currentSong.videoId}`, '_blank');
-								toast.success('Download started!', { icon: '⬇️' });
-							}
-							setShowMenu(false);
-						}}>
-							<Download className='h-4 w-4 text-neutral-400' />
-							<span className='text-sm'>Download</span>
 						</div>
 						<div className='h-px bg-zinc-700 my-1' />
 						<div className='flex items-center gap-3 px-4 py-2.5 hover:bg-zinc-700 cursor-pointer' onClick={() => setShowMenu(false)}>

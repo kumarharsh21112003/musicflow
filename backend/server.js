@@ -358,51 +358,6 @@ app.get('/api/stream/:videoId', async (req, res) => {
     }
 });
 
-// Download audio as MP3
-app.get('/api/download/:videoId', async (req, res) => {
-    try {
-        const { videoId } = req.params;
-
-        const info = await ytdl.getInfo(videoId);
-        const format = ytdl.chooseFormat(info.formats, {
-            filter: 'audioonly',
-            quality: 'highestaudio'
-        });
-
-        if (!format) throw new Error('No audio format found');
-
-        // Clean title for filename
-        const title = info.videoDetails.title
-            .replace(/[^a-zA-Z0-9\s\-]/g, '')
-            .trim()
-            .substring(0, 100);
-
-        res.writeHead(200, {
-            'Content-Type': 'audio/mpeg',
-            'Content-Disposition': `attachment; filename="${title}.mp3"`,
-            'Content-Length': format.contentLength,
-        });
-
-        const stream = ytdl(videoId, {
-            format: format,
-            highWaterMark: 1 << 25,
-            dlChunkSize: 0
-        });
-
-        stream.pipe(res);
-
-        stream.on('error', (err) => {
-            console.error('❌ Download stream error:', err.message);
-            if (!res.headersSent) res.status(500).send('Download failed');
-        });
-
-        console.log(`⬇️ Download: ${title}`);
-    } catch (error) {
-        console.error('❌ Download error:', error.message);
-        if (!res.headersSent) res.status(500).send('Download failed: ' + error.message);
-    }
-});
-
 // Global error handler
 app.use((err, req, res, next) => {
     console.error('💥 Server error:', err.message);
