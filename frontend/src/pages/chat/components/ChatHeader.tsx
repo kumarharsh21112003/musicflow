@@ -7,7 +7,7 @@ const ChatHeader = () => {
 	if (!selectedUser) return null;
 
 	return (
-		<div className='p-4 border-b border-zinc-800'>
+		<div className='p-4 border-b border-neutral-800'>
 			<div className='flex items-center gap-3'>
 				<Avatar>
 					<AvatarImage src={selectedUser.imageUrl} />
@@ -15,7 +15,7 @@ const ChatHeader = () => {
 				</Avatar>
 				<div>
 					<h2 className='font-medium'>{selectedUser.fullName}</h2>
-					<p className='text-sm text-zinc-400'>
+					<p className='text-sm text-neutral-400'>
 						{onlineUsers.has(selectedUser.clerkId) ? "Online" : "Offline"}
 					</p>
 				</div>

@@ -242,14 +242,14 @@ const AudioVisualizer = ({ isOpen, onClose }: VisualizerProps) => {
   if (!isOpen) return null;
 
   return (
-    <div className={`fixed ${isFullscreen ? 'inset-0' : 'bottom-24 right-4 w-96 h-64'} bg-black/95 backdrop-blur-xl z-40 rounded-2xl overflow-hidden border border-zinc-800 shadow-2xl transition-all duration-300`}>
+    <div className={`fixed ${isFullscreen ? 'inset-0' : 'bottom-24 right-4 w-96 h-64'} bg-black/95 backdrop-blur-xl z-40 rounded-2xl overflow-hidden border border-neutral-800 shadow-2xl transition-all duration-300`}>
       {/* Header */}
       <div className="absolute top-0 left-0 right-0 p-3 flex items-center justify-between bg-gradient-to-b from-black/80 to-transparent z-10">
         <div className="flex items-center gap-2">
-          <Activity className="h-4 w-4 text-emerald-400 animate-pulse" />
+          <Activity className="h-4 w-4 text-orange-400 animate-pulse" />
           <span className="text-sm font-medium text-white">Audio Visualizer</span>
           {currentSong && (
-            <span className="text-xs text-zinc-400 truncate max-w-[150px]">
+            <span className="text-xs text-neutral-400 truncate max-w-[150px]">
               • {currentSong.title}
             </span>
           )}
@@ -258,7 +258,7 @@ const AudioVisualizer = ({ isOpen, onClose }: VisualizerProps) => {
           <Button 
             size="icon" 
             variant="ghost" 
-            className="h-7 w-7 text-zinc-400 hover:text-white"
+            className="h-7 w-7 text-neutral-400 hover:text-white"
             onClick={() => setIsFullscreen(!isFullscreen)}
           >
             {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
@@ -266,7 +266,7 @@ const AudioVisualizer = ({ isOpen, onClose }: VisualizerProps) => {
           <Button 
             size="icon" 
             variant="ghost" 
-            className="h-7 w-7 text-zinc-400 hover:text-white"
+            className="h-7 w-7 text-neutral-400 hover:text-white"
             onClick={onClose}
           >
             <X className="h-4 w-4" />
@@ -291,8 +291,8 @@ const AudioVisualizer = ({ isOpen, onClose }: VisualizerProps) => {
               onClick={() => setVisualStyle(style)}
               className={`px-3 py-1 text-xs rounded-full transition-all ${
                 visualStyle === style 
-                  ? 'bg-emerald-500 text-black font-bold' 
-                  : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
+                  ? 'bg-orange-500 text-black font-bold' 
+                  : 'bg-neutral-900 text-neutral-400 hover:bg-zinc-700'
               }`}
             >
               {style.charAt(0).toUpperCase() + style.slice(1)}

@@ -88,17 +88,17 @@ const Topbar = () => {
 				<div className="flex items-center gap-2 mr-2">
 					<button 
 						onClick={() => navigate("/")} 
-						className={`p-3 rounded-full transition-all ${location.pathname === '/' ? 'bg-zinc-800 text-white' : 'bg-transparent text-zinc-400 hover:text-white'}`}
+						className={`p-3 rounded-full transition-all ${location.pathname === '/' ? 'bg-neutral-900 text-white' : 'bg-transparent text-neutral-400 hover:text-white'}`}
 					>
 						<Home className='size-6' fill={location.pathname === '/' ? "currentColor" : "none"} />
 					</button>
 				</div>
 				
 				<div className="hidden md:flex items-center gap-2">
-					<button onClick={() => navigate(-1)} className='p-1.5 bg-black rounded-full text-zinc-400 hover:text-white transition-colors'>
+					<button onClick={() => navigate(-1)} className='p-1.5 bg-black rounded-full text-neutral-400 hover:text-white transition-colors'>
 						<ChevronLeft className='size-6' />
 					</button>
-					<button onClick={() => navigate(1)} className='p-1.5 bg-black rounded-full text-zinc-400 hover:text-white transition-colors'>
+					<button onClick={() => navigate(1)} className='p-1.5 bg-black rounded-full text-neutral-400 hover:text-white transition-colors'>
 						<ChevronRight className='size-6' />
 					</button>
 				</div>
@@ -109,7 +109,7 @@ const Topbar = () => {
 				<div ref={searchRef} className='flex-1 relative max-w-[500px]'>
 					<form onSubmit={handleSearch} className="relative group">
 						<div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
-							<Search className='size-5 text-zinc-400 group-focus-within:text-white transition-colors' />
+							<Search className='size-5 text-neutral-400 group-focus-within:text-white transition-colors' />
 						</div>
 						<input
 							type='text'
@@ -117,10 +117,10 @@ const Topbar = () => {
 							onChange={(e) => setSearchQuery(e.target.value)}
 							onFocus={() => setShowDropdown(true)}
 							placeholder='What do you want to play?'
-							className='w-full pl-10 pr-12 py-3 bg-[#242424] hover:bg-[#2a2a2a] focus:bg-[#2a2a2a] rounded-full text-sm border-2 border-transparent focus:border-white/40 outline-none placeholder:text-zinc-400 text-white transition-all overflow-hidden truncate'
+							className='w-full pl-10 pr-12 py-3 bg-[#242424] hover:bg-[#2a2a2a] focus:bg-[#2a2a2a] rounded-full text-sm border-2 border-transparent focus:border-white/40 outline-none placeholder:text-neutral-400 text-white transition-all overflow-hidden truncate'
 						/>
-						<div className="absolute right-4 top-1/2 -translate-y-1/2 py-1 pl-3 border-l border-zinc-700 flex items-center">
-							<Library className="size-5 text-zinc-400 hover:text-white cursor-pointer transition-colors" />
+						<div className="absolute right-4 top-1/2 -translate-y-1/2 py-1 pl-3 border-l border-neutral-700 flex items-center">
+							<Library className="size-5 text-neutral-400 hover:text-white cursor-pointer transition-colors" />
 						</div>
 					</form>
 
@@ -157,12 +157,12 @@ const Topbar = () => {
 														/>
 														<div className="truncate">
 															<p className='font-medium text-white truncate'>{song.title}</p>
-															<p className='text-xs text-zinc-400 truncate'>Song • {song.artist}</p>
+															<p className='text-xs text-neutral-400 truncate'>Song • {song.artist}</p>
 														</div>
 													</div>
 													<button 
 														onClick={(e) => { e.stopPropagation(); clearRecent(song._id); }}
-														className='p-2 text-zinc-400 hover:text-white opacity-0 group-hover:opacity-100 transition-all'
+														className='p-2 text-neutral-400 hover:text-white opacity-0 group-hover:opacity-100 transition-all'
 													>
 														<X className='size-5' />
 													</button>
@@ -176,7 +176,7 @@ const Topbar = () => {
 								{searchQuery && (
 									<div className="py-2">
 										{isLoading ? (
-											<div className='px-4 py-8 text-center text-zinc-400 text-sm'>
+											<div className='px-4 py-8 text-center text-neutral-400 text-sm'>
 												<div className="size-5 border-2 border-zinc-500 border-t-white rounded-full animate-spin mx-auto mb-2" />
 												Searching...
 											</div>
@@ -197,7 +197,7 @@ const Topbar = () => {
 															/>
 															<div className='flex-1 min-w-0'>
 																<p className='font-medium truncate text-white'>{song.title}</p>
-																<p className='text-sm text-zinc-400 truncate'>Song • {song.artist}</p>
+																<p className='text-sm text-neutral-400 truncate'>Song • {song.artist}</p>
 															</div>
 														</div>
 													))}
@@ -213,7 +213,7 @@ const Topbar = () => {
 											<div className='px-4 py-12 text-center'>
 												<Search className="size-10 text-zinc-600 mx-auto mb-3" />
 												<p className="text-white font-bold">No results found for "{searchQuery}"</p>
-												<p className="text-sm text-zinc-400">Please check your spelling or try another search.</p>
+												<p className="text-sm text-neutral-400">Please check your spelling or try another search.</p>
 											</div>
 										)}
 									</div>
@@ -231,11 +231,11 @@ const Topbar = () => {
 					onClick={() => setShowProfile(!showProfile)}
 					className='flex items-center gap-2 p-1 bg-black hover:scale-105 transition-transform'
 				>
-					<div className='size-8 bg-zinc-800 rounded-full flex items-center justify-center overflow-hidden border border-zinc-700'>
+					<div className='size-8 bg-neutral-900 rounded-full flex items-center justify-center overflow-hidden border border-neutral-700'>
 						{user?.photoURL ? (
 							<img src={user.photoURL} alt='' className='size-full object-cover' />
 						) : (
-							<User className='size-5 text-zinc-400' />
+							<User className='size-5 text-neutral-400' />
 						)}
 					</div>
 				</button>
@@ -246,7 +246,7 @@ const Topbar = () => {
 						<div className='absolute top-12 right-0 bg-[#282828] rounded shadow-2xl z-[2147483641] py-1 min-w-[190px] border border-[#3e3e3e] animate-in fade-in slide-in-from-top-2 duration-150'>
 							<div className='px-3 py-2 border-b border-[#3e3e3e] mb-1'>
 								<p className='font-bold text-white text-sm truncate'>{user?.displayName || 'User'}</p>
-								<p className='text-[11px] text-zinc-400 truncate'>{user?.email || 'Logged in'}</p>
+								<p className='text-[11px] text-neutral-400 truncate'>{user?.email || 'Logged in'}</p>
 							</div>
 							<button 
 								onClick={(e) => {

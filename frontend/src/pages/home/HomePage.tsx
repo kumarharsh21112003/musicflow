@@ -57,7 +57,7 @@ const ARTIST_IMAGES: Record<string, string> = {
 // Fallback to text avatar if image not found
 const getArtistImg = (name: string) => {
 	if (ARTIST_IMAGES[name]) return ARTIST_IMAGES[name];
-	return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&size=400&background=1DB954&color=fff&bold=true&font-size=0.35`;
+	return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&size=400&background=ec5b13&color=fff&bold=true&font-size=0.35`;
 };
 
 const HomePage = () => {
@@ -164,10 +164,10 @@ const HomePage = () => {
 	// Full-screen Onboarding
 	if (showOnboarding) {
 		return (
-			<div className='fixed inset-0 bg-zinc-900 z-[100] flex flex-col'>
-				<div className='p-6 text-center border-b border-zinc-800'>
+			<div className='fixed inset-0 bg-neutral-950 z-[100] flex flex-col'>
+				<div className='p-6 text-center border-b border-neutral-800'>
 					<h1 className='text-2xl font-bold'>Choose 3 or more artists you like</h1>
-					<p className='text-zinc-400 text-sm mt-1'>We'll fetch their songs from YouTube!</p>
+					<p className='text-neutral-400 text-sm mt-1'>We'll fetch their songs from YouTube!</p>
 				</div>
 
 				<div className='flex-1 overflow-auto p-6'>
@@ -181,16 +181,16 @@ const HomePage = () => {
 									className='flex flex-col items-center cursor-pointer group'
 								>
 									<div className={`relative w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden mb-2 transition-all
-										${isSelected ? 'ring-4 ring-emerald-500 scale-110' : 'ring-2 ring-transparent group-hover:ring-zinc-500'}`}>
+										${isSelected ? 'ring-4 ring-orange-500 scale-110' : 'ring-2 ring-transparent group-hover:ring-zinc-500'}`}>
 										<img src={getArtistImg(artist)} alt={artist} className='w-full h-full' />
 										{isSelected && (
-											<div className='absolute inset-0 bg-emerald-500/60 flex items-center justify-center'>
+											<div className='absolute inset-0 bg-orange-500/60 flex items-center justify-center'>
 												<Check className='h-8 w-8 text-white' strokeWidth={3} />
 											</div>
 										)}
 									</div>
 									<span className={`text-xs font-medium text-center truncate w-full
-										${isSelected ? 'text-emerald-400' : 'text-white'}`}>
+										${isSelected ? 'text-orange-400' : 'text-white'}`}>
 										{artist}
 									</span>
 								</div>
@@ -199,12 +199,12 @@ const HomePage = () => {
 					</div>
 				</div>
 
-				<div className='p-6 border-t border-zinc-800 bg-zinc-900'>
+				<div className='p-6 border-t border-neutral-800 bg-neutral-950'>
 					<div className='max-w-md mx-auto'>
 						<Button 
 							onClick={finishOnboarding}
 							disabled={selectedArtists.length < 3 || loadingArtists}
-							className='w-full py-6 text-lg rounded-full bg-emerald-500 hover:bg-emerald-600 text-black font-bold disabled:opacity-40'
+							className='w-full py-6 text-lg rounded-full bg-orange-500 hover:bg-orange-600 text-black font-bold disabled:opacity-40'
 						>
 							{loadingArtists ? (
 								<><Loader2 className='mr-2 h-5 w-5 animate-spin' /> Loading songs...</>
@@ -225,9 +225,9 @@ const HomePage = () => {
 						<div className='flex items-center justify-between mb-6 sticky top-0 bg-transparent backdrop-blur-md z-[20] -mx-4 px-4 py-3 md:relative md:p-0 md:m-0'>
 							<h1 className='text-2xl sm:text-3xl font-black tracking-tight'>{getGreeting()}</h1>
 							<div className='flex gap-4 items-center'>
-								<span className='text-zinc-400 md:hidden'><Bell size={22} /></span>
-								<span className='text-zinc-400 md:hidden'><History size={22} /></span>
-								<span className='text-zinc-400 md:hidden'><Settings size={22} /></span>
+								<span className='text-neutral-400 md:hidden'><Bell size={22} /></span>
+								<span className='text-neutral-400 md:hidden'><History size={22} /></span>
+								<span className='text-neutral-400 md:hidden'><Settings size={22} /></span>
 							</div>
 						</div>
 
@@ -238,8 +238,8 @@ const HomePage = () => {
 									onClick={() => setActiveFilter(filter)}
 									className={`px-6 py-2 rounded-full text-sm font-bold transition-all whitespace-nowrap
 										${activeFilter === filter 
-											? 'bg-emerald-500 text-black shadow-[0_4px_12px_rgba(16,185,129,0.3)]' 
-											: 'bg-zinc-800/80 text-white hover:bg-zinc-700'}`}
+											? 'bg-orange-500 text-black shadow-[0_4px_12px_rgba(16,185,129,0.3)]' 
+											: 'bg-neutral-900/80 text-white hover:bg-zinc-700'}`}
 								>
 									{filter}
 								</button>

@@ -92,9 +92,9 @@ const LyricsPanel = ({ onClose }: LyricsPanelProps) => {
   return (
     <div className='h-full flex flex-col bg-gradient-to-b from-zinc-900 to-black'>
       {/* Header */}
-      <div className='flex items-center justify-between p-4 border-b border-zinc-800'>
+      <div className='flex items-center justify-between p-4 border-b border-neutral-800'>
         <div className='flex items-center gap-2'>
-          <Mic2 className='w-5 h-5 text-emerald-400' />
+          <Mic2 className='w-5 h-5 text-orange-400' />
           <span className='font-semibold'>Lyrics</span>
         </div>
         <Button size='icon' variant='ghost' onClick={onClose} className='h-8 w-8'>
@@ -104,9 +104,9 @@ const LyricsPanel = ({ onClose }: LyricsPanelProps) => {
 
       {/* Song Info */}
       {currentSong && (
-        <div className='p-4 bg-zinc-900/50'>
+        <div className='p-4 bg-neutral-950/50'>
           <h3 className='font-bold text-lg truncate'>{currentSong.title}</h3>
-          <p className='text-sm text-zinc-400'>{currentSong.artist}</p>
+          <p className='text-sm text-neutral-400'>{currentSong.artist}</p>
         </div>
       )}
 
@@ -117,13 +117,13 @@ const LyricsPanel = ({ onClose }: LyricsPanelProps) => {
       >
         {isLoading ? (
           <div className='flex flex-col items-center justify-center h-full gap-3'>
-            <Loader2 className='w-8 h-8 animate-spin text-emerald-400' />
-            <p className='text-zinc-400'>Loading lyrics...</p>
+            <Loader2 className='w-8 h-8 animate-spin text-orange-400' />
+            <p className='text-neutral-400'>Loading lyrics...</p>
           </div>
         ) : error ? (
           <div className='flex flex-col items-center justify-center h-full gap-3 text-center'>
             <Mic2 className='w-12 h-12 text-zinc-600' />
-            <p className='text-zinc-400'>{error}</p>
+            <p className='text-neutral-400'>{error}</p>
             <p className='text-xs text-zinc-600'>Lyrics available for most English songs</p>
           </div>
         ) : lyrics ? (
@@ -144,13 +144,13 @@ const LyricsPanel = ({ onClose }: LyricsPanelProps) => {
         ) : !currentSong ? (
           <div className='flex flex-col items-center justify-center h-full gap-3'>
             <Mic2 className='w-12 h-12 text-zinc-600' />
-            <p className='text-zinc-400'>Play a song to see lyrics</p>
+            <p className='text-neutral-400'>Play a song to see lyrics</p>
           </div>
         ) : null}
       </div>
 
       {/* Footer */}
-      <div className='p-3 border-t border-zinc-800 text-center'>
+      <div className='p-3 border-t border-neutral-800 text-center'>
         <p className='text-xs text-zinc-600'>Lyrics provided by lyrics.ovh</p>
       </div>
     </div>

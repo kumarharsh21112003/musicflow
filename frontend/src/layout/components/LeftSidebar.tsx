@@ -73,7 +73,7 @@ const LeftSidebar = () => {
 	return (
 		<div className='h-full flex flex-col'>
 			{/* Library section */}
-			<div className='flex-1 rounded-lg bg-zinc-900 p-4'>
+			<div className='flex-1 rounded-lg bg-neutral-950 p-4'>
 				<div className='flex items-center justify-between mb-4'>
 					<div className='flex items-center text-white px-2'>
 						<Library className='size-5 mr-2' />
@@ -83,7 +83,7 @@ const LeftSidebar = () => {
 						<Button
 							variant='ghost'
 							size='icon'
-							className='h-8 w-8 text-zinc-400 hover:text-white'
+							className='h-8 w-8 text-neutral-400 hover:text-white'
 							onClick={() => setShowPlusMenu(!showPlusMenu)}
 						>
 							<Plus className='size-5' />
@@ -93,7 +93,7 @@ const LeftSidebar = () => {
 						{showPlusMenu && (
 							<>
 								<div className='fixed inset-0 z-50 bg-black/60' onClick={() => { setShowPlusMenu(false); setShowCreateInput(false); }} />
-								<div className='fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-zinc-800 rounded-lg shadow-xl z-50 py-3 w-[240px] border border-zinc-700'>
+								<div className='fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-neutral-900 rounded-lg shadow-xl z-50 py-3 w-[240px] border border-neutral-700'>
 									{/* Create Playlist Input */}
 									{showCreateInput ? (
 										<div className='px-4 py-3'>
@@ -103,7 +103,7 @@ const LeftSidebar = () => {
 												value={newPlaylistName}
 												onChange={(e) => setNewPlaylistName(e.target.value)}
 												placeholder='Playlist name...'
-												className='w-full px-3 py-2 bg-zinc-700 rounded-lg text-sm border-none outline-none focus:ring-2 ring-emerald-500'
+												className='w-full px-3 py-2 bg-zinc-700 rounded-lg text-sm border-none outline-none focus:ring-2 ring-orange-500'
 												autoFocus
 												onKeyDown={(e) => e.key === 'Enter' && handleCreatePlaylist()}
 											/>
@@ -112,7 +112,7 @@ const LeftSidebar = () => {
 													size='sm' 
 													onClick={handleCreatePlaylist}
 													disabled={!newPlaylistName.trim()}
-													className='flex-1 bg-emerald-500 hover:bg-emerald-400 text-black'
+													className='flex-1 bg-orange-500 hover:bg-orange-400 text-black'
 												>
 													Create
 												</Button>
@@ -134,7 +134,7 @@ const LeftSidebar = () => {
 													</div>
 													<div>
 														<p className='font-medium'>{item.label}</p>
-														<p className='text-xs text-zinc-400'>{item.desc}</p>
+														<p className='text-xs text-neutral-400'>{item.desc}</p>
 													</div>
 												</div>
 											))}
@@ -148,9 +148,9 @@ const LeftSidebar = () => {
 
 				{/* Filter Tabs */}
 				<div className='flex gap-2 mb-4' style={{ overflow: 'hidden' }}>
-					<button className='px-3 py-1.5 bg-zinc-800 rounded-full text-sm whitespace-nowrap hover:bg-zinc-700'>Playlists</button>
-					<button className='px-3 py-1.5 bg-zinc-800 rounded-full text-sm whitespace-nowrap hover:bg-zinc-700'>Podcasts</button>
-					<button className='px-3 py-1.5 bg-zinc-800 rounded-full text-sm whitespace-nowrap hover:bg-zinc-700'>Albums</button>
+					<button className='px-3 py-1.5 bg-neutral-900 rounded-full text-sm whitespace-nowrap hover:bg-zinc-700'>Playlists</button>
+					<button className='px-3 py-1.5 bg-neutral-900 rounded-full text-sm whitespace-nowrap hover:bg-zinc-700'>Podcasts</button>
+					<button className='px-3 py-1.5 bg-neutral-900 rounded-full text-sm whitespace-nowrap hover:bg-zinc-700'>Albums</button>
 				</div>
 
 				<ScrollArea className='h-[calc(100vh-350px)]'>
@@ -158,7 +158,7 @@ const LeftSidebar = () => {
 						{/* Liked Songs - Only show if there are liked songs */}
 						{likedSongs.length > 0 && (
 							<div 
-								className='p-2 hover:bg-zinc-800 rounded-md flex items-center gap-3 group cursor-pointer'
+								className='p-2 hover:bg-neutral-900 rounded-md flex items-center gap-3 group cursor-pointer'
 								onClick={() => navigate('/liked')}
 								onContextMenu={(e) => handleRightClick(e, 'liked', 'liked')}
 							>
@@ -167,8 +167,8 @@ const LeftSidebar = () => {
 								</div>
 								<div className='flex-1 min-w-0 hidden md:block'>
 									<p className='font-medium truncate'>Liked Songs</p>
-									<p className='text-sm text-zinc-400 truncate'>
-										<span className='text-emerald-400'>📌</span> Playlist • {likedSongs.length} songs
+									<p className='text-sm text-neutral-400 truncate'>
+										<span className='text-orange-400'>📌</span> Playlist • {likedSongs.length} songs
 									</p>
 								</div>
 								<div className='opacity-0 group-hover:opacity-100 transition-opacity'>
@@ -181,11 +181,11 @@ const LeftSidebar = () => {
 						{playlists.map((playlist) => (
 							<div 
 								key={playlist.id} 
-								className='p-2 hover:bg-zinc-800 rounded-md flex items-center gap-3 group cursor-pointer'
+								className='p-2 hover:bg-neutral-900 rounded-md flex items-center gap-3 group cursor-pointer'
 								onClick={() => navigate(`/playlist/${playlist.id}`)}
 								onContextMenu={(e) => handleRightClick(e, playlist.id, 'playlist')}
 							>
-								<div className='size-12 rounded-md flex-shrink-0 bg-zinc-800 flex items-center justify-center overflow-hidden'>
+								<div className='size-12 rounded-md flex-shrink-0 bg-neutral-900 flex items-center justify-center overflow-hidden'>
 									{playlist.songs[0] ? (
 										<img
 											src={playlist.songs[0].imageUrl}
@@ -193,12 +193,12 @@ const LeftSidebar = () => {
 											className='size-12 object-cover'
 										/>
 									) : (
-										<Music className='size-6 text-zinc-500' />
+										<Music className='size-6 text-neutral-500' />
 									)}
 								</div>
 								<div className='flex-1 min-w-0 hidden md:block'>
 									<p className='font-medium truncate'>{playlist.name}</p>
-									<p className='text-sm text-zinc-400 truncate'>Playlist • {playlist.songs.length} songs</p>
+									<p className='text-sm text-neutral-400 truncate'>Playlist • {playlist.songs.length} songs</p>
 								</div>
 								<div className='opacity-0 group-hover:opacity-100 transition-opacity'>
 									<Play className='size-4 text-white' />
@@ -208,7 +208,7 @@ const LeftSidebar = () => {
 
 						{/* Empty state */}
 						{playlists.length === 0 && likedSongs.length === 0 && (
-							<div className='text-center py-8 text-zinc-500'>
+							<div className='text-center py-8 text-neutral-500'>
 								<Music className='size-12 mx-auto mb-3 opacity-50' />
 								<p className='text-sm'>No playlists yet</p>
 								<p className='text-xs mt-1'>Click + to create one</p>
@@ -223,7 +223,7 @@ const LeftSidebar = () => {
 				<>
 					<div className='fixed inset-0 z-50' onClick={() => setContextMenu(null)} />
 					<div 
-						className='fixed bg-zinc-800 rounded-lg shadow-xl z-50 py-2 min-w-[200px] border border-zinc-700'
+						className='fixed bg-neutral-900 rounded-lg shadow-xl z-50 py-2 min-w-[200px] border border-neutral-700'
 						style={{ 
 							left: Math.min(contextMenu.x, window.innerWidth - 220),
 							top: Math.min(contextMenu.y, window.innerHeight - 250)

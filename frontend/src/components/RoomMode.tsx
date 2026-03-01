@@ -126,18 +126,18 @@ const RoomMode = ({ isOpen, onClose }: RoomModeProps) => {
       onClick={onClose} // Click outside to close
     >
       <div 
-        className="bg-zinc-900 rounded-2xl w-full max-w-md border border-zinc-800 shadow-2xl overflow-hidden max-h-[85vh] flex flex-col"
+        className="bg-neutral-950 rounded-2xl w-full max-w-md border border-neutral-800 shadow-2xl overflow-hidden max-h-[85vh] flex flex-col"
         onClick={(e) => e.stopPropagation()} // Prevent close when clicking modal
       >
         {/* Header */}
-        <div className="p-4 border-b border-zinc-800 flex items-center justify-between bg-gradient-to-r from-emerald-500/10 to-purple-500/10 flex-shrink-0">
+        <div className="p-4 border-b border-neutral-800 flex items-center justify-between bg-gradient-to-r from-orange-500/10 to-purple-500/10 flex-shrink-0">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-gradient-to-br from-emerald-500 to-purple-500 rounded-lg">
+            <div className="p-2 bg-gradient-to-br from-orange-500 to-purple-500 rounded-lg">
               <Radio className="h-5 w-5 text-white" />
             </div>
             <div>
               <h2 className="font-bold text-lg">Room Mode</h2>
-              <p className="text-xs text-zinc-400">{roomCode ? `Room: ${roomCode}` : 'Listen together with friends'}</p>
+              <p className="text-xs text-neutral-400">{roomCode ? `Room: ${roomCode}` : 'Listen together with friends'}</p>
             </div>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose}>
@@ -151,9 +151,9 @@ const RoomMode = ({ isOpen, onClose }: RoomModeProps) => {
             // No room - Show create/join options
             <div className="space-y-4">
               <div className="text-center py-6">
-                <Headphones className="h-16 w-16 mx-auto text-emerald-500 mb-4" />
+                <Headphones className="h-16 w-16 mx-auto text-orange-500 mb-4" />
                 <h3 className="text-xl font-bold mb-2">Start a Listening Party</h3>
-                <p className="text-zinc-400 text-sm">
+                <p className="text-neutral-400 text-sm">
                   Create a room and invite friends, or join an existing room
                 </p>
               </div>
@@ -161,7 +161,7 @@ const RoomMode = ({ isOpen, onClose }: RoomModeProps) => {
               {/* Create Room */}
               <Button 
                 onClick={handleCreateRoom}
-                className="w-full bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-black font-bold py-6"
+                className="w-full bg-gradient-to-r from-orange-500 to-cyan-500 hover:from-orange-400 hover:to-cyan-400 text-black font-bold py-6"
               >
                 <Plus className="h-5 w-5 mr-2" />
                 Create Room
@@ -176,7 +176,7 @@ const RoomMode = ({ isOpen, onClose }: RoomModeProps) => {
                     onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
                     placeholder="Enter room code"
                     maxLength={6}
-                    className="flex-1 px-4 py-3 bg-zinc-800 rounded-lg border border-zinc-700 focus:border-emerald-500 outline-none text-center font-mono text-lg tracking-widest"
+                    className="flex-1 px-4 py-3 bg-neutral-900 rounded-lg border border-neutral-700 focus:border-orange-500 outline-none text-center font-mono text-lg tracking-widest"
                   />
                   <Button onClick={handleJoinRoom} disabled={joinCode.length < 4}>
                     <LogIn className="h-5 w-5" />
@@ -186,7 +186,7 @@ const RoomMode = ({ isOpen, onClose }: RoomModeProps) => {
                 <Button 
                   variant="outline" 
                   onClick={() => setShowJoinInput(true)}
-                  className="w-full py-6 border-zinc-700"
+                  className="w-full py-6 border-neutral-700"
                 >
                   <LogIn className="h-5 w-5 mr-2" />
                   Join Room
@@ -197,10 +197,10 @@ const RoomMode = ({ isOpen, onClose }: RoomModeProps) => {
             // In a room - Show room info
             <div className="space-y-4">
               {/* Room Code */}
-              <div className="bg-zinc-800/50 rounded-xl p-4 flex items-center justify-between">
+              <div className="bg-neutral-900/50 rounded-xl p-4 flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-zinc-500 mb-1">Room Code</p>
-                  <p className="font-mono text-2xl font-bold tracking-widest text-emerald-400">
+                  <p className="text-xs text-neutral-500 mb-1">Room Code</p>
+                  <p className="font-mono text-2xl font-bold tracking-widest text-orange-400">
                     {roomCode}
                   </p>
                 </div>
@@ -211,7 +211,7 @@ const RoomMode = ({ isOpen, onClose }: RoomModeProps) => {
 
               {/* Members */}
               <div>
-                <p className="text-sm text-zinc-400 mb-2 flex items-center gap-2">
+                <p className="text-sm text-neutral-400 mb-2 flex items-center gap-2">
                   <Users className="h-4 w-4" />
                   {members.length} {members.length === 1 ? 'member' : 'members'}
                 </p>
@@ -222,7 +222,7 @@ const RoomMode = ({ isOpen, onClose }: RoomModeProps) => {
                       className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${
                         member.isHost 
                           ? 'bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-400 border border-amber-500/30' 
-                          : 'bg-zinc-800 text-zinc-300'
+                          : 'bg-neutral-900 text-zinc-300'
                       }`}
                     >
                       {member.isHost && <Crown className="h-3 w-3" />}
@@ -234,7 +234,7 @@ const RoomMode = ({ isOpen, onClose }: RoomModeProps) => {
 
               {/* Now Playing */}
               {roomSong && (
-                <div className="bg-zinc-800/50 rounded-xl p-3 flex items-center gap-3">
+                <div className="bg-neutral-900/50 rounded-xl p-3 flex items-center gap-3">
                   <div className="relative">
                     <img 
                       src={roomSong.imageUrl} 
@@ -242,31 +242,31 @@ const RoomMode = ({ isOpen, onClose }: RoomModeProps) => {
                       className="w-12 h-12 rounded-lg object-cover"
                     />
                     <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-lg">
-                      <Music2 className="h-5 w-5 text-emerald-400" />
+                      <Music2 className="h-5 w-5 text-orange-400" />
                     </div>
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-medium truncate">{roomSong.title}</p>
-                    <p className="text-xs text-zinc-400 truncate">{roomSong.artist}</p>
+                    <p className="text-xs text-neutral-400 truncate">{roomSong.artist}</p>
                   </div>
                 </div>
               )}
 
               {/* Chat */}
-              <div className="border border-zinc-800 rounded-xl overflow-hidden">
-                <div className="h-32 overflow-y-auto p-2 space-y-1 bg-zinc-800/30">
+              <div className="border border-neutral-800 rounded-xl overflow-hidden">
+                <div className="h-32 overflow-y-auto p-2 space-y-1 bg-neutral-900/30">
                   {messages.length === 0 ? (
-                    <p className="text-center text-zinc-500 text-xs py-4">No messages yet</p>
+                    <p className="text-center text-neutral-500 text-xs py-4">No messages yet</p>
                   ) : (
                     messages.map((msg, idx) => (
                       <div key={idx} className="text-sm">
-                        <span className="font-medium text-emerald-400">{msg.username}: </span>
+                        <span className="font-medium text-orange-400">{msg.username}: </span>
                         <span className="text-zinc-300">{msg.message}</span>
                       </div>
                     ))
                   )}
                 </div>
-                <div className="flex border-t border-zinc-800">
+                <div className="flex border-t border-neutral-800">
                   <input
                     type="text"
                     value={chatMessage}
@@ -295,13 +295,13 @@ const RoomMode = ({ isOpen, onClose }: RoomModeProps) => {
 
         {/* Connection Status */}
         <div className="px-4 pb-4">
-          <div className="flex items-center gap-2 text-xs text-zinc-500">
-            <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-500' : 'bg-red-500 animate-pulse'}`} />
+          <div className="flex items-center gap-2 text-xs text-neutral-500">
+            <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-orange-500' : 'bg-red-500 animate-pulse'}`} />
             {isConnected ? 'Connected' : 'Connecting...'}
             {!isConnected && (
               <button 
                 onClick={() => connect()} 
-                className="ml-2 text-emerald-400 hover:text-emerald-300 underline"
+                className="ml-2 text-orange-400 hover:text-orange-300 underline"
               >
                 Retry
               </button>

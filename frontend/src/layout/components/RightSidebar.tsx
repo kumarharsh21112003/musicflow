@@ -55,28 +55,28 @@ const RightSidebar = ({ onShowLyrics }: RightSidebarProps) => {
 
 	if (!currentSong) {
 		return (
-			<div className='h-full bg-zinc-900 rounded-lg flex flex-col items-center justify-center p-6'>
-				<div className='w-32 h-32 bg-zinc-800 rounded-lg flex items-center justify-center mb-4'>
+			<div className='h-full bg-neutral-950 rounded-lg flex flex-col items-center justify-center p-6'>
+				<div className='w-32 h-32 bg-neutral-900 rounded-lg flex items-center justify-center mb-4'>
 					<svg className='w-16 h-16 text-zinc-600' fill="currentColor" viewBox="0 0 24 24">
 						<path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
 					</svg>
 				</div>
-				<p className='text-zinc-400 text-center'>Select a song to see details</p>
+				<p className='text-neutral-400 text-center'>Select a song to see details</p>
 			</div>
 		);
 	}
 
 	return (
-		<div className='h-full bg-zinc-900 rounded-lg flex flex-col overflow-hidden'>
+		<div className='h-full bg-neutral-950 rounded-lg flex flex-col overflow-hidden'>
 			{/* Header */}
-			<div className='p-3 flex items-center justify-between border-b border-zinc-800 shrink-0'>
+			<div className='p-3 flex items-center justify-between border-b border-neutral-800 shrink-0'>
 				<span className='text-sm font-medium truncate flex-1'>{currentSong.title}</span>
 				<div className='flex items-center gap-1'>
 					{/* Lyrics Button */}
 					<Button 
 						variant='ghost' 
 						size='icon' 
-						className='h-8 w-8 text-zinc-400 hover:text-emerald-400'
+						className='h-8 w-8 text-neutral-400 hover:text-orange-400'
 						onClick={onShowLyrics}
 						title='Show lyrics'
 					>
@@ -99,14 +99,14 @@ const RightSidebar = ({ onShowLyrics }: RightSidebarProps) => {
 			{showMenu && (
 				<>
 					<div className='fixed inset-0 z-50 bg-black/60' onClick={() => { setShowMenu(false); setShowPlaylistMenu(false); setShowCreatePlaylist(false); }} />
-					<div className='fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-zinc-800 rounded-lg shadow-xl z-50 py-2 w-[260px] border border-zinc-700'>
+					<div className='fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-neutral-900 rounded-lg shadow-xl z-50 py-2 w-[260px] border border-neutral-700'>
 						<div 
 							className='flex items-center gap-3 px-4 py-2.5 hover:bg-zinc-700 cursor-pointer'
 							onClick={() => setShowPlaylistMenu(!showPlaylistMenu)}
 						>
-							<ListPlus className='h-4 w-4 text-zinc-400' />
+							<ListPlus className='h-4 w-4 text-neutral-400' />
 							<span className='text-sm'>Add to playlist</span>
-							<ChevronRight className='h-4 w-4 text-zinc-400 ml-auto' />
+							<ChevronRight className='h-4 w-4 text-neutral-400 ml-auto' />
 						</div>
 						
 						{showPlaylistMenu && (
@@ -122,14 +122,14 @@ const RightSidebar = ({ onShowLyrics }: RightSidebarProps) => {
 											autoFocus
 										/>
 										<div className='flex gap-2 mt-2'>
-											<Button size='sm' className='flex-1 bg-emerald-500 hover:bg-emerald-400 text-black' onClick={handleCreatePlaylist}>
+											<Button size='sm' className='flex-1 bg-orange-500 hover:bg-orange-400 text-black' onClick={handleCreatePlaylist}>
 												<Check className='h-3 w-3 mr-1' /> Create
 											</Button>
 										</div>
 									</div>
 								) : (
 									<div className='flex items-center gap-3 px-3 py-2 hover:bg-zinc-600 cursor-pointer rounded mx-1' onClick={() => setShowCreatePlaylist(true)}>
-										<Plus className='h-4 w-4 text-zinc-400' />
+										<Plus className='h-4 w-4 text-neutral-400' />
 										<span className='text-sm'>Create new playlist</span>
 									</div>
 								)}
@@ -149,16 +149,16 @@ const RightSidebar = ({ onShowLyrics }: RightSidebarProps) => {
 						<div className='h-px bg-zinc-700 my-1' />
 						
 						<div className='flex items-center gap-3 px-4 py-2.5 hover:bg-zinc-700 cursor-pointer' onClick={() => setShowMenu(false)}>
-							<Radio className='h-4 w-4 text-zinc-400' />
+							<Radio className='h-4 w-4 text-neutral-400' />
 							<span className='text-sm'>Go to song radio</span>
 						</div>
 						<div className='flex items-center gap-3 px-4 py-2.5 hover:bg-zinc-700 cursor-pointer' onClick={() => setShowMenu(false)}>
-							<User className='h-4 w-4 text-zinc-400' />
+							<User className='h-4 w-4 text-neutral-400' />
 							<span className='text-sm'>Go to artist</span>
 						</div>
 						<div className='h-px bg-zinc-700 my-1' />
 						<div className='flex items-center gap-3 px-4 py-2.5 hover:bg-zinc-700 cursor-pointer' onClick={() => setShowMenu(false)}>
-							<Share2 className='h-4 w-4 text-zinc-400' />
+							<Share2 className='h-4 w-4 text-neutral-400' />
 							<span className='text-sm'>Share</span>
 						</div>
 					</div>
@@ -186,15 +186,15 @@ const RightSidebar = ({ onShowLyrics }: RightSidebarProps) => {
 					<div className='flex items-center justify-between'>
 						<div className='min-w-0 flex-1'>
 							<h3 className='text-lg font-bold truncate'>{currentSong.title}</h3>
-							<p className='text-sm text-zinc-400 truncate'>{currentSong.artist}</p>
+							<p className='text-sm text-neutral-400 truncate'>{currentSong.artist}</p>
 						</div>
 						<Button 
 							variant='ghost' 
 							size='icon' 
-							className={`h-8 w-8 ${isLiked ? 'text-emerald-400' : 'text-zinc-400 hover:text-white'}`}
+							className={`h-8 w-8 ${isLiked ? 'text-orange-400' : 'text-neutral-400 hover:text-white'}`}
 							onClick={handleLike}
 						>
-							<Heart className={`h-5 w-5 ${isLiked ? 'fill-emerald-400' : ''}`} />
+							<Heart className={`h-5 w-5 ${isLiked ? 'fill-orange-400' : ''}`} />
 						</Button>
 					</div>
 				</div>
@@ -203,7 +203,7 @@ const RightSidebar = ({ onShowLyrics }: RightSidebarProps) => {
 				<div className='px-3 pb-3'>
 					<Button 
 						onClick={togglePlay}
-						className='w-full py-5 bg-emerald-500 hover:bg-emerald-400 text-black font-bold rounded-full'
+						className='w-full py-5 bg-orange-500 hover:bg-orange-400 text-black font-bold rounded-full'
 					>
 						{isPlaying ? <Pause className='h-5 w-5 mr-2' /> : <Play className='h-5 w-5 mr-2' />}
 						{isPlaying ? 'Pause' : 'Play'}
@@ -212,10 +212,10 @@ const RightSidebar = ({ onShowLyrics }: RightSidebarProps) => {
 
 				{/* Up Next */}
 				<div className='px-3 pb-3'>
-					<h4 className='text-sm font-semibold text-zinc-400 mb-2'>Up Next</h4>
+					<h4 className='text-sm font-semibold text-neutral-400 mb-2'>Up Next</h4>
 					<div className='space-y-1'>
 						{queue.slice(0, 4).map((song, idx) => (
-							<div key={`${song._id}-${idx}`} className='flex items-center gap-2 p-2 rounded hover:bg-zinc-800/50'>
+							<div key={`${song._id}-${idx}`} className='flex items-center gap-2 p-2 rounded hover:bg-neutral-900/50'>
 								<img
 									src={song.imageUrl || `https://i.ytimg.com/vi/${song.videoId}/default.jpg`}
 									alt={song.title}
@@ -223,7 +223,7 @@ const RightSidebar = ({ onShowLyrics }: RightSidebarProps) => {
 								/>
 								<div className='min-w-0 flex-1'>
 									<p className='text-xs font-medium truncate'>{song.title}</p>
-									<p className='text-xs text-zinc-500 truncate'>{song.artist}</p>
+									<p className='text-xs text-neutral-500 truncate'>{song.artist}</p>
 								</div>
 							</div>
 						))}

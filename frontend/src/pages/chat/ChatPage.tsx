@@ -65,7 +65,7 @@ const ChatPage = () => {
 
 											<div
 												className={`rounded-lg p-3 max-w-[70%]
-													${message.senderId === user?.id ? "bg-green-500" : "bg-zinc-800"}
+													${message.senderId === user?.id ? "bg-green-500" : "bg-neutral-900"}
 												`}
 											>
 												<p className='text-sm'>{message.content}</p>
@@ -95,7 +95,7 @@ const NoConversationPlaceholder = () => (
 		<img src='/spotify.png' alt='Spotify' className='size-16 animate-bounce' />
 		<div className='text-center'>
 			<h3 className='text-zinc-300 text-lg font-medium mb-1'>No conversation selected</h3>
-			<p className='text-zinc-500 text-sm'>Choose a friend to start chatting</p>
+			<p className='text-neutral-500 text-sm'>Choose a friend to start chatting</p>
 		</div>
 	</div>
 );

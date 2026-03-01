@@ -15,9 +15,9 @@ const PlaylistPage = () => {
 
 	if (!playlist) {
 		return (
-			<div className='h-full bg-zinc-900 rounded-lg flex flex-col items-center justify-center'>
+			<div className='h-full bg-neutral-950 rounded-lg flex flex-col items-center justify-center'>
 				<Music className='w-16 h-16 text-zinc-600 mb-4' />
-				<p className='text-zinc-400'>Playlist not found</p>
+				<p className='text-neutral-400'>Playlist not found</p>
 				<Button variant='ghost' onClick={() => navigate('/')} className='mt-4'>
 					<ArrowLeft className='w-4 h-4 mr-2' /> Go Home
 				</Button>
@@ -55,14 +55,14 @@ const PlaylistPage = () => {
 	const coverImage = playlist.songs[0]?.imageUrl || null;
 
 	return (
-		<div className='h-full bg-gradient-to-b from-emerald-900/50 via-zinc-900 to-zinc-900 rounded-lg overflow-hidden'>
+		<div className='h-full bg-gradient-to-b from-orange-900/50 via-zinc-900 to-zinc-900 rounded-lg overflow-hidden'>
 			{/* Header */}
 			<div className='p-6 pb-4'>
-				<Button variant='ghost' size='sm' onClick={() => navigate('/')} className='mb-4 text-zinc-400 hover:text-white'>
+				<Button variant='ghost' size='sm' onClick={() => navigate('/')} className='mb-4 text-neutral-400 hover:text-white'>
 					<ArrowLeft className='w-4 h-4 mr-2' /> Back
 				</Button>
 				<div className='flex items-end gap-6'>
-					<div className='w-48 h-48 bg-zinc-800 rounded-lg flex items-center justify-center shadow-2xl overflow-hidden'>
+					<div className='w-48 h-48 bg-neutral-900 rounded-lg flex items-center justify-center shadow-2xl overflow-hidden'>
 						{coverImage ? (
 							<img src={coverImage} alt={playlist.name} className='w-full h-full object-cover' />
 						) : (
@@ -72,7 +72,7 @@ const PlaylistPage = () => {
 					<div className='flex-1'>
 						<p className='text-sm font-medium text-zinc-300'>Playlist</p>
 						<h1 className='text-5xl font-bold mt-2 mb-4'>{playlist.name}</h1>
-						<p className='text-zinc-400'>{playlist.songs.length} songs</p>
+						<p className='text-neutral-400'>{playlist.songs.length} songs</p>
 					</div>
 				</div>
 			</div>
@@ -81,12 +81,12 @@ const PlaylistPage = () => {
 			<div className='px-6 py-4 flex items-center gap-4'>
 				<Button 
 					onClick={handlePlayAll}
-					className='bg-emerald-500 hover:bg-emerald-400 text-black rounded-full h-14 w-14 p-0'
+					className='bg-orange-500 hover:bg-orange-400 text-black rounded-full h-14 w-14 p-0'
 					disabled={playlist.songs.length === 0}
 				>
 					<Play className='h-7 w-7 ml-1' />
 				</Button>
-				<span className='text-zinc-400 text-sm'>
+				<span className='text-neutral-400 text-sm'>
 					{playlist.songs.length === 0 ? "Add songs to this playlist" : "Click to play all"}
 				</span>
 			</div>
@@ -96,13 +96,13 @@ const PlaylistPage = () => {
 				{playlist.songs.length === 0 ? (
 					<div className='flex flex-col items-center justify-center py-20'>
 						<Music className='w-16 h-16 text-zinc-600 mb-4' />
-						<p className='text-zinc-400 text-lg'>No songs in this playlist</p>
+						<p className='text-neutral-400 text-lg'>No songs in this playlist</p>
 						<p className='text-zinc-600 text-sm'>Add songs from search or Now Playing</p>
 					</div>
 				) : (
 					<>
 						{/* Table Header */}
-						<div className='grid grid-cols-[16px_4fr_1fr_auto] gap-4 px-4 py-2 text-zinc-400 text-sm border-b border-zinc-800'>
+						<div className='grid grid-cols-[16px_4fr_1fr_auto] gap-4 px-4 py-2 text-neutral-400 text-sm border-b border-neutral-800'>
 							<span>#</span>
 							<span>Title</span>
 							<span><Clock className='w-4 h-4' /></span>
@@ -116,11 +116,11 @@ const PlaylistPage = () => {
 								<div 
 									key={`${song._id}-${index}`}
 									onClick={() => handlePlaySong(index)}
-									className={`grid grid-cols-[16px_4fr_1fr_auto] gap-4 px-4 py-3 rounded-lg hover:bg-zinc-800/50 cursor-pointer group ${isCurrentSong ? 'bg-zinc-800/50' : ''}`}
+									className={`grid grid-cols-[16px_4fr_1fr_auto] gap-4 px-4 py-3 rounded-lg hover:bg-neutral-900/50 cursor-pointer group ${isCurrentSong ? 'bg-neutral-900/50' : ''}`}
 								>
 									{/* Number/Play */}
 									<div className='flex items-center justify-center'>
-										<span className={`group-hover:hidden ${isCurrentSong ? 'text-emerald-400' : 'text-zinc-400'}`}>
+										<span className={`group-hover:hidden ${isCurrentSong ? 'text-orange-400' : 'text-neutral-400'}`}>
 											{isCurrentSong && isPlaying ? (
 												<Music className='w-4 h-4 animate-pulse' />
 											) : (
@@ -138,15 +138,15 @@ const PlaylistPage = () => {
 											className='w-10 h-10 rounded object-cover'
 										/>
 										<div className='min-w-0'>
-											<p className={`font-medium truncate ${isCurrentSong ? 'text-emerald-400' : 'text-white'}`}>
+											<p className={`font-medium truncate ${isCurrentSong ? 'text-orange-400' : 'text-white'}`}>
 												{song.title}
 											</p>
-											<p className='text-sm text-zinc-400 truncate'>{song.artist}</p>
+											<p className='text-sm text-neutral-400 truncate'>{song.artist}</p>
 										</div>
 									</div>
 
 									{/* Duration */}
-									<div className='flex items-center text-zinc-400 text-sm'>
+									<div className='flex items-center text-neutral-400 text-sm'>
 										{formatDuration(song.duration)}
 									</div>
 
@@ -155,7 +155,7 @@ const PlaylistPage = () => {
 										<Button 
 											variant='ghost' 
 											size='icon'
-											className='h-8 w-8 text-zinc-400 hover:text-red-400 opacity-0 group-hover:opacity-100'
+											className='h-8 w-8 text-neutral-400 hover:text-red-400 opacity-0 group-hover:opacity-100'
 											onClick={(e) => handleRemove(song._id, e)}
 										>
 											<Trash2 className='w-4 h-4' />

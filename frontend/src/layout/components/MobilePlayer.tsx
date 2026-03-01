@@ -169,7 +169,7 @@ export const MobilePlayer = ({ isOpen, onClose }: MobilePlayerProps) => {
                 <div className="flex items-center justify-between mb-8">
                     <button 
                         onClick={toggleShuffle}
-                        className={`p-3 active:scale-90 transition-all ${isShuffled ? 'text-emerald-400' : 'text-white/50'}`}
+                        className={`p-3 active:scale-90 transition-all ${isShuffled ? 'text-orange-400' : 'text-white/50'}`}
                     >
                         <Shuffle size={22} />
                     </button>
@@ -187,7 +187,7 @@ export const MobilePlayer = ({ isOpen, onClose }: MobilePlayerProps) => {
                         className="w-[72px] h-[72px] bg-white rounded-full flex items-center justify-center active:scale-95 transition-transform shadow-xl disabled:opacity-50"
                     >
                         {isPlaybackLoading ? (
-                            <div className="w-8 h-8 border-3 border-zinc-300 border-t-emerald-500 rounded-full animate-spin" />
+                            <div className="w-8 h-8 border-3 border-zinc-300 border-t-orange-500 rounded-full animate-spin" />
                         ) : isPlaying ? (
                             <Pause size={34} fill="black" stroke="black" />
                         ) : (
@@ -204,7 +204,7 @@ export const MobilePlayer = ({ isOpen, onClose }: MobilePlayerProps) => {
 
                     <button 
                         onClick={toggleRepeat}
-                        className={`p-3 active:scale-90 transition-all relative ${repeatMode !== 'off' ? 'text-emerald-400' : 'text-white/50'}`}
+                        className={`p-3 active:scale-90 transition-all relative ${repeatMode !== 'off' ? 'text-orange-400' : 'text-white/50'}`}
                     >
                         <Repeat size={22} />
                         {repeatMode === 'one' && (

@@ -9,7 +9,7 @@ const SongsTable = () => {
 	if (isLoading) {
 		return (
 			<div className='flex items-center justify-center py-8'>
-				<div className='text-zinc-400'>Loading songs...</div>
+				<div className='text-neutral-400'>Loading songs...</div>
 			</div>
 		);
 	}
@@ -25,7 +25,7 @@ const SongsTable = () => {
 	return (
 		<Table>
 			<TableHeader>
-				<TableRow className='hover:bg-zinc-800/50'>
+				<TableRow className='hover:bg-neutral-900/50'>
 					<TableHead className='w-[50px]'></TableHead>
 					<TableHead>Title</TableHead>
 					<TableHead>Artist</TableHead>
@@ -36,14 +36,14 @@ const SongsTable = () => {
 
 			<TableBody>
 				{songs.map((song) => (
-					<TableRow key={song._id} className='hover:bg-zinc-800/50'>
+					<TableRow key={song._id} className='hover:bg-neutral-900/50'>
 						<TableCell>
 							<img src={song.imageUrl} alt={song.title} className='size-10 rounded object-cover' />
 						</TableCell>
 						<TableCell className='font-medium'>{song.title}</TableCell>
 						<TableCell>{song.artist}</TableCell>
 						<TableCell>
-							<span className='inline-flex items-center gap-1 text-zinc-400'>
+							<span className='inline-flex items-center gap-1 text-neutral-400'>
 								<Calendar className='h-4 w-4' />
 								{song.createdAt.split("T")[0]}
 							</span>

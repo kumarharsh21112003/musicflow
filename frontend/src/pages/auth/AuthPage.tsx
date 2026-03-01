@@ -26,15 +26,15 @@ const AuthPage = () => {
       <div className='w-full max-w-md'>
         {/* Logo */}
         <div className='text-center mb-8'>
-          <div className='inline-flex items-center justify-center w-16 h-16 bg-emerald-500 rounded-full mb-4'>
+          <div className='inline-flex items-center justify-center w-16 h-16 bg-orange-500 rounded-full mb-4'>
             <Music className='w-8 h-8 text-black' />
           </div>
           <h1 className='text-3xl font-bold text-white'>MusicFlow</h1>
-          <p className='text-zinc-400 mt-2'>Stream unlimited music for free</p>
+          <p className='text-neutral-400 mt-2'>Stream unlimited music for free</p>
         </div>
 
         {/* Auth Card */}
-        <div className='bg-zinc-900/80 backdrop-blur-xl rounded-2xl p-8 border border-zinc-800'>
+        <div className='bg-neutral-950/80 backdrop-blur-xl rounded-2xl p-8 border border-neutral-800'>
           <h2 className='text-xl font-bold text-white text-center mb-6'>
             {isLogin ? 'Welcome back!' : 'Create account'}
           </h2>
@@ -42,37 +42,37 @@ const AuthPage = () => {
           <form onSubmit={handleSubmit} className='space-y-4'>
             {!isLogin && (
               <div className='relative'>
-                <User className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400' />
+                <User className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400' />
                 <Input
                   type='text'
                   placeholder='Your name'
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className='pl-10 bg-zinc-800 border-zinc-700 text-white h-12'
+                  className='pl-10 bg-neutral-900 border-neutral-700 text-white h-12'
                 />
               </div>
             )}
             
             <div className='relative'>
-              <Mail className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400' />
+              <Mail className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400' />
               <Input
                 type='email'
                 placeholder='Email address'
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className='pl-10 bg-zinc-800 border-zinc-700 text-white h-12'
+                className='pl-10 bg-neutral-900 border-neutral-700 text-white h-12'
                 required
               />
             </div>
 
             <div className='relative'>
-              <Lock className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400' />
+              <Lock className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400' />
               <Input
                 type='password'
                 placeholder='Password'
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className='pl-10 bg-zinc-800 border-zinc-700 text-white h-12'
+                className='pl-10 bg-neutral-900 border-neutral-700 text-white h-12'
                 required
                 minLength={6}
               />
@@ -80,7 +80,7 @@ const AuthPage = () => {
 
             <Button 
               type='submit' 
-              className='w-full h-12 bg-emerald-500 hover:bg-emerald-600 text-black font-bold text-lg'
+              className='w-full h-12 bg-orange-500 hover:bg-orange-600 text-black font-bold text-lg'
               disabled={isLoading}
             >
               {isLoading ? (
@@ -95,16 +95,16 @@ const AuthPage = () => {
 
           <div className='relative my-6'>
             <div className='absolute inset-0 flex items-center'>
-              <div className='w-full border-t border-zinc-700'></div>
+              <div className='w-full border-t border-neutral-700'></div>
             </div>
             <div className='relative flex justify-center text-xs'>
-              <span className='px-2 bg-zinc-900 text-zinc-400'>or</span>
+              <span className='px-2 bg-neutral-950 text-neutral-400'>or</span>
             </div>
           </div>
 
           <Button
             variant='outline'
-            className='w-full h-12 bg-white/5 border-zinc-700 text-white hover:bg-white/10'
+            className='w-full h-12 bg-white/5 border-neutral-700 text-white hover:bg-white/10'
             onClick={signInWithGoogle}
             disabled={isLoading}
           >
@@ -117,11 +117,11 @@ const AuthPage = () => {
             Continue with Google
           </Button>
 
-          <p className='text-center text-zinc-400 text-sm mt-6'>
+          <p className='text-center text-neutral-400 text-sm mt-6'>
             {isLogin ? "Don't have an account?" : 'Already have an account?'}{' '}
             <button
               type='button'
-              className='text-emerald-400 hover:underline font-medium'
+              className='text-orange-400 hover:underline font-medium'
               onClick={() => setIsLogin(!isLogin)}
             >
               {isLogin ? 'Sign up' : 'Sign in'}
@@ -129,7 +129,7 @@ const AuthPage = () => {
           </p>
         </div>
 
-        <p className='text-center text-zinc-500 text-xs mt-6'>
+        <p className='text-center text-neutral-500 text-xs mt-6'>
           By continuing, you agree to our Terms of Service and Privacy Policy.
         </p>
       </div>

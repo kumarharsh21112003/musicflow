@@ -10,7 +10,7 @@ const Header = () => {
 				</Link>
 				<div>
 					<h1 className='text-3xl font-bold'>Music Manager</h1>
-					<p className='text-zinc-400 mt-1'>Manage your music catalog</p>
+					<p className='text-neutral-400 mt-1'>Manage your music catalog</p>
 				</div>
 			</div>
 			<UserButton />

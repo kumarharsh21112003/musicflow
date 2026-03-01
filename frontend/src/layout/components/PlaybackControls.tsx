@@ -507,28 +507,28 @@ export const PlaybackControls = () => {
 
 			{/* MOBILE FLOATING PLAYER (Spotify Style) */}
 			<div 
-				className={`md:hidden fixed bottom-[80px] left-2 right-2 bg-zinc-900 shadow-[0_4px_32px_rgba(0,0,0,0.8)] rounded-lg flex flex-col z-[100] border border-white/5 transition-all duration-300 ease-out active:scale-[0.98] ${!currentSong ? 'translate-y-[200%]' : 'translate-y-0'}`}
+				className={`md:hidden fixed bottom-[80px] left-2 right-2 bg-neutral-950 shadow-[0_4px_32px_rgba(0,0,0,0.8)] rounded-lg flex flex-col z-[100] border border-white/5 transition-all duration-300 ease-out active:scale-[0.98] ${!currentSong ? 'translate-y-[200%]' : 'translate-y-0'}`}
 				onClick={() => setShowMobilePlayer(true)}
 			>
 				<div className="flex items-center gap-3 p-2 h-[56px]">
 					<img 
 						src={currentSong?.imageUrl} 
 						alt="Album Art" 
-						className="w-10 h-10 rounded-md bg-zinc-800 object-cover flex-shrink-0 shadow-md" 
+						className="w-10 h-10 rounded-md bg-neutral-900 object-cover flex-shrink-0 shadow-md" 
 						onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.png' }}
 					/>
 					<div className="flex-1 min-w-0 flex flex-col justify-center">
 						<div className="font-bold text-[13px] text-white truncate leading-tight">
 							{currentSong?.title || "Choose a song"}
 						</div>
-						<div className="text-[11px] text-zinc-400 font-medium truncate leading-tight opacity-80">
+						<div className="text-[11px] text-neutral-400 font-medium truncate leading-tight opacity-80">
 							{currentSong?.artist}
 						</div>
 					</div>
 					
 					{/* Mobile Controls */}
 					<div className="flex items-center gap-5 px-2">
-                        <button className="text-zinc-400 hidden sm:block">
+                        <button className="text-neutral-400 hidden sm:block">
                             <Headphones size={20} />
                         </button>
 						<button 
@@ -556,7 +556,7 @@ export const PlaybackControls = () => {
 			</div>
 
 			{/* DESKTOP FOOTER PLAYER */}
-			<footer className='hidden md:flex h-24 bg-zinc-900 border-t border-zinc-800 px-4 flex-col justify-center relative z-50'>
+			<footer className='hidden md:flex h-24 bg-neutral-950 border-t border-neutral-800 px-4 flex-col justify-center relative z-50'>
 				
 				<div className='flex justify-between items-center h-full max-w-[1800px] mx-auto w-full'>
 					{/* Song info */}
@@ -571,11 +571,11 @@ export const PlaybackControls = () => {
 								/>
 								<div className='flex-1 min-w-0'>
 									<div className='font-medium truncate text-sm'>{currentSong.title}</div>
-									<div className='text-xs text-zinc-400 truncate'>{currentSong.artist}</div>
+									<div className='text-xs text-neutral-400 truncate'>{currentSong.artist}</div>
 								</div>
 							</>
 						) : (
-							<div className='text-zinc-500 text-sm'>Select a song</div>
+							<div className='text-neutral-500 text-sm'>Select a song</div>
 						)}
 					</div>
 
@@ -585,7 +585,7 @@ export const PlaybackControls = () => {
 						<Button 
 							size='icon' 
 							variant='ghost' 
-							className={`hidden sm:inline-flex h-8 w-8 ${isShuffled ? 'text-emerald-400' : 'text-zinc-400 hover:text-white'}`}
+							className={`hidden sm:inline-flex h-8 w-8 ${isShuffled ? 'text-orange-400' : 'text-neutral-400 hover:text-white'}`}
 							onClick={() => {
 								toggleShuffle();
 								toast.success(isShuffled ? 'Shuffle off' : 'Shuffle on', { icon: '🔀', duration: 1500 });
@@ -594,19 +594,19 @@ export const PlaybackControls = () => {
 						>
 							<Shuffle className='h-4 w-4' />
 						</Button>
-						<Button size='icon' variant='ghost' className='text-zinc-400 hover:text-white h-8 w-8' onClick={playPrevious}>
+						<Button size='icon' variant='ghost' className='text-neutral-400 hover:text-white h-8 w-8' onClick={playPrevious}>
 							<SkipBack className='h-4 w-4' />
 						</Button>
 						<Button size='icon' className='bg-white hover:bg-white/90 text-black rounded-full h-9 w-9' onClick={handlePlayPause}>
 							{isPlaying ? <Pause className='h-5 w-5' /> : <Play className='h-5 w-5 ml-0.5' />}
 						</Button>
-						<Button size='icon' variant='ghost' className='text-zinc-400 hover:text-white h-8 w-8' onClick={playNext}>
+						<Button size='icon' variant='ghost' className='text-neutral-400 hover:text-white h-8 w-8' onClick={playNext}>
 							<SkipForward className='h-4 w-4' />
 						</Button>
 						<Button 
 							size='icon' 
 							variant='ghost' 
-							className={`hidden sm:inline-flex h-8 w-8 relative ${repeatMode !== 'off' ? 'text-emerald-400' : 'text-zinc-400 hover:text-white'}`}
+							className={`hidden sm:inline-flex h-8 w-8 relative ${repeatMode !== 'off' ? 'text-orange-400' : 'text-neutral-400 hover:text-white'}`}
 							onClick={() => {
 								toggleRepeat();
 								const nextMode = repeatMode === 'off' ? 'all' : repeatMode === 'all' ? 'one' : 'off';
@@ -619,7 +619,7 @@ export const PlaybackControls = () => {
 						>
 							<Repeat className='h-4 w-4' />
 							{repeatMode === 'one' && (
-								<span className='absolute -top-0.5 -right-0.5 text-[8px] font-bold bg-emerald-500 text-black rounded-full w-3 h-3 flex items-center justify-center'>1</span>
+								<span className='absolute -top-0.5 -right-0.5 text-[8px] font-bold bg-orange-500 text-black rounded-full w-3 h-3 flex items-center justify-center'>1</span>
 							)}
 						</Button>
 							{/* Mix Mode Button with Dropdown */}
@@ -627,7 +627,7 @@ export const PlaybackControls = () => {
 								<Button 
 									size='icon' 
 									variant='ghost' 
-									className={`h-8 w-8 ${(audioSettings.mixMode || 'off') !== 'off' ? 'text-emerald-400' : 'text-zinc-400 hover:text-white'}`}
+									className={`h-8 w-8 ${(audioSettings.mixMode || 'off') !== 'off' ? 'text-orange-400' : 'text-neutral-400 hover:text-white'}`}
 									onClick={() => {
 										// Cycle through modes
 										const modes: ('off' | 'fade' | 'rise' | 'blend' | 'party')[] = ['off', 'fade', 'rise', 'blend', 'party'];
@@ -648,7 +648,7 @@ export const PlaybackControls = () => {
 									<Waves className='h-4 w-4' />
 								</Button>
 								{(audioSettings.mixMode || 'off') !== 'off' && (
-									<span className='absolute -top-1 -right-1 text-[9px] bg-emerald-500 text-black px-1 rounded font-bold uppercase'>
+									<span className='absolute -top-1 -right-1 text-[9px] bg-orange-500 text-black px-1 rounded font-bold uppercase'>
 										{(audioSettings.mixMode || 'off').slice(0, 1)}
 									</span>
 								)}
@@ -656,9 +656,9 @@ export const PlaybackControls = () => {
 						</div>
 
 						<div className='flex items-center gap-2 w-full'>
-							<span className='text-xs text-zinc-400 w-10 text-right font-mono'>{formatTime(currentTime)}</span>
+							<span className='text-xs text-neutral-400 w-10 text-right font-mono'>{formatTime(currentTime)}</span>
 							<Slider value={[currentTime]} max={duration || 100} step={1} className='flex-1' onValueChange={handleSeek} />
-							<span className='text-xs text-zinc-400 w-10 font-mono'>{formatTime(duration)}</span>
+							<span className='text-xs text-neutral-400 w-10 font-mono'>{formatTime(duration)}</span>
 						</div>
 					</div>
 					
@@ -668,7 +668,7 @@ export const PlaybackControls = () => {
 						{/* Room Mode Button */}
 						<Button 
 							size='icon' variant='ghost' 
-							className='h-8 w-8 text-zinc-400 hover:text-purple-400'
+							className='h-8 w-8 text-neutral-400 hover:text-purple-400'
 							onClick={() => setShowRoomMode(true)}
 							title='Room Mode - Listen Together'
 						>
@@ -678,7 +678,7 @@ export const PlaybackControls = () => {
 						<div className='relative'>
 							<Button 
 								size='icon' variant='ghost' 
-								className={`h-8 w-8 ${showAudioMenu ? 'text-emerald-400' : 'text-zinc-400 hover:text-emerald-400'}`}
+								className={`h-8 w-8 ${showAudioMenu ? 'text-orange-400' : 'text-neutral-400 hover:text-orange-400'}`}
 								onClick={() => setShowAudioMenu(!showAudioMenu)}
 								title='Sleep Timer'
 							>
@@ -689,15 +689,15 @@ export const PlaybackControls = () => {
 							{showAudioMenu && (
 								<>
 									<div className='fixed inset-0 z-40' onClick={() => setShowAudioMenu(false)} />
-									<div className='absolute bottom-12 right-0 bg-zinc-800 rounded-lg shadow-xl z-50 p-4 w-[240px] border border-zinc-700'>
+									<div className='absolute bottom-12 right-0 bg-neutral-900 rounded-lg shadow-xl z-50 p-4 w-[240px] border border-neutral-700'>
 										<div className='flex items-center gap-2 mb-3'>
-									<Moon className='h-4 w-4 text-emerald-400' />
+									<Moon className='h-4 w-4 text-orange-400' />
 									<span className='text-sm font-bold'>Sleep Timer</span>
 								</div>
 
 								{sleepTimer && (
 									<div className='mb-3 text-center'>
-										<span className='text-xs bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded-full'>
+										<span className='text-xs bg-orange-500/20 text-orange-400 px-3 py-1 rounded-full'>
 											<Timer className='h-3 w-3 inline mr-1' />
 											{formatSleepTime(sleepTimeRemaining)}
 										</span>
@@ -731,7 +731,7 @@ export const PlaybackControls = () => {
 						
 						<Button 
 						size='icon' variant='ghost' 
-						className={`h-8 w-8 ${showVideo ? 'text-emerald-500' : 'text-zinc-400'}`} 
+						className={`h-8 w-8 ${showVideo ? 'text-orange-500' : 'text-neutral-400'}`} 
 						onClick={() => setShowVideo(!showVideo)}
 						title='Toggle Video'
 					>
@@ -739,13 +739,13 @@ export const PlaybackControls = () => {
 					</Button>
 					<Button 
 						size='icon' variant='ghost' 
-						className={`h-8 w-8 ${showVisualizer ? 'text-emerald-500' : 'text-zinc-400'}`} 
+						className={`h-8 w-8 ${showVisualizer ? 'text-orange-500' : 'text-neutral-400'}`} 
 						onClick={() => setShowVisualizer(!showVisualizer)}
 						title='Audio Visualizer'
 					>
 						<Waves className='h-4 w-4' />
 					</Button>
-						<Button size='icon' variant='ghost' className='h-8 w-8 text-zinc-400' onClick={handleMute}>
+						<Button size='icon' variant='ghost' className='h-8 w-8 text-neutral-400' onClick={handleMute}>
 							{getVolumeIcon()}
 						</Button>
 						<Slider value={[isMuted ? 0 : volume]} max={100} step={1} className='w-24' onValueChange={handleVolumeChange} />
@@ -755,10 +755,10 @@ export const PlaybackControls = () => {
 
 			{/* Audio Visualizer Overlay */}
 			{showVisualizer && currentSong && (
-				<div className='fixed bottom-28 right-4 z-50 bg-zinc-900/95 backdrop-blur-xl rounded-xl border border-zinc-700 p-4 shadow-2xl'>
+				<div className='fixed bottom-28 right-4 z-50 bg-neutral-950/95 backdrop-blur-xl rounded-xl border border-neutral-700 p-4 shadow-2xl'>
 					<div className='flex items-center justify-between mb-3'>
 						<div className='flex items-center gap-2'>
-							<Waves className='h-4 w-4 text-emerald-400' />
+							<Waves className='h-4 w-4 text-orange-400' />
 							<span className='text-sm font-bold'>Audio Visualizer</span>
 						</div>
 						<button onClick={() => setShowVisualizer(false)} className='p-1 hover:bg-zinc-700 rounded'>
@@ -769,7 +769,7 @@ export const PlaybackControls = () => {
 						ref={canvasRef}
 						width={280}
 						height={100}
-						className='rounded-lg bg-zinc-800'
+						className='rounded-lg bg-neutral-900'
 					/>
 					<AudioVisualizerEffect 
 						canvasRef={canvasRef} 

@@ -7,7 +7,7 @@ const UsersList = () => {
 	const { users, selectedUser, isLoading, setSelectedUser, onlineUsers } = useChatStore();
 
 	return (
-		<div className='border-r border-zinc-800'>
+		<div className='border-r border-neutral-800'>
 			<div className='flex flex-col h-full'>
 				<ScrollArea className='h-[calc(100vh-280px)]'>
 					<div className='space-y-2 p-4'>
@@ -20,7 +20,7 @@ const UsersList = () => {
 									onClick={() => setSelectedUser(user)}
 									className={`flex items-center justify-center lg:justify-start gap-3 p-3 
 										rounded-lg cursor-pointer transition-colors
-                    ${selectedUser?.clerkId === user.clerkId ? "bg-zinc-800" : "hover:bg-zinc-800/50"}`}
+                    ${selectedUser?.clerkId === user.clerkId ? "bg-neutral-900" : "hover:bg-neutral-900/50"}`}
 								>
 									<div className='relative'>
 										<Avatar className='size-8 md:size-12'>

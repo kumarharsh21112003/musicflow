@@ -67,8 +67,8 @@ const SearchPage = () => {
 									onClick={() => setActiveFilter(filter)}
 									className={`px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all
 										${activeFilter === filter 
-											? 'bg-emerald-500 text-black' 
-											: 'bg-zinc-800 text-white hover:bg-zinc-700'}`}
+											? 'bg-orange-500 text-black' 
+											: 'bg-neutral-900 text-white hover:bg-zinc-700'}`}
 								>
 									{filter}
 								</button>
@@ -87,7 +87,7 @@ const SearchPage = () => {
 									{topResult && (
 										<div 
 											onClick={() => handlePlay(topResult)}
-											className='bg-zinc-900/60 rounded-lg p-5 hover:bg-zinc-800/60 transition-all cursor-pointer group relative border border-white/5'
+											className='bg-neutral-950/60 rounded-lg p-5 hover:bg-neutral-900/60 transition-all cursor-pointer group relative border border-white/5'
 										>
 											<img
 												src={topResult.imageUrl}
@@ -95,12 +95,12 @@ const SearchPage = () => {
 												className='w-32 h-32 rounded shadow-2xl mb-4 object-cover'
 											/>
 											<h3 className='text-2xl font-black mb-1 truncate'>{topResult.title}</h3>
-											<p className='text-zinc-400'>
-												<span className='text-sm bg-zinc-800 px-2 py-0.5 rounded-full mr-2'>Song</span>
+											<p className='text-neutral-400'>
+												<span className='text-sm bg-neutral-900 px-2 py-0.5 rounded-full mr-2'>Song</span>
 												<span className='text-white font-bold'>{topResult.artist}</span>
 											</p>
 											
-											<div className={`absolute bottom-5 right-5 w-14 h-14 bg-emerald-500 rounded-full flex items-center justify-center shadow-xl
+											<div className={`absolute bottom-5 right-5 w-14 h-14 bg-orange-500 rounded-full flex items-center justify-center shadow-xl
 												transition-all active:scale-95
 												${currentSong?._id === topResult._id ? 'opacity-100' : 'opacity-100 md:opacity-0 md:translate-y-2 md:group-hover:opacity-100 md:group-hover:translate-y-0'}`}>
 												{currentSong?._id === topResult._id && isPlaying 
@@ -123,8 +123,8 @@ const SearchPage = () => {
 												<div
 													key={song._id}
 													onClick={() => handlePlay(song)}
-													className={`flex items-center gap-3 p-2 rounded-md hover:bg-zinc-900/60 cursor-pointer group transition-colors
-														${isCurrentSong ? 'bg-zinc-900/60' : ''}`}
+													className={`flex items-center gap-3 p-2 rounded-md hover:bg-neutral-950/60 cursor-pointer group transition-colors
+														${isCurrentSong ? 'bg-neutral-950/60' : ''}`}
 												>
 													<div className='relative w-12 h-12 flex-shrink-0'>
 														<img
@@ -140,12 +140,12 @@ const SearchPage = () => {
 														</div>
 													</div>
 													<div className='flex-1 min-w-0'>
-														<p className={`font-bold truncate text-sm mb-0.5 ${isCurrentSong ? 'text-emerald-400' : 'text-white'}`}>
+														<p className={`font-bold truncate text-sm mb-0.5 ${isCurrentSong ? 'text-orange-400' : 'text-white'}`}>
 															{song.title}
 														</p>
-														<p className='text-xs text-zinc-400 truncate font-medium'>{song.artist}</p>
+														<p className='text-xs text-neutral-400 truncate font-medium'>{song.artist}</p>
 													</div>
-													<span className='text-xs text-zinc-500 font-medium tabular-nums px-2'>
+													<span className='text-xs text-neutral-500 font-medium tabular-nums px-2'>
 														{formatDuration(song.duration || 210)}
 													</span>
 												</div>
@@ -167,7 +167,7 @@ const SearchPage = () => {
 												<div
 													key={song._id}
 													onClick={() => handlePlay(song)}
-													className='bg-zinc-900/40 p-4 rounded-md hover:bg-zinc-800/40 transition-all cursor-pointer group border border-white/5'
+													className='bg-neutral-950/40 p-4 rounded-md hover:bg-neutral-900/40 transition-all cursor-pointer group border border-white/5'
 												>
 													<div className='relative mb-4'>
 														<img
@@ -176,7 +176,7 @@ const SearchPage = () => {
 															className='w-full aspect-square rounded shadow-xl object-cover'
 														/>
 														<button
-															className={`absolute bottom-2 right-2 w-10 h-10 bg-emerald-500 hover:bg-emerald-400 shadow-2xl rounded-full flex items-center justify-center
+															className={`absolute bottom-2 right-2 w-10 h-10 bg-orange-500 hover:bg-orange-400 shadow-2xl rounded-full flex items-center justify-center
 																${isCurrentSong ? 'opacity-100' : 'opacity-100 md:opacity-0 md:group-hover:opacity-100'} transition-all hover:scale-105 active:scale-90`}
 														>
 															{isCurrentSong && isPlaying 
@@ -184,10 +184,10 @@ const SearchPage = () => {
 																: <Play className='h-5 w-5 text-black fill-black ml-0.5' />}
 														</button>
 													</div>
-													<h4 className={`font-bold truncate text-sm mb-1 ${isCurrentSong ? 'text-emerald-400' : ''}`}>
+													<h4 className={`font-bold truncate text-sm mb-1 ${isCurrentSong ? 'text-orange-400' : ''}`}>
 														{song.title}
 													</h4>
-													<p className='text-xs text-zinc-400 font-medium truncate opacity-80'>{song.artist}</p>
+													<p className='text-xs text-neutral-400 font-medium truncate opacity-80'>{song.artist}</p>
 												</div>
 											);
 										})}
@@ -228,7 +228,7 @@ const SearchPage = () => {
 
 					{isLoading && (
 						<div className='flex items-center justify-center py-20'>
-							<div className='animate-spin w-10 h-10 border-[3px] border-emerald-500 border-t-transparent rounded-full'></div>
+							<div className='animate-spin w-10 h-10 border-[3px] border-orange-500 border-t-transparent rounded-full'></div>
 						</div>
 					)}
 				</div>

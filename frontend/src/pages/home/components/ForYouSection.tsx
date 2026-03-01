@@ -77,7 +77,7 @@ const ForYouSection = () => {
       allRecs.unshift({
         query: `${topArtists[0]} latest songs`,
         reason: `You love ${topArtists[0]}`,
-        icon: <Sparkles className="h-4 w-4 text-emerald-400" />
+        icon: <Sparkles className="h-4 w-4 text-orange-400" />
       });
       
       if (topArtists.length > 1) {
@@ -140,7 +140,7 @@ const ForYouSection = () => {
       shuffled.unshift({
         query: `${randomArtist} best songs`,
         reason: "Your favorite",
-        icon: <Sparkles className="h-4 w-4 text-emerald-400" />
+        icon: <Sparkles className="h-4 w-4 text-orange-400" />
       });
     }
     
@@ -153,12 +153,12 @@ const ForYouSection = () => {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-gradient-to-br from-emerald-500 to-cyan-500 rounded-lg">
+          <div className="p-2 bg-gradient-to-br from-orange-500 to-cyan-500 rounded-lg">
             <Brain className="h-5 w-5 text-white" />
           </div>
           <div>
             <h2 className="text-xl font-bold">{greeting} Made For You</h2>
-            <p className="text-sm text-zinc-400">AI-powered recommendations based on your taste</p>
+            <p className="text-sm text-neutral-400">AI-powered recommendations based on your taste</p>
           </div>
         </div>
         <Button 
@@ -166,7 +166,7 @@ const ForYouSection = () => {
           size="sm" 
           onClick={refreshRecommendations}
           disabled={isLoading}
-          className="text-zinc-400 hover:text-white"
+          className="text-neutral-400 hover:text-white"
         >
           <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
           Refresh
@@ -180,30 +180,30 @@ const ForYouSection = () => {
             key={index}
             onClick={() => playRecommendation(rec.query)}
             disabled={isLoading}
-            className="group p-4 bg-zinc-800/50 hover:bg-zinc-700/50 rounded-xl transition-all duration-300 
-                       border border-transparent hover:border-emerald-500/30 text-left
-                       hover:shadow-lg hover:shadow-emerald-500/10 relative overflow-hidden
+            className="group p-4 bg-neutral-900/50 hover:bg-zinc-700/50 rounded-xl transition-all duration-300 
+                       border border-transparent hover:border-orange-500/30 text-left
+                       hover:shadow-lg hover:shadow-orange-500/10 relative overflow-hidden
                        disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {/* Play overlay on hover */}
-            <div className="absolute inset-0 bg-emerald-500/0 group-hover:bg-emerald-500/5 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+            <div className="absolute inset-0 bg-orange-500/0 group-hover:bg-orange-500/5 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
               {activeQuery === rec.query ? (
-                <Loader2 className="h-8 w-8 text-emerald-400 animate-spin" />
+                <Loader2 className="h-8 w-8 text-orange-400 animate-spin" />
               ) : (
-                <Play className="h-8 w-8 text-emerald-400 fill-emerald-400" />
+                <Play className="h-8 w-8 text-orange-400 fill-orange-400" />
               )}
             </div>
             
             <div className="flex items-center gap-2 mb-2 relative z-10">
               {rec.icon}
-              <span className="text-xs text-zinc-500 group-hover:text-emerald-400 transition-colors">
+              <span className="text-xs text-neutral-500 group-hover:text-orange-400 transition-colors">
                 AI Pick
               </span>
             </div>
             <p className="text-sm font-medium text-white mb-1 line-clamp-2 relative z-10">
               {rec.query.split(' ').slice(0, 3).join(' ')}...
             </p>
-            <p className="text-xs text-zinc-500 line-clamp-1 relative z-10">
+            <p className="text-xs text-neutral-500 line-clamp-1 relative z-10">
               {rec.reason}
             </p>
           </button>
@@ -212,7 +212,7 @@ const ForYouSection = () => {
 
       {/* History Stats */}
       {listeningHistory.length > 0 && (
-        <div className="mt-4 flex items-center gap-4 text-xs text-zinc-500">
+        <div className="mt-4 flex items-center gap-4 text-xs text-neutral-500">
           <span className="flex items-center gap-1">
             <Clock className="h-3 w-3" />
             {listeningHistory.length} songs in history

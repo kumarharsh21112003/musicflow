@@ -77,7 +77,7 @@ const AddAlbumDialog = () => {
 					Add Album
 				</Button>
 			</DialogTrigger>
-			<DialogContent className='bg-zinc-900 border-zinc-700'>
+			<DialogContent className='bg-neutral-950 border-neutral-700'>
 				<DialogHeader>
 					<DialogTitle>Add New Album</DialogTitle>
 					<DialogDescription>Add a new album to your collection</DialogDescription>
@@ -91,14 +91,14 @@ const AddAlbumDialog = () => {
 						className='hidden'
 					/>
 					<div
-						className='flex items-center justify-center p-6 border-2 border-dashed border-zinc-700 rounded-lg cursor-pointer'
+						className='flex items-center justify-center p-6 border-2 border-dashed border-neutral-700 rounded-lg cursor-pointer'
 						onClick={() => fileInputRef.current?.click()}
 					>
 						<div className='text-center'>
-							<div className='p-3 bg-zinc-800 rounded-full inline-block mb-2'>
-								<Upload className='h-6 w-6 text-zinc-400' />
+							<div className='p-3 bg-neutral-900 rounded-full inline-block mb-2'>
+								<Upload className='h-6 w-6 text-neutral-400' />
 							</div>
-							<div className='text-sm text-zinc-400 mb-2'>
+							<div className='text-sm text-neutral-400 mb-2'>
 								{imageFile ? imageFile.name : "Upload album artwork"}
 							</div>
 							<Button variant='outline' size='sm' className='text-xs'>
@@ -111,7 +111,7 @@ const AddAlbumDialog = () => {
 						<Input
 							value={newAlbum.title}
 							onChange={(e) => setNewAlbum({ ...newAlbum, title: e.target.value })}
-							className='bg-zinc-800 border-zinc-700'
+							className='bg-neutral-900 border-neutral-700'
 							placeholder='Enter album title'
 						/>
 					</div>
@@ -120,7 +120,7 @@ const AddAlbumDialog = () => {
 						<Input
 							value={newAlbum.artist}
 							onChange={(e) => setNewAlbum({ ...newAlbum, artist: e.target.value })}
-							className='bg-zinc-800 border-zinc-700'
+							className='bg-neutral-900 border-neutral-700'
 							placeholder='Enter artist name'
 						/>
 					</div>
@@ -130,7 +130,7 @@ const AddAlbumDialog = () => {
 							type='number'
 							value={newAlbum.releaseYear}
 							onChange={(e) => setNewAlbum({ ...newAlbum, releaseYear: parseInt(e.target.value) })}
-							className='bg-zinc-800 border-zinc-700'
+							className='bg-neutral-900 border-neutral-700'
 							placeholder='Enter release year'
 							min={1900}
 							max={new Date().getFullYear()}
