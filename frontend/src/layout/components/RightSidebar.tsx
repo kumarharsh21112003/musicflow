@@ -1,15 +1,16 @@
 import { usePlayerStore } from "@/stores/usePlayerStore";
 import { usePlaylistStore } from "@/stores/usePlaylistStore";
-import { Play, Pause, Plus, MoreHorizontal, Heart, ListPlus, Radio, User, Share2, ChevronRight, Check, Mic2 } from "lucide-react";
+import { Play, Pause, Plus, MoreHorizontal, Heart, ListPlus, Radio, User, Share2, ChevronRight, Check, Mic2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
 interface RightSidebarProps {
 	onShowLyrics?: () => void;
+	onClose?: () => void;
 }
 
-const RightSidebar = ({ onShowLyrics }: RightSidebarProps) => {
+const RightSidebar = ({ onShowLyrics, onClose }: RightSidebarProps) => {
 	const { currentSong, isPlaying, togglePlay, queue } = usePlayerStore();
 	const { playlists, likedSongs, addToPlaylist, addToLikedSongs, removeFromLikedSongs, createPlaylist } = usePlaylistStore();
 	const [showMenu, setShowMenu] = useState(false);
@@ -58,7 +59,7 @@ const RightSidebar = ({ onShowLyrics }: RightSidebarProps) => {
 			<div className='h-full bg-neutral-950 rounded-lg flex flex-col items-center justify-center p-6'>
 				<div className='w-32 h-32 bg-neutral-900 rounded-lg flex items-center justify-center mb-4'>
 					<svg className='w-16 h-16 text-zinc-600' fill="currentColor" viewBox="0 0 24 24">
-						<path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+						<path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />
 					</svg>
 				</div>
 				<p className='text-neutral-400 text-center'>Select a song to see details</p>
@@ -71,22 +72,28 @@ const RightSidebar = ({ onShowLyrics }: RightSidebarProps) => {
 			{/* Header */}
 			<div className='p-3 flex items-center justify-between border-b border-neutral-800 shrink-0'>
 				<span className='text-sm font-medium truncate flex-1'>{currentSong.title}</span>
+				{/* Close Button */}
+				{onClose && (
+					<Button variant='ghost' size='icon' className='h-7 w-7 text-neutral-400 hover:text-white mr-1' onClick={onClose} title='Hide panel'>
+						<X className='h-4 w-4' />
+					</Button>
+				)}
 				<div className='flex items-center gap-1'>
 					{/* Lyrics Button */}
-					<Button 
-						variant='ghost' 
-						size='icon' 
+					<Button
+						variant='ghost'
+						size='icon'
 						className='h-8 w-8 text-neutral-400 hover:text-orange-400'
 						onClick={onShowLyrics}
 						title='Show lyrics'
 					>
 						<Mic2 className='h-4 w-4' />
 					</Button>
-					
+
 					{/* More Button */}
-					<Button 
-						variant='ghost' 
-						size='icon' 
+					<Button
+						variant='ghost'
+						size='icon'
 						className='h-8 w-8'
 						onClick={() => setShowMenu(!showMenu)}
 					>
@@ -100,7 +107,7 @@ const RightSidebar = ({ onShowLyrics }: RightSidebarProps) => {
 				<>
 					<div className='fixed inset-0 z-50 bg-black/60' onClick={() => { setShowMenu(false); setShowPlaylistMenu(false); setShowCreatePlaylist(false); }} />
 					<div className='fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-neutral-900 rounded-lg shadow-xl z-50 py-2 w-[260px] border border-neutral-700'>
-						<div 
+						<div
 							className='flex items-center gap-3 px-4 py-2.5 hover:bg-zinc-700 cursor-pointer'
 							onClick={() => setShowPlaylistMenu(!showPlaylistMenu)}
 						>
@@ -108,7 +115,7 @@ const RightSidebar = ({ onShowLyrics }: RightSidebarProps) => {
 							<span className='text-sm'>Add to playlist</span>
 							<ChevronRight className='h-4 w-4 text-neutral-400 ml-auto' />
 						</div>
-						
+
 						{showPlaylistMenu && (
 							<div className='bg-zinc-700/50 mx-2 rounded-lg py-1 mt-1'>
 								{showCreatePlaylist ? (
@@ -133,7 +140,7 @@ const RightSidebar = ({ onShowLyrics }: RightSidebarProps) => {
 										<span className='text-sm'>Create new playlist</span>
 									</div>
 								)}
-								
+
 								{playlists.map((playlist) => (
 									<div
 										key={playlist.id}
@@ -145,9 +152,9 @@ const RightSidebar = ({ onShowLyrics }: RightSidebarProps) => {
 								))}
 							</div>
 						)}
-						
+
 						<div className='h-px bg-zinc-700 my-1' />
-						
+
 						<div className='flex items-center gap-3 px-4 py-2.5 hover:bg-zinc-700 cursor-pointer' onClick={() => setShowMenu(false)}>
 							<Radio className='h-4 w-4 text-neutral-400' />
 							<span className='text-sm'>Go to song radio</span>
@@ -188,9 +195,9 @@ const RightSidebar = ({ onShowLyrics }: RightSidebarProps) => {
 							<h3 className='text-lg font-bold truncate'>{currentSong.title}</h3>
 							<p className='text-sm text-neutral-400 truncate'>{currentSong.artist}</p>
 						</div>
-						<Button 
-							variant='ghost' 
-							size='icon' 
+						<Button
+							variant='ghost'
+							size='icon'
 							className={`h-8 w-8 ${isLiked ? 'text-orange-400' : 'text-neutral-400 hover:text-white'}`}
 							onClick={handleLike}
 						>
@@ -201,7 +208,7 @@ const RightSidebar = ({ onShowLyrics }: RightSidebarProps) => {
 
 				{/* Play Button */}
 				<div className='px-3 pb-3'>
-					<Button 
+					<Button
 						onClick={togglePlay}
 						className='w-full py-5 bg-orange-500 hover:bg-orange-400 text-black font-bold rounded-full'
 					>

@@ -13,6 +13,7 @@ const MainLayout = () => {
 	// Proper SSR-safe mobile detection
 	const [isMobile, setIsMobile] = useState(false);
 	const [showLyrics, setShowLyrics] = useState(false);
+	const [hideRightSidebar, setHideRightSidebar] = useState(false);
 	const { currentSong } = usePlayerStore();
 
 	useEffect(() => {
@@ -22,13 +23,18 @@ const MainLayout = () => {
 
 		// Initial check
 		checkMobile();
-		
+
 		// Listen for resize
 		window.addEventListener("resize", checkMobile);
 		return () => window.removeEventListener("resize", checkMobile);
 	}, []);
 
-	const showRightSidebar = !isMobile && currentSong;
+	const showRightSidebar = !isMobile && currentSong && !hideRightSidebar;
+
+	// Re-show right sidebar when a new song starts
+	useEffect(() => {
+		if (currentSong) setHideRightSidebar(false);
+	}, [currentSong?._id]);
 
 	// ========================================
 	// MOBILE LAYOUT (Phone)
@@ -39,7 +45,7 @@ const MainLayout = () => {
 				{/* Mobile: No Topbar, Full screen content */}
 				<div className="flex-1 overflow-y-auto pb-40">
 					<Outlet />
-					
+
 					{/* Mobile Lyrics Overlay */}
 					{showLyrics && (
 						<div className="fixed inset-0 z-50 bg-black">
@@ -62,7 +68,7 @@ const MainLayout = () => {
 		<div className='h-screen bg-black text-white flex flex-col overflow-hidden'>
 			{/* Desktop Topbar with Search */}
 			<Topbar />
-			
+
 			<div className="flex-1 overflow-hidden relative">
 				<ResizablePanelGroup direction='horizontal' className='flex h-full p-2'>
 					{/* Left Sidebar */}
@@ -85,7 +91,7 @@ const MainLayout = () => {
 								{showLyrics ? (
 									<LyricsPanel onClose={() => setShowLyrics(false)} />
 								) : (
-									<RightSidebar onShowLyrics={() => setShowLyrics(true)} />
+									<RightSidebar onShowLyrics={() => setShowLyrics(true)} onClose={() => setHideRightSidebar(true)} />
 								)}
 							</ResizablePanel>
 						</>
