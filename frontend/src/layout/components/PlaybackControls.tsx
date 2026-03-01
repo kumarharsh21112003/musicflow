@@ -173,6 +173,8 @@ export const PlaybackControls = () => {
 	// Sync Audio Engine with Store State
 	useEffect(() => {
 		if (!currentSong) return;
+		// Don't auto-load on mount when song is restored from persist (isPlaying is false)
+		if (!isPlaying) return;
 
 		const loadAndPlay = async () => {
 			if (lastVideoId.current === currentSong.videoId) return;
@@ -228,7 +230,7 @@ export const PlaybackControls = () => {
 		};
 
 		loadAndPlay();
-	}, [currentSong?.videoId, isReady, setIsPlaybackLoading]);
+	}, [currentSong?.videoId, isReady, isPlaying, setIsPlaybackLoading]);
 
 	// Update Store Time from Audio Engine
 	useEffect(() => {
@@ -254,64 +256,8 @@ export const PlaybackControls = () => {
 	useEffect(() => {
 		if (isPlaying) {
 			// If track isn't loaded yet (persisted song after reload)
-			if (currentSong?.videoId && lastVideoId.current !== currentSong.videoId) {
-				const resumePersistedSong = async () => {
-					setIsPlaybackLoading(true);
-					lastVideoId.current = currentSong.videoId!;
-
-					// Strategy 1: Try audioEngine (needs backend)
-					try {
-						await audioEngine.loadTrack({ ...currentSong, videoId: currentSong.videoId! } as any);
-						const savedTime = currentTime;
-						if (savedTime > 0) audioEngine.seek(savedTime);
-						setTimeout(() => {
-							const dur = audioEngine.getDuration();
-							if (dur > 0) setDuration(dur);
-						}, 500);
-						audioEngine.play();
-						if (isReady && playerRef.current) {
-							playerRef.current.loadVideoById(currentSong.videoId);
-							playerRef.current.mute();
-						}
-						setIsPlaybackLoading(false);
-						return; // Success!
-					} catch {
-						console.log("AudioEngine failed, using YouTube...");
-					}
-
-					// Strategy 2: YouTube iframe (no backend needed)
-					// Wait for YouTube to be ready (max 5 seconds)
-					let waitMs = 0;
-					while (!isReady && waitMs < 5000) {
-						await new Promise(r => setTimeout(r, 200));
-						waitMs += 200;
-					}
-
-					if (playerRef.current) {
-						try {
-							playerRef.current.loadVideoById(currentSong.videoId);
-							playerRef.current.unMute();
-							playerRef.current.setVolume(volume);
-							setTimeout(() => {
-								playerRef.current?.playVideo();
-								const savedTime = currentTime;
-								if (savedTime > 0) playerRef.current?.seekTo(savedTime, true);
-							}, 1000);
-							setIsPlaybackLoading(false);
-						} catch {
-							toast.error('Tap play again in a moment', { icon: '🔄', duration: 2000 });
-							setIsPlaybackLoading(false);
-							lastVideoId.current = ''; // Allow retry
-						}
-					} else {
-						toast.error('Loading player, try again...', { icon: '🔄', duration: 2000 });
-						setIsPlaybackLoading(false);
-						lastVideoId.current = ''; // Allow retry
-						setIsPlaying(false);
-					}
-				};
-				resumePersistedSong();
-			} else {
+			// The loadAndPlay effect above will handle it since we added isPlaying to deps
+			if (lastVideoId.current === currentSong?.videoId) {
 				audioEngine.play();
 				if (isReady) playerRef.current?.playVideo();
 			}
