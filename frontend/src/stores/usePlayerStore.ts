@@ -85,19 +85,19 @@ export const usePlayerStore = create<PlayerStore>()(
 
 				const { queue, listeningHistory } = get();
 				const songIndex = queue.findIndex((s) => s._id === song._id);
-				
+
 				// Track listening history
 				const newHistory: ListenedSong = {
 					artist: song.artist,
 					title: song.title,
 					playedAt: Date.now(),
 				};
-				
+
 				// Keep last 100 songs
 				const updatedHistory = [newHistory, ...listeningHistory].slice(0, 100);
-				
-				set({ 
-					currentSong: song, 
+
+				set({
+					currentSong: song,
 					currentIndex: songIndex !== -1 ? songIndex : 0,
 					isPlaying: true,
 					listeningHistory: updatedHistory,
@@ -111,12 +111,12 @@ export const usePlayerStore = create<PlayerStore>()(
 
 			togglePlay: () => {
 				const { isPlaying, currentSong, queue } = get();
-				
+
 				if (!currentSong && queue.length > 0) {
 					get().setCurrentSong(queue[0]);
 					return;
 				}
-				
+
 				set({ isPlaying: !isPlaying });
 			},
 
@@ -176,11 +176,11 @@ export const usePlayerStore = create<PlayerStore>()(
 			getTopArtists: () => {
 				const { listeningHistory } = get();
 				const artistCount: Record<string, number> = {};
-				
+
 				listeningHistory.forEach(song => {
 					artistCount[song.artist] = (artistCount[song.artist] || 0) + 1;
 				});
-				
+
 				// Sort by play count and return top 5
 				return Object.entries(artistCount)
 					.sort((a, b) => b[1] - a[1])
@@ -191,9 +191,9 @@ export const usePlayerStore = create<PlayerStore>()(
 			// Toggle crossfade mixing
 			toggleCrossfade: () => {
 				set((state) => ({
-					audioSettings: { 
-						...state.audioSettings, 
-						crossfadeEnabled: !state.audioSettings.crossfadeEnabled 
+					audioSettings: {
+						...state.audioSettings,
+						crossfadeEnabled: !state.audioSettings.crossfadeEnabled
 					}
 				}));
 			},
@@ -201,7 +201,7 @@ export const usePlayerStore = create<PlayerStore>()(
 			// Toggle shuffle
 			toggleShuffle: () => {
 				const { queue, isShuffled, currentSong } = get();
-				
+
 				if (!isShuffled) {
 					// Shuffle the queue (Fisher-Yates algorithm)
 					const shuffled = [...queue];
@@ -234,11 +234,22 @@ export const usePlayerStore = create<PlayerStore>()(
 		}),
 		{
 			name: 'musicflow-player',
-			partialize: (state) => ({ 
+			partialize: (state) => ({
 				audioSettings: state.audioSettings,
 				listeningHistory: state.listeningHistory,
-                volume: state.volume,
+				volume: state.volume,
+				currentSong: state.currentSong,
+				queue: state.queue,
+				currentIndex: state.currentIndex,
 			}),
+			onRehydrateStorage: () => (state) => {
+				// Don't auto-play on reload — just show last song
+				if (state) {
+					state.isPlaying = false;
+					state.currentTime = 0;
+					state.duration = 0;
+				}
+			},
 		}
 	)
 );
