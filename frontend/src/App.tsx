@@ -38,7 +38,7 @@ function App() {
 			<>
 				<AuthPage />
 				<Toaster
-					position='bottom-center'
+					position='top-right'
 					toastOptions={{
 						style: {
 							background: 'rgba(23, 23, 23, 0.95)',
@@ -80,7 +80,7 @@ function App() {
 				</Route>
 			</Routes>
 			<Toaster
-				position='bottom-center'
+				position='top-right'
 				toastOptions={{
 					style: {
 						background: 'rgba(23, 23, 23, 0.95)',
