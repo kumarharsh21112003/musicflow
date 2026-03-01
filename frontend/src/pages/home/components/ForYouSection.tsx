@@ -1,5 +1,5 @@
 /**
- * Smart AI Recommendations - Spotify/YouTube Music style
+ * Smart AI Recommendations - Premium
  * Personalized mixes with cover images, genre Quick Picks
  */
 
@@ -167,7 +167,7 @@ const ForYouSection = () => {
           </Button>
         </div>
 
-        {/* Spotify-style cards with cover images */}
+        {/* Premium cards with cover images */}
         <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar">
           {smartRecs.map((rec, i) => (
             <button

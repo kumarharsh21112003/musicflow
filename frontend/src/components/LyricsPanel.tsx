@@ -211,7 +211,7 @@ const LyricsPanel = ({ onClose }: LyricsPanelProps) => {
             <p className='text-xs text-neutral-600'>Try playing a popular song</p>
           </div>
         ) : isSynced && syncedLyrics.length > 0 ? (
-          /* Synced Lyrics - Apple Music style */
+          /* Synced Lyrics - Premium */
           <div className='space-y-1 py-8'>
             {syncedLyrics.map((line, idx) => {
               const isActive = idx === activeLine;

@@ -104,7 +104,7 @@ const Topbar = () => {
 				</div>
 			</div>
 
-			{/* Center - Spotify Style Search Bar */}
+			{/* Center - Premium Search Bar */}
 			<div className='flex-1 flex items-center justify-center max-w-2xl'>
 				<div ref={searchRef} className='flex-1 relative max-w-[500px]'>
 					<form onSubmit={handleSearch} className="relative group">

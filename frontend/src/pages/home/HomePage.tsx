@@ -88,7 +88,7 @@ const HomePage = () => {
 		// First check Firebase userData, then localStorage
 		const firebaseArtists = userData?.selectedArtists;
 		const localArtists = localStorage.getItem('musicflow_artists');
-		
+
 		if (firebaseArtists && firebaseArtists.length > 0) {
 			// Load from Firebase (returning user)
 			setSelectedArtists(firebaseArtists);
@@ -106,9 +106,9 @@ const HomePage = () => {
 			setCheckingData(false);
 			clearTimeout(timeout);
 		}
-		
+
 		fetchTrending();
-		
+
 		return () => clearTimeout(timeout);
 	}, [fetchTrending, fetchArtistsSongs, userData, user]);
 
@@ -137,7 +137,7 @@ const HomePage = () => {
 	}, [featuredSongs, trendingSongs, recommendedSongs, setQueue]);
 
 	const toggleArtist = (name: string) => {
-		setSelectedArtists(prev => 
+		setSelectedArtists(prev =>
 			prev.includes(name) ? prev.filter(a => a !== name) : [...prev, name]
 		);
 	};
@@ -167,7 +167,7 @@ const HomePage = () => {
 			<div className='fixed inset-0 bg-neutral-950 z-[100] flex flex-col'>
 				<div className='p-6 text-center border-b border-neutral-800'>
 					<h1 className='text-2xl font-bold'>Choose 3 or more artists you like</h1>
-					<p className='text-neutral-400 text-sm mt-1'>We'll fetch their songs from YouTube!</p>
+					<p className='text-neutral-400 text-sm mt-1'>We'll personalize your music experience!</p>
 				</div>
 
 				<div className='flex-1 overflow-auto p-6'>
@@ -201,15 +201,15 @@ const HomePage = () => {
 
 				<div className='p-6 border-t border-neutral-800 bg-neutral-950'>
 					<div className='max-w-md mx-auto'>
-						<Button 
+						<Button
 							onClick={finishOnboarding}
 							disabled={selectedArtists.length < 3 || loadingArtists}
 							className='w-full py-6 text-lg rounded-full bg-orange-500 hover:bg-orange-600 text-black font-bold disabled:opacity-40'
 						>
 							{loadingArtists ? (
 								<><Loader2 className='mr-2 h-5 w-5 animate-spin' /> Loading songs...</>
-							) : selectedArtists.length < 3 
-								? `Select ${3 - selectedArtists.length} more` 
+							) : selectedArtists.length < 3
+								? `Select ${3 - selectedArtists.length} more`
 								: `Done (${selectedArtists.length} selected)`}
 						</Button>
 					</div>
@@ -222,47 +222,47 @@ const HomePage = () => {
 		<main className='rounded-md overflow-hidden h-full bg-gradient-to-b from-zinc-800 to-zinc-900'>
 			<ScrollArea className='h-full'>
 				<div className='p-4 sm:p-6'>
-						<div className='flex items-center justify-between mb-6 sticky top-0 bg-transparent backdrop-blur-md z-[20] -mx-4 px-4 py-3 md:relative md:p-0 md:m-0'>
-							<h1 className='text-2xl sm:text-3xl font-black tracking-tight'>{getGreeting()}</h1>
-							<div className='flex gap-4 items-center'>
-								<span className='text-neutral-400 md:hidden'><Bell size={22} /></span>
-								<span className='text-neutral-400 md:hidden'><History size={22} /></span>
-								<span className='text-neutral-400 md:hidden'><Settings size={22} /></span>
-							</div>
+					<div className='flex items-center justify-between mb-6 sticky top-0 bg-transparent backdrop-blur-md z-[20] -mx-4 px-4 py-3 md:relative md:p-0 md:m-0'>
+						<h1 className='text-2xl sm:text-3xl font-black tracking-tight'>{getGreeting()}</h1>
+						<div className='flex gap-4 items-center'>
+							<span className='text-neutral-400 md:hidden'><Bell size={22} /></span>
+							<span className='text-neutral-400 md:hidden'><History size={22} /></span>
+							<span className='text-neutral-400 md:hidden'><Settings size={22} /></span>
 						</div>
+					</div>
 
-						<div className='flex gap-2 mb-8 overflow-x-auto no-scrollbar -mx-1 px-1 sticky top-[60px] bg-transparent z-[15] py-2 md:relative md:top-0 h-14'>
-							{FILTERS.map(filter => (
-								<button
-									key={filter}
-									onClick={() => setActiveFilter(filter)}
-									className={`px-6 py-2 rounded-full text-sm font-bold transition-all whitespace-nowrap
-										${activeFilter === filter 
-											? 'bg-orange-500 text-black shadow-[0_4px_12px_rgba(16,185,129,0.3)]' 
-											: 'bg-neutral-900/80 text-white hover:bg-zinc-700'}`}
-								>
-									{filter}
-								</button>
-							))}
-						</div>
-						
-						<ForYouSection />
+					<div className='flex gap-2 mb-8 overflow-x-auto no-scrollbar -mx-1 px-1 sticky top-[60px] bg-transparent z-[15] py-2 md:relative md:top-0 h-14'>
+						{FILTERS.map(filter => (
+							<button
+								key={filter}
+								onClick={() => setActiveFilter(filter)}
+								className={`px-6 py-2 rounded-full text-sm font-bold transition-all whitespace-nowrap
+										${activeFilter === filter
+										? 'bg-orange-500 text-black shadow-[0_4px_12px_rgba(16,185,129,0.3)]'
+										: 'bg-neutral-900/80 text-white hover:bg-zinc-700'}`}
+							>
+								{filter}
+							</button>
+						))}
+					</div>
 
-						<FeaturedSection />
+					<ForYouSection />
 
-						<div className='space-y-10 pb-32'>
-							{recommendedSongs.length > 0 && (
-								<SectionGrid title='Recently Played' songs={recommendedSongs.slice(0, 8)} isLoading={isLoading} />
-							) || <SectionGrid title='Recently Played' songs={featuredSongs.slice(0, 8)} isLoading={isLoading} />}
-							
-							{madeForYouSongs.length > 0 && (
-								<SectionGrid title='Made For You' songs={madeForYouSongs} isLoading={isLoading} />
-							)}
-							
-							{trendingSongs.length > 0 && (
-								<SectionGrid title='Trending Now' songs={trendingSongs} isLoading={isLoading} />
-							)}
-						</div>
+					<FeaturedSection />
+
+					<div className='space-y-10 pb-32'>
+						{recommendedSongs.length > 0 && (
+							<SectionGrid title='Recently Played' songs={recommendedSongs.slice(0, 8)} isLoading={isLoading} />
+						) || <SectionGrid title='Recently Played' songs={featuredSongs.slice(0, 8)} isLoading={isLoading} />}
+
+						{madeForYouSongs.length > 0 && (
+							<SectionGrid title='Made For You' songs={madeForYouSongs} isLoading={isLoading} />
+						)}
+
+						{trendingSongs.length > 0 && (
+							<SectionGrid title='Trending Now' songs={trendingSongs} isLoading={isLoading} />
+						)}
+					</div>
 				</div>
 			</ScrollArea>
 		</main>

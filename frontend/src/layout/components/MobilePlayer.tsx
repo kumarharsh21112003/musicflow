@@ -76,7 +76,7 @@ export const MobilePlayer = ({ isOpen, onClose }: MobilePlayerProps) => {
                 style={{ background: 'rgba(0,0,0,0.3)' }}
             />
 
-            {/* Header - Apple Music Style */}
+            {/* Header - Premium */}
             <header className="relative z-10 flex items-center justify-between px-6 pt-14 pb-4">
                 <button 
                     onClick={onClose}
