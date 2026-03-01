@@ -63,6 +63,41 @@ interface SmartRec {
   gradient: string;
 }
 
+// Daily rotation algorithm — seeded shuffle based on date
+const getDaySeed = (): number => {
+  const today = new Date();
+  const dateStr = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
+  let hash = 0;
+  for (let i = 0; i < dateStr.length; i++) {
+    hash = ((hash << 5) - hash) + dateStr.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash);
+};
+
+// Seeded random number generator
+const seededRandom = (seed: number, index: number): number => {
+  const x = Math.sin(seed + index) * 10000;
+  return x - Math.floor(x);
+};
+
+// Shuffle array with seed (same seed = same order, different day = different order)
+const seededShuffle = <T,>(arr: T[], seed: number): T[] => {
+  const shuffled = [...arr];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(seededRandom(seed, i) * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
+
+// Daily variation keywords to make search results fresh
+const DAILY_KEYWORDS = ['new', 'best', 'top', 'latest', 'trending', 'popular', 'hit'];
+const getDailyKeyword = (): string => {
+  const seed = getDaySeed();
+  return DAILY_KEYWORDS[seed % DAILY_KEYWORDS.length];
+};
+
 const ForYouSection = () => {
   const { listeningHistory, getTopArtists, setQueue, setCurrentSong, setIsPlaying } = usePlayerStore();
   const { searchSongs, searchResults, isLoading } = useMusicStore();
@@ -147,35 +182,45 @@ const ForYouSection = () => {
     }
   };
 
-  // Extra recommendation sections data
-  const DISCOVER_WEEKLY = [
-    { title: "Discover Weekly", subtitle: "New music, just for you", query: "new indie songs 2025 underrated", img: "https://images.unsplash.com/photo-1506157786151-b8491531f063?w=300", gradient: "from-green-600/80 to-emerald-500/80" },
-    { title: "Release Radar", subtitle: "Catch the latest drops", query: "new releases hindi songs 2025 latest", img: "https://images.unsplash.com/photo-1526142684086-16ce9e5c9bd3?w=300", gradient: "from-blue-600/80 to-cyan-500/80" },
-    { title: "On Repeat", subtitle: "Songs you can't stop playing", query: "most played hindi songs 2025", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300", gradient: "from-violet-600/80 to-purple-500/80" },
-    { title: "Repeat Rewind", subtitle: "Past favorites comeback", query: "old hindi songs remix 2024 best", img: "https://images.unsplash.com/photo-1483412033650-1015ddeb83d1?w=300", gradient: "from-amber-600/80 to-orange-500/80" },
-    { title: "Blend Mix", subtitle: "Music that brings people together", query: "popular party songs india 2025", img: "https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=300", gradient: "from-pink-600/80 to-rose-500/80" },
-    { title: "Fresh Finds", subtitle: "Emerging artists you'll love", query: "new artists hindi indie 2025", img: "https://images.unsplash.com/photo-1460723237483-7a6dc9d0b212?w=300", gradient: "from-teal-600/80 to-green-500/80" },
-  ];
+  // Apply daily rotation to all sections
+  const daySeed = getDaySeed();
+  const dailyWord = getDailyKeyword();
 
-  const MOOD_PLAYLISTS = [
-    { name: "💆 Relax", query: "relaxing calm hindi songs peaceful", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200", gradient: "from-teal-600 to-cyan-500" },
-    { name: "🔥 Energy", query: "high energy workout gym songs hindi", img: "https://images.unsplash.com/photo-1534258936925-c58bed479fcb?w=200", gradient: "from-red-600 to-orange-500" },
-    { name: "💜 Romance", query: "romantic love songs hindi 2025 best", img: "https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=200", gradient: "from-pink-600 to-rose-500" },
-    { name: "🎉 Party", query: "party dance songs bollywood 2025", img: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=200", gradient: "from-purple-600 to-violet-500" },
-    { name: "😔 Sad", query: "sad emotional songs hindi heartbreak", img: "https://images.unsplash.com/photo-1499084732479-de2c02d45fcc?w=200", gradient: "from-blue-700 to-indigo-600" },
-    { name: "🌙 Sleep", query: "sleep lullaby lofi instrumental calm", img: "https://images.unsplash.com/photo-1489549132488-d00b7eee80f1?w=200", gradient: "from-indigo-700 to-slate-700" },
-    { name: "☀️ Happy", query: "happy upbeat bollywood songs feel good", img: "https://images.unsplash.com/photo-1506157786151-b8491531f063?w=200", gradient: "from-yellow-500 to-amber-500" },
-    { name: "🎸 Rock", query: "rock songs hindi english best", img: "https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=200", gradient: "from-gray-700 to-zinc-600" },
-  ];
+  // Extra recommendation sections data — shuffled daily
+  const DISCOVER_WEEKLY = seededShuffle([
+    { title: "Discover Weekly", subtitle: "New music, just for you", query: `new indie songs 2025 ${dailyWord}`, img: "https://images.unsplash.com/photo-1506157786151-b8491531f063?w=300", gradient: "from-green-600/80 to-emerald-500/80" },
+    { title: "Release Radar", subtitle: "Catch the latest drops", query: `new releases hindi songs 2025 ${dailyWord}`, img: "https://images.unsplash.com/photo-1526142684086-16ce9e5c9bd3?w=300", gradient: "from-blue-600/80 to-cyan-500/80" },
+    { title: "On Repeat", subtitle: "Songs you can't stop playing", query: `most played hindi songs 2025 ${dailyWord}`, img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300", gradient: "from-violet-600/80 to-purple-500/80" },
+    { title: "Repeat Rewind", subtitle: "Past favorites comeback", query: `old hindi songs remix 2024 ${dailyWord}`, img: "https://images.unsplash.com/photo-1483412033650-1015ddeb83d1?w=300", gradient: "from-amber-600/80 to-orange-500/80" },
+    { title: "Blend Mix", subtitle: "Music that brings people together", query: `popular party songs india 2025 ${dailyWord}`, img: "https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=300", gradient: "from-pink-600/80 to-rose-500/80" },
+    { title: "Fresh Finds", subtitle: "Emerging artists you'll love", query: `new artists hindi indie 2025 ${dailyWord}`, img: "https://images.unsplash.com/photo-1460723237483-7a6dc9d0b212?w=300", gradient: "from-teal-600/80 to-green-500/80" },
+    { title: "Acoustic Session", subtitle: "Unplugged & raw", query: `acoustic unplugged hindi songs ${dailyWord}`, img: "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=300", gradient: "from-yellow-600/80 to-amber-500/80" },
+    { title: "Retro Classics", subtitle: "Golden era vibes", query: `90s hindi songs classic retro ${dailyWord}`, img: "https://images.unsplash.com/photo-1415201364774-f6f0bb35f28f?w=300", gradient: "from-rose-700/80 to-red-500/80" },
+  ], daySeed);
 
-  const NEW_RELEASES = [
-    { title: "Today's Hits", subtitle: "Updated daily", query: "today new hindi songs 2025", img: "https://images.unsplash.com/photo-1614680376593-902f74cf0d41?w=300", gradient: "from-emerald-600/80 to-green-500/80" },
-    { title: "New In Bollywood", subtitle: "Fresh from the studios", query: "latest bollywood songs march 2025", img: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300", gradient: "from-rose-600/80 to-pink-500/80" },
-    { title: "Punjabi New", subtitle: "Latest Punjabi drops", query: "new punjabi songs 2025 latest this week", img: "https://images.unsplash.com/photo-1504898770365-14faca6a7320?w=300", gradient: "from-amber-600/80 to-yellow-500/80" },
-    { title: "Global Top 50", subtitle: "World's most played", query: "global top 50 songs 2025 most played", img: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=300", gradient: "from-sky-600/80 to-blue-500/80" },
-    { title: "Viral Hits", subtitle: "Trending on social media", query: "viral instagram reels songs 2025", img: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300", gradient: "from-fuchsia-600/80 to-pink-500/80" },
-    { title: "Throwback Hits", subtitle: "Nostalgic gems", query: "best old hindi songs evergreen classics", img: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=300", gradient: "from-orange-600/80 to-red-500/80" },
-  ];
+  const MOOD_PLAYLISTS = seededShuffle([
+    { name: "💆 Relax", query: `relaxing calm hindi songs ${dailyWord}`, img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200", gradient: "from-teal-600 to-cyan-500" },
+    { name: "🔥 Energy", query: `high energy workout gym songs ${dailyWord}`, img: "https://images.unsplash.com/photo-1534258936925-c58bed479fcb?w=200", gradient: "from-red-600 to-orange-500" },
+    { name: "💜 Romance", query: `romantic love songs hindi 2025 ${dailyWord}`, img: "https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=200", gradient: "from-pink-600 to-rose-500" },
+    { name: "🎉 Party", query: `party dance songs bollywood ${dailyWord}`, img: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=200", gradient: "from-purple-600 to-violet-500" },
+    { name: "😔 Sad", query: `sad emotional songs hindi ${dailyWord}`, img: "https://images.unsplash.com/photo-1499084732479-de2c02d45fcc?w=200", gradient: "from-blue-700 to-indigo-600" },
+    { name: "🌙 Sleep", query: `sleep lofi instrumental calm ${dailyWord}`, img: "https://images.unsplash.com/photo-1489549132488-d00b7eee80f1?w=200", gradient: "from-indigo-700 to-slate-700" },
+    { name: "☀️ Happy", query: `happy upbeat bollywood feel good ${dailyWord}`, img: "https://images.unsplash.com/photo-1506157786151-b8491531f063?w=200", gradient: "from-yellow-500 to-amber-500" },
+    { name: "🎸 Rock", query: `rock songs hindi english ${dailyWord}`, img: "https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=200", gradient: "from-gray-700 to-zinc-600" },
+    { name: "🎵 Sufi", query: `sufi songs best qawwali ${dailyWord}`, img: "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=200", gradient: "from-emerald-700 to-teal-600" },
+    { name: "🎤 Karaoke", query: `karaoke songs hindi popular sing along ${dailyWord}`, img: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=200", gradient: "from-fuchsia-600 to-pink-500" },
+  ], daySeed + 1);
+
+  const NEW_RELEASES = seededShuffle([
+    { title: "Today's Hits", subtitle: "Updated daily", query: `today new hindi songs 2025 ${dailyWord}`, img: "https://images.unsplash.com/photo-1614680376593-902f74cf0d41?w=300", gradient: "from-emerald-600/80 to-green-500/80" },
+    { title: "New In Bollywood", subtitle: "Fresh from the studios", query: `latest bollywood songs 2025 ${dailyWord}`, img: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300", gradient: "from-rose-600/80 to-pink-500/80" },
+    { title: "Punjabi New", subtitle: "Latest Punjabi drops", query: `new punjabi songs 2025 ${dailyWord}`, img: "https://images.unsplash.com/photo-1504898770365-14faca6a7320?w=300", gradient: "from-amber-600/80 to-yellow-500/80" },
+    { title: "Global Top 50", subtitle: "World's most played", query: `global top 50 songs 2025 ${dailyWord}`, img: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=300", gradient: "from-sky-600/80 to-blue-500/80" },
+    { title: "Viral Hits", subtitle: "Trending on social media", query: `viral reels songs 2025 ${dailyWord}`, img: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300", gradient: "from-fuchsia-600/80 to-pink-500/80" },
+    { title: "Throwback Hits", subtitle: "Nostalgic gems", query: `best old hindi songs evergreen ${dailyWord}`, img: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=300", gradient: "from-orange-600/80 to-red-500/80" },
+    { title: "Indie Spotlight", subtitle: "Independent artists shine", query: `indie music india 2025 ${dailyWord}`, img: "https://images.unsplash.com/photo-1460723237483-7a6dc9d0b212?w=300", gradient: "from-lime-600/80 to-green-500/80" },
+    { title: "Devotional", subtitle: "Spiritual peace", query: `devotional songs hindi bhajan ${dailyWord}`, img: "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=300", gradient: "from-orange-700/80 to-amber-600/80" },
+  ], daySeed + 2);
 
   return (
     <div className="mb-10 space-y-10">
