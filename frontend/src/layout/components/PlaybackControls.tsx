@@ -81,26 +81,35 @@ export const PlaybackControls = () => {
 			if (playerRef.current) return;
 			playerRef.current = new window.YT.Player('yt-player-element', {
 				height: '100%', width: '100%',
-				playerVars: { autoplay: 0, controls: 0, modestbranding: 1, rel: 0, showinfo: 0, iv_load_policy: 3, playsinline: 1, vq: 'hd720' },
+				playerVars: { autoplay: 0, controls: 0, modestbranding: 1, rel: 0, showinfo: 0, iv_load_policy: 3, playsinline: 1, vq: 'hd1080' },
 				events: {
 					onReady: (e: any) => {
 						setIsReady(true);
-						// Set highest quality by default
-						e.target.setPlaybackQuality('hd1080');
+						e.target.setPlaybackQuality('highres');
 					},
 					onStateChange: (e: any) => {
-						// When video starts playing, force highest quality
+						// Force max quality on every state change
 						if (e.data === window.YT.PlayerState.PLAYING || e.data === window.YT.PlayerState.BUFFERING) {
 							const availableQuals = e.target.getAvailableQualityLevels();
 							if (availableQuals && availableQuals.length > 0) {
-								// Prefer HD: hd1080 > hd720 > large > medium
-								const preferred = ['hd1080', 'hd720', 'large'];
-								const best = preferred.find(q => availableQuals.includes(q)) || availableQuals[0];
+								// Pick absolute highest: highres > hd2160 > hd1440 > hd1080 > hd720
+								const best = availableQuals[0]; // First is always highest
 								e.target.setPlaybackQuality(best);
+								console.log('🎬 Video quality set to:', best, '| Available:', availableQuals.join(', '));
 							}
 						}
-						// Sync video state if needed, but audio is handled by audioEngine
 						if (e.data === window.YT.PlayerState.ENDED) playNext();
+					},
+					onPlaybackQualityChange: (e: any) => {
+						console.log('🎬 Quality changed to:', e.data);
+						// If YouTube downgraded, force it back up
+						const lowQuals = ['small', 'tiny', 'medium'];
+						if (lowQuals.includes(e.data)) {
+							const avail = e.target.getAvailableQualityLevels();
+							if (avail && avail.length > 0) {
+								e.target.setPlaybackQuality(avail[0]);
+							}
+						}
 					}
 				}
 			});
@@ -186,7 +195,7 @@ export const PlaybackControls = () => {
 
 				// Sync YouTube Video if visible
 				if (isReady && playerRef.current) {
-					playerRef.current.loadVideoById(videoId);
+					playerRef.current.loadVideoById({ videoId: videoId, suggestedQuality: 'highres' });
 					playerRef.current.mute(); // Always mute video, audioEngine provides sound
 				}
 
